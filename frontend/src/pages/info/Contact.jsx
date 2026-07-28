@@ -11,7 +11,7 @@ const Contact = () => {
     email: "",
     message: ""
   });
-   const API = import.meta.env.VITE_API_BASE_URL;
+   const API = import.meta.env.VITE_API_URL;
   // State for UI handling
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState({ type: "", msg: "" });

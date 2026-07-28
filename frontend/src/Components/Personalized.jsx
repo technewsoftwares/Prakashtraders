@@ -18,7 +18,7 @@ const Personalized = ({products = []}) => {
     }
     if (img.startsWith("http")) return img;
     const cleanPath = img.startsWith("/") ? img : `/${img}`;
-    return API ? `${import.meta.env.VITE_API_BASE_URL}${cleanPath}`: cleanPath;
+    return API ? `${import.meta.env.VITE_API_URL}${cleanPath}`: cleanPath;
   };
 
   //  HELPER: Get the first available image
