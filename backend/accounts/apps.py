@@ -6,19 +6,28 @@ class AccountsConfig(AppConfig):
     name = 'accounts'
 
     def ready(self):
-        # Import inside ready(), after apps are loaded
         try:
             from django.contrib.auth.models import User
             from django.db.utils import OperationalError, ProgrammingError
 
-            # Only create default admin if it doesn't exist
-            if not User.objects.filter(username="prakash").exists():
-                User.objects.create_superuser(
-                    username="prakash",
-                    password="password123",
-                    email="admin@example.com"
-                )
-                print("✅ Default admin created: username=prakash, password=password123")
-        except (OperationalError, ProgrammingError) as e:
-            # Skip during migrations or when DB is not ready
-            logging.info("Database not ready yet, skipping default admin creation")
+            user, created = User.objects.get_or_create(
+                username="prakash",
+                defaults={
+                    "email": "ptindsupplier@gmail.com"
+                }
+            )
+
+            user.email = "ptindsupplier@gmail.com"
+            user.is_staff = True
+            user.is_superuser = True
+            user.is_active = True
+
+            # THIS IS THE IMPORTANT LINE
+            user.set_password("Password@123")
+
+            user.save()
+
+            print("✅ Admin password reset successfully")
+
+        except (OperationalError, ProgrammingError):
+            logging.info("Database not ready yet, skipping admin setup")
