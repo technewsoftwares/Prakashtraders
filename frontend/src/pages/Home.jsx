@@ -6,7 +6,7 @@ import Personalized from "../Components/Personalized";
 import Slider from "../Components/Slider";
 import BrandSlider from "../Components/BrandPartnersBanner";
 import WeekBest from "../Components/WeekBest";
-import { API_BASE } from "../config";
+import { API_BASE } from "../Config";
 
 const Home = () => {
   const [personalizedProducts, setPersonalizedProducts] = useState([]);
