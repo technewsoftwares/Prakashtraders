@@ -39,6 +39,8 @@ const SearchBar = ({ autoFocus = false }) => {
 
   const API = import.meta.env.VITE_API_URL;
 
+  console.log("API =", API);
+
   // --- Search Result States ---
   const [matchedCategories, setMatchedCategories] = useState([]);
   const [matchedBrands, setMatchedBrands] = useState([]);
