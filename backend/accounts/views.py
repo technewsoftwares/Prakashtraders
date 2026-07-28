@@ -147,23 +147,22 @@ Stay safe — never share your OTP.
 
 Thank you for choosing us!
 """,
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[email],
                 fail_silently=False,
             )
 
-        
-except Exception as e:
-    print("MAIL ERROR:", repr(e))
-    traceback.print_exc()
+        except Exception as e:
+            print("MAIL ERROR:", repr(e))
+            traceback.print_exc()
 
-    return Response(
-        {
-            "success": False,
-            "message": str(e)
-        },
-        status=500
-    )
+            return Response(
+                {
+                    "success": False,
+                    "message": str(e)
+                },
+                status=500
+            )
 
         return Response({
             "success": True,
