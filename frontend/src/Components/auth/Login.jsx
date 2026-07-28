@@ -4,8 +4,9 @@ import { IoCloseOutline } from "react-icons/io5";
 import { ShopContext } from "../../Context/Context";
 import { useNavigate } from "react-router-dom";
 import Loading from "../Loading";
+import { API_BASE } from "../../Config";
 
-const API = import.meta.env.VITE_API_URL;
+const API = API_BASE;
 const Login = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -33,7 +34,7 @@ const Login = () => {
       setIsLoading(true);
       try {
         const response = await axios.post(
-          `{API}/api/auth/admin-login/`,
+          `${API}/api/auth/admin-login/`,
           { email, password }
         );
 
@@ -57,7 +58,7 @@ const Login = () => {
       setIsLoading(true);
       try {
         const res = await axios.post(
-          `{API}/api/auth/login-type/`,
+          `${API}/api/auth/login-type/`,
           { email }
         );
 
@@ -67,7 +68,7 @@ const Login = () => {
         }
 
         await axios.post(
-          `{API}/api/auth/send-otp/`,
+          `${API}/api/auth/send-otp/`,
           { email }
         );
 
@@ -84,7 +85,7 @@ const Login = () => {
     if (stage === "otp") {
       try {
         const response = await axios.post(
-          `{API}/api/auth/verify-otp/`,
+          `${API}/api/auth/verify-otp/`,
           { email, otp }
         );
 
