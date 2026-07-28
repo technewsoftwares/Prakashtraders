@@ -139,6 +139,8 @@ DEFAULT_FROM_EMAIL = "Prakash Traders <harishrajs0808@gmail.com>"
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
+    "https://prakashtraders.onrender.com",
+    "https://prakashtraders-frontend.onrender.com",
 ]
 
 CORS_ALLOW_HEADERS = [
