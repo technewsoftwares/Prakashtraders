@@ -19,7 +19,7 @@ import { FaInfoCircle } from "react-icons/fa";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
 
   const {
     isAuth,

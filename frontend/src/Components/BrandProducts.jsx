@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 // --- HELPER FUNCTIONS ---
 const toFullImageUrl = (img) => {
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
 
   if (!img) return "https://prakashtraders.com/150";
   if (img.startsWith("http")) return img;
@@ -214,7 +214,7 @@ const BrandProducts = () => {
   const [activeFilter, setActiveFilter] = useState(null);
 
   // Define API variable here
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchBrandProducts = async () => {

@@ -5,7 +5,7 @@ import { ShopContext } from "../../Context/Context";
 import { useNavigate } from "react-router-dom";
 import Loading from "../Loading";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 const Login = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");

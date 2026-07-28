@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
   
   // 1. Get Context Functions
   const { addToCart, addToWishlist } = useContext(ShopContext);

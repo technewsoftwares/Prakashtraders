@@ -7,7 +7,7 @@ const Personalized = ({products = []}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
 
   const { addToCart, addToWishlist } = useContext(ShopContext);
 

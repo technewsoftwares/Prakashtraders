@@ -9,7 +9,7 @@ import Chart from "react-apexcharts";
 import toast from "react-hot-toast";
 
 /* ===================== CONFIG ===================== */
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 
 /* ===================== HELPERS ===================== */
 const getImageUrl = (path) => {

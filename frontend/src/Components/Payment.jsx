@@ -5,7 +5,7 @@ import { load } from "@cashfreepayments/cashfree-js";
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
-   const API = import.meta.env.VITE_API_BASE_URL;
+   const API = import.meta.env.VITE_API_URL;
   // 1. Initialize State with data from Cart Page
   const [cartItems, setCartItems] = useState(location.state?.items || []);
   

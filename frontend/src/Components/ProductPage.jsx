@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Loading from "./Loading";
 import ProductCard from "./CategoryProducts";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 
 const ProductPage = () => {
   const { category } = useParams();

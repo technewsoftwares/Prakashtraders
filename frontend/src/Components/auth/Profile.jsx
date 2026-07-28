@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 const Profile = () => {
   // ✅ FIX 1: Changed "admin_token" to "access_token" to match your login logic
   const token = localStorage.getItem("access_token");

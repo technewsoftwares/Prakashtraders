@@ -5,7 +5,7 @@ import { ShopContext } from "../../Context/Context";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

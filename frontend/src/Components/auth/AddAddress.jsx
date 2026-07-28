@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 const AddAddress = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");

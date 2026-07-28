@@ -37,7 +37,7 @@ const SearchBar = ({ autoFocus = false }) => {
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
 
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
 
   // --- Search Result States ---
   const [matchedCategories, setMatchedCategories] = useState([]);

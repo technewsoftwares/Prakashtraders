@@ -14,7 +14,7 @@ const SingleItem = () => {
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_URL;
   const { addToCart: contextAddToCart } = useContext(ShopContext);
 
   // ✅ FIX: This useEffect is now at the TOP, before any conditional return

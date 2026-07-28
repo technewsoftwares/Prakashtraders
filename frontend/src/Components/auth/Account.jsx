@@ -5,7 +5,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { ShopContext } from "../../Context/Context";
 import Loading from "../Loading";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_URL;
 
 // ✅ ADD onSuccess to props
 const Account = ({ onClose, onSuccess }) => {
