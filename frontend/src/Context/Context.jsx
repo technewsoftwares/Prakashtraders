@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
-import { API_BASE } from "../config";
+import { API_BASE } from "../Config";
 import toast from "react-hot-toast";
 
 export const ShopContext = createContext();
