@@ -13,7 +13,7 @@ pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-wrixg0)#!-cky4s73@qf(eamflu*)!4g6sug4!)z_ud5z4*y0w'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = True
 
@@ -127,8 +127,8 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = "harishrajs0808@gmail.com"
-EMAIL_HOST_PASSWORD = "zqiv hujo mkkd xhgk"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = "Prakash Traders <harishrajs0808@gmail.com>"
 
@@ -149,8 +149,8 @@ from pathlib import Path
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-RAZORPAY_KEY_ID = "rzp_test_S2wmzfpOPnBhVh"
-RAZORPAY_KEY_SECRET = "xKMNrj7BrGcndEl5akxxl920"
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-DEBUG = False
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com",]
+DEBUG = os.getenv("DEBUG", "False") == "True"
