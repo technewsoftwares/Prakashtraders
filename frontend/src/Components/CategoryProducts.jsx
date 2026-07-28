@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
-import { API_BASE } from "../config";
+import { API_BASE } from "../Config";
 const CategoryProducts = () => {
   const { category } = useParams();
   const navigate = useNavigate();
