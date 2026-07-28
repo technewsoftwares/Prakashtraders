@@ -16,7 +16,7 @@ import SearchBar from "./SearchBar";
 import logo from "../../assets/images/logo.png";
 import ProductCard from "../CategoryProducts";
 import { FaInfoCircle } from "react-icons/fa";
-import { API_BASE } from "../Config";
+import { API_BASE } from "../../Config";
 const API = API_BASE;
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);

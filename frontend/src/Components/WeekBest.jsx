@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast"; 
-import { API_BASE } from "../Config";
+import { API_BASE } from "../../Config";
 
 const API = API_BASE;
 

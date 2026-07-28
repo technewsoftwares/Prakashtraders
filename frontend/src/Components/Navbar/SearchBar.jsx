@@ -3,7 +3,7 @@ import { CiSearch } from "react-icons/ci";
 import { useNavigate } from "react-router-dom"; // Removed Link, using useNavigate
 import { FaChevronRight, FaTag, FaBuilding } from "react-icons/fa";
 import axios from "axios";
-import { API_BASE } from "../Config";
+import { API_BASE } from "../../Config";
 
 const API = API_BASE;
 
