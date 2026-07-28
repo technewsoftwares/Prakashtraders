@@ -3,15 +3,15 @@ import "react-multi-carousel/lib/styles.css";
 import Carousel from "react-multi-carousel";
 import { Link } from "react-router-dom";
 import Loading from "./Loading";
+import latest_launch from "../assets/images/latest_launch.png"
 
-// ✅ DEMO MODE
 const USE_DEMO_DATA = true;
 
 const CategorySlider = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ CATEGORY DATA (Add your data here)
+  //  CATEGORY DATA (Add your data here)
   const categories =  [
     {
       "category": "Mobiles",
@@ -71,14 +71,14 @@ const CategorySlider = () => {
     setIsLoading(false);
   };
 
-  useEffect(() => {
+useEffect(() => {
     getData();
   }, []);
 
-  const responsive = {
+const responsive = {
     desktop: { breakpoint: { max: 3000, min: 1024 }, items: 10, slidesToSlide: 10 },
     tablet: { breakpoint: { max: 1024, min: 464 }, items: 9, slidesToSlide: 9 },
-    mobile: { breakpoint: { max: 464, min: 0 }, items: 1, slidesToSlide: 1 }
+    mobile: { breakpoint: { max: 464, min: 0 }, items: 4, slidesToSlide: 2 }  
   };
 
   const getMobileRows = () => {
@@ -87,12 +87,15 @@ const CategorySlider = () => {
     return [firstRow, secondRow];
   };
 
-  return (
-    <div className="container py-4">
-      {/* 1. CATEGORIES SECTION */}
-      <center>
-        <h2 className="text-2xl font-bold mb-4 uppercase tracking-wider">Categories</h2>
-      </center>
+return (
+<div className="w-full px-4 py-6 md:py-4">
+
+  <div className="text-center mb-4 md:mb-6">
+    <h2 className="text-2xl font-bold uppercase tracking-wider">
+      Categories
+    </h2>
+  </div>
+
 
       {isLoading && (
         <div className="flex items-center justify-center h-48">
@@ -102,13 +105,13 @@ const CategorySlider = () => {
 
       {/* Desktop & Tablet Carousel */}
       {!isLoading && (
-        <div className="hidden sm:block mb-10">
-          <Carousel responsive={responsive} infinite arrows={true} renderButtonGroupOutside={true}>
+        <div className="hidden md:block mb-10">
+          <Carousel responsive={responsive} infinite arrows>
             {data.map((e, index) => (
               <div key={index} className="px-2 text-center transition-transform duration-300 hover:scale-110">
                 <Link to={categoryToRoute(e.category)}>
-                  <img src={e.category_image} alt={e.category} className="w-full object-contain rounded-lg" />
-                  <p className="mt-2 text-sm font-medium">{e.category}</p>
+                  <img src={e.category_image} alt={e.category} className="w-full object-contain rounded-lg bg-white" />
+                  <p className="mt-3 text-sm font-medium">{e.category}</p>
                 </Link>
               </div>
             ))}
@@ -118,17 +121,21 @@ const CategorySlider = () => {
 
       {/* Mobile 2 Rows Grid */}
       {!isLoading && (
-        <div className="sm:hidden mt-4 mb-10">
+        <div className="md:hidden mb-10 px-1">
           {getMobileRows().map((row, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-5 gap-4 mb-4">
+            /* FIX: Reduced gap to gap-2 so 5 items can fit properly on small screens */
+            <div key={rowIndex} className="grid grid-cols-5 gap-2 mb-4">
               {row.map((e, index) => (
-                <Link key={index} to={categoryToRoute(e.category)} className="text-center">
-                  <img 
-                    src={e.category_image} 
-                    alt={e.category} 
-                    className="w-20 h-20 object-contain rounded-full bg-gray-100 p-2 mx-auto transition-all active:scale-90" 
-                  />
-                  <p className="mt-1 text-[10px] font-medium truncate">{e.category}</p>
+                <Link key={index} to={categoryToRoute(e.category)} className="flex flex-col items-center text-center group">
+                  {/* FIX: Removed invalid 'h-15'. Used a wrapper div for a perfect square to prevent image distortion */}
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-lg p-1 sm:p-2 flex items-center justify-center transition-all active:scale-90">
+                    <img
+                      src={e.category_image}
+                      alt={e.category}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <p className="mt-1 text-[9px] sm:text-[10px] font-medium truncate w-full group-hover:text-gray-300">{e.category}</p>
                 </Link>
               ))}
             </div>
@@ -136,12 +143,14 @@ const CategorySlider = () => {
         </div>
       )}
 
-      <hr className="my-8 border-gray-200" />
+
+<hr className="my-2 border-gray-700" />
 
       {/* 2. LATEST LAUNCH SECTION */}
       {!isLoading && (
-        <div className="mt-8">
-          <div className="flex justify-between items-center mb-6">
+
+        <div className="mt-1">
+          <div className="text-center mb-3">
             <h2 className="text-2xl font-bold uppercase tracking-wider">
               Latest Launch
             </h2>
@@ -149,11 +158,12 @@ const CategorySlider = () => {
 
           <div className="overflow-hidden rounded-xl shadow-md transition-transform duration-300 hover:scale-[1.01]">
             <Link to="/latest-launch">
-              <img
-                src="../src/assets/images/latest_lunch.png" 
-                alt="Latest Launch Banner"
-                className="w-full h-[280px] object-cover rounded-xl"
-                onError={(e) => { e.target.src = "https://via.placeholder.com/1200x280?text=Latest+Launch"; }}
+              <video
+                className="w-full aspect-video md:h-[320px] object-contain mx-auto"
+                src="/videos/latest-launch.mp4"
+                controls
+                playsInline
+                poster={latest_launch}
               />
             </Link>
           </div>

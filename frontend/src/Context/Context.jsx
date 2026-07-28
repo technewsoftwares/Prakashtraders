@@ -1,144 +1,208 @@
 import { createContext, useEffect, useState } from "react";
+import axios from "axios";
+import { API_BASE } from "../config";
+import toast from "react-hot-toast";
 
-export const ContextProvider = createContext();
+export const ShopContext = createContext();
 
-const Context = ({ children }) => {
-  // 🔐 AUTH STATE
+const ShopContextProvider = ({ children }) => {
+
+
+  // ================= AUTH STATE =================
+
   const [isAuth, setIsAuth] = useState(false);
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
-    const API = import.meta.env.VITE_API_URL;
 
+  // ================= CART & WISHLIST =================
 
-  // 🛒 CART & ❤️ WISHLIST
   const [cartItems, setCartItems] = useState([]);
-  const [wishlistItems, setWishlistItems] = useState([]);
+  const [wishlistItems, setWishlistItems] = useState(() => {
+    const saved = localStorage.getItem("wishlistItems");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  // 🔁 Restore auth on refresh
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const role = localStorage.getItem("role");
+  // ================= RESTORE LOGIN ON REFRESH =================
 
-    if (token && role) {
-      setIsAuth(true);
-      setToken(token);
-      setRole(role);
-    }
-  }, []);
+useEffect(() => {
+  const token =
 
-  // 🔁 Restore cart & wishlist on refresh
-  useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
-    const savedWishlist = JSON.parse(localStorage.getItem("wishlistItems")) || [];
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("adminToken")
+  const role = localStorage.getItem("role");
 
-    setCartItems(savedCart);
-    setWishlistItems(savedWishlist);
-  }, []);
+  if (token && role) {
+    setIsAuth(true);
+    setToken(token);
+    setRole(role);
+  }
+}, []);
 
-  // 💾 Save cart whenever it changes
+   // ================= SAVE WISHLIST =================
+useEffect(() => {
+  localStorage.setItem("wishlistItems", JSON.stringify(wishlistItems));
+}, [wishlistItems]);
+
+
+  // ================= RESTORE CART =================
+
+
+
+  // ================= SAVE CART =================
+
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // 💾 Save wishlist whenever it changes
-  useEffect(() => {
-    localStorage.setItem("wishlistItems", JSON.stringify(wishlistItems));
-  }, [wishlistItems]);
 
-  // 🔑 LOGIN
+  // ================= LOGIN =================
+
   const login = (token, role) => {
     setIsAuth(true);
     setToken(token);
     setRole(role);
 
-    localStorage.setItem("access_token", token);
+    if (role === "admin") {
+      localStorage.setItem("adminToken", token);
+    } else {
+      localStorage.setItem("access_token", token);
+    }
     localStorage.setItem("role", role);
   };
 
-  // 🚪 LOGOUT
+  // ================= LOGOUT =================
+
   const logout = () => {
     setIsAuth(false);
     setToken(null);
     setRole(null);
-
     setCartItems([]);
     setWishlistItems([]);
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("cartItems");
-    localStorage.removeItem("wishlistItems");
+    localStorage.clear();
+
   };
 
-  // 🖼️ IMAGE NORMALIZER
+
+
+  // ================= IMAGE NORMALIZER =================
+
   const toFullImageUrl = (img) => {
-    if (!img) return "https://via.placeholder.com/150";
-    if (img.startsWith("http")) return img;
-    return `${API}${img}`;
-  };
+  if (!img || typeof img !== "string") return "/image.jpeg";
 
-  // 🧠 NORMALIZE PRODUCT
+  if (img.startsWith("http")) return img;
+
+  return `${API_BASE}${img}`;
+};
+
+
+
   const normalizeProduct = (product) => ({
+
     ...product,
-    image: toFullImageUrl(product.image || product.image_1),
+
+image: toFullImageUrl(product?.image || product?.image_1),
+
   });
 
-  // 🛒 ADD TO CART
+
+
+  // ================= CART FUNCTIONS =================
+
   const addToCart = (product) => {
+
     const normalized = normalizeProduct(product);
+
     const exist = cartItems.find((x) => x.id === normalized.id);
 
+
     if (exist) return false;
-
     setCartItems([...cartItems, { ...normalized, qty: 1 }]);
-    return true;
-  };
 
-  // 🗑️ REMOVE FROM CART
+    return true;
+
+  };
   const removeFromCart = (id) => {
     setCartItems(cartItems.filter((x) => x.id !== id));
   };
 
-  // ❤️ ADD TO WISHLIST
-  const addToWishlist = (product) => {
-    const normalized = normalizeProduct(product);
-    const exist = wishlistItems.find((x) => x.id === normalized.id);
 
-    if (exist) return false;
 
-    setWishlistItems([...wishlistItems, normalized]);
-    return true;
-  };
+  // ================= WISHLIST =================
 
-  // ❌ REMOVE FROM WISHLIST
+const addToWishlist = async (product) => {
+
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    toast.error("Please login to add items to wishlist");
+    return false;
+  }
+
+  const normalized = normalizeProduct(product);
+
+  const exist = wishlistItems.find((x) => x.id === normalized.id);
+
+  if (exist) {
+    toast("Already in wishlist");
+    return false;
+  }
+
+  // ✅ ADD LOCALLY FIRST (instant UI)
+  setWishlistItems((prev) => [...prev, normalized]);
+
+  try {
+    // ✅ THEN SAVE TO BACKEND
+    await axios.post(
+      `${API_BASE}/api/auth/wishlist/`,
+      { product_id: product.id },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (error) {
+    console.error("Permanent Wishlist Error:", error);
+  }
+
+  return true;
+};
+
+
+
   const removeFromWishlist = (id) => {
+
     setWishlistItems(wishlistItems.filter((x) => x.id !== id));
+
   };
+
+
 
   return (
-    <ContextProvider.Provider
+
+    <ShopContext.Provider
       value={{
-        // 🔐 AUTH
         isAuth,
         token,
         role,
         login,
         logout,
-
-        // 🛒 CART
         cartItems,
         addToCart,
         removeFromCart,
-
-        // ❤️ WISHLIST
         wishlistItems,
         addToWishlist,
         removeFromWishlist,
       }}
     >
       {children}
-    </ContextProvider.Provider>
+    </ShopContext.Provider>
+
   );
+
 };
 
-export default Context;
+
+
+export default ShopContextProvider;
+
+
+
+

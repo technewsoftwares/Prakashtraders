@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 
+
+const API = import.meta.env.VITE_API_BASE_URL;
 const AddAddress = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
@@ -23,14 +25,11 @@ const AddAddress = () => {
   };
 
   const handleSubmit = async () => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+    if (!token) return; // 👈 IMPORTANT
 
     try {
       await axios.post(
-        "http://127.0.0.1:8000/api/auth/addresses/",
+        `${API}/api/auth/addresses/`,
         form,
         {
           headers: {

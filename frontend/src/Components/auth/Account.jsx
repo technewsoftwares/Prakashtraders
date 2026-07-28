@@ -2,10 +2,13 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import { useContext, useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
-import { ContextProvider } from "../../Context/Context";
+import { ShopContext } from "../../Context/Context";
 import Loading from "../Loading";
 
-const Account = ({ onClose }) => {
+const API = import.meta.env.VITE_API_BASE_URL;
+
+// ✅ ADD onSuccess to props
+const Account = ({ onClose, onSuccess }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [stage, setStage] = useState("email");
@@ -13,8 +16,8 @@ const Account = ({ onClose }) => {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ USE ONLY login()
-  const { login } = useContext(ContextProvider);
+  
+  const { login } = useContext(ShopContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,9 +28,7 @@ const Account = ({ onClose }) => {
     if (stage === "email") {
       setIsLoading(true);
       try {
-        await axios.post("http://127.0.0.1:8000/api/auth/send-otp/", {
-          email,
-        });
+        await axios.post(`${API}/api/auth/send-otp/`, { email });
         setStage("otp");
       } catch (err) {
         setError("Error sending OTP. Please try again.");
@@ -41,23 +42,24 @@ const Account = ({ onClose }) => {
     if (stage === "otp") {
       setIsLoading(true);
       try {
-        const response = await axios.post(
-          "http://127.0.0.1:8000/api/auth/verify-otp/",
-          { email, otp }
-        );
+        const response = await axios.post(`${API}/api/auth/verify-otp/`, { email, otp });
 
-        if (response.data.success) {
-          // ✅ USER LOGIN WITH ROLE
-          login(response.data.token, "user");
+if (response.data.success) {
+  login(response.data.token, "user");
 
-          setSuccess("Login successful 🎉");
+  setSuccess("Login successful 🎉");
 
-          setTimeout(() => {
-            setEmail("");
-            setOtp("");
-            setStage("email");
-            onClose();
-          }, 1500);
+  setTimeout(() => {
+    setEmail("");
+    setOtp("");
+    setStage("email");
+
+    onSuccess?.();   // ✅ THIS LINE
+  }, 1000);
+
+
+
+
         } else {
           setError(response.data.message || "Invalid OTP");
         }
@@ -90,11 +92,7 @@ const Account = ({ onClose }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-
-            <button
-              type="submit"
-              className="bg-teal-500 w-full h-14 rounded-md font-semibold"
-            >
+            <button type="submit" className="bg-teal-500 w-full h-14 rounded-md font-semibold">
               {isLoading ? <Loading text="Sending OTP..." /> : "Continue"}
             </button>
           </>
@@ -108,11 +106,7 @@ const Account = ({ onClose }) => {
               onChange={(e) => setOtp(e.target.value)}
               required
             />
-
-            <button
-              type="submit"
-              className="bg-teal-500 w-full h-14 rounded-md mt-4 font-semibold"
-            >
+            <button type="submit" className="bg-teal-500 w-full h-14 rounded-md mt-4 font-semibold">
               {isLoading ? <Loading text="Verifying OTP..." /> : "Verify OTP"}
             </button>
           </>
@@ -127,6 +121,7 @@ const Account = ({ onClose }) => {
 
 Account.propTypes = {
   onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func, // Added prop validation
 };
 
 export default Account;

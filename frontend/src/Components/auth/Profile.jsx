@@ -1,37 +1,54 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+const API = import.meta.env.VITE_API_BASE_URL;
 const Profile = () => {
+  // ✅ FIX 1: Changed "admin_token" to "access_token" to match your login logic
   const token = localStorage.getItem("access_token");
 
   const [form, setForm] = useState({
     title: "",
     first_name: "",
-    middle_name: "",
     last_name: "",
     gender: "",
     mobile: "",
     email: "",
     dob: "",
-    anniversary: "",
   });
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    // ✅ FIX 2: If token is missing, stop loading immediately so page doesn't freeze
+    if (!token) {
+      setLoading(false); 
+      return;
+    }
 
     axios
-      .get(`http://127.0.0.1:8000/api/auth/profile/`, {
+      .get(`${API}/api/auth/profile/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setForm((prev) => ({ ...prev, ...res.data }));
-        setLoading(false);
+        setForm((prev) => ({
+        title: res.data.title || "",
+        first_name: res.data.first_name || "",
+        last_name: res.data.last_name || "",
+        email: res.data.email || res.data.email_id || "",
+        gender: res.data.gender || "",
+        mobile: res.data.mobile || "",
+        dob: res.data.dob || "",
+       }));
+        // setLoading(false) is handled in .finally() below
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Error fetching profile:", err.response?.data);
+        // setLoading(false) is handled in .finally() below
+      })
+      .finally(() => {
+        // ✅ FIX 3: .finally() ensures loading stops whether the API succeeds or fails
         setLoading(false);
       });
   }, [token]);
@@ -46,16 +63,29 @@ const Profile = () => {
       alert("Please login again");
       return;
     }
+  const payload = {
+    title: form.title,
+    first_name: form.first_name,
+    last_name: form.last_name,
+    email: form.email,
+    email_id: form.email, // backend compatibility
+    gender: form.gender,
+    mobile: form.mobile,
+    dob: form.dob,
+  };     
+
 
     try {
-      await axios.post(`http://127.0.0.1:8000/api/auth/profile/`, form, {
+      await axios.post(`${API}/api/auth/profile/`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
       alert("Profile saved successfully");
-    } catch {
-      alert("Failed to save profile. Try again.");
+    } catch (err) {
+      console.error("SAVE ERROR:", err.response?.data);
+      alert(err.response?.data?.detail || "Profile update failed");
     }
   };
 
@@ -84,7 +114,7 @@ const Profile = () => {
             <label className="block text-sm mb-2">Title</label>
             <select
               name="title"
-              value={form.title}
+              value={form.title || ""}
               onChange={handleChange}
               className="w-full bg-black border border-gray-600 rounded-md px-4 py-3"
             >
@@ -99,20 +129,9 @@ const Profile = () => {
             <label className="block text-sm mb-2">First Name</label>
             <input
               name="first_name"
-              value={form.first_name}
+              value={form.first_name || ""}
               onChange={handleChange}
               placeholder="Enter first name"
-              className="w-full bg-white text-black rounded-md px-4 py-3"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-2">Middle Name</label>
-            <input
-              name="middle_name"
-              value={form.middle_name}
-              onChange={handleChange}
-              placeholder="Enter middle name"
               className="w-full bg-white text-black rounded-md px-4 py-3"
             />
           </div>
@@ -121,7 +140,7 @@ const Profile = () => {
             <label className="block text-sm mb-2">Last Name</label>
             <input
               name="last_name"
-              value={form.last_name}
+              value={form.last_name || ""}
               onChange={handleChange}
               placeholder="Enter last name"
               className="w-full bg-white text-black rounded-md px-4 py-3"
@@ -152,7 +171,7 @@ const Profile = () => {
             <label className="block text-sm mb-2">Mobile Number *</label>
             <input
               name="mobile"
-              value={form.mobile}
+              value={form.mobile || ""}
               onChange={handleChange}
               placeholder="+91 XXXXX XXXXX"
               className="w-full bg-white text-black rounded-md px-4 py-3"
@@ -160,15 +179,16 @@ const Profile = () => {
           </div>
 
           <div>
-            <label className="block text-sm mb-2">Email Id *</label>
+            <label className="block text-sm mb-2">Email *</label>
             <input
               name="email"
-              value={form.email}
-              disabled
-              className="w-full bg-gray-300 text-black rounded-md px-4 py-3 cursor-not-allowed"
+              type="email"
+              value={form.email || ""}
+              onChange={handleChange}
+              className="w-full bg-white text-black rounded-md px-4 py-3"
+              required
             />
           </div>
-
           <div>
             <label className="block text-sm mb-2">Date of Birth</label>
             <input
@@ -179,23 +199,13 @@ const Profile = () => {
               className="w-full bg-black border border-gray-600 rounded-md px-4 py-3"
             />
           </div>
-
-          <div>
-            <label className="block text-sm mb-2">Date of Anniversary</label>
-            <input
-              type="date"
-              name="anniversary"
-              value={form.anniversary || ""}
-              onChange={handleChange}
-              className="w-full bg-black border border-gray-600 rounded-md px-4 py-3"
-            />
-          </div>
         </form>
 
         <div className="flex justify-center gap-4 mt-10">
           <button
             type="button"
             className="border border-white px-6 py-3 rounded-md text-sm"
+            onClick={() => window.location.reload()} // Optional: Reload to reset
           >
             DISCARD CHANGES
           </button>

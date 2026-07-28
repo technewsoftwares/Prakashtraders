@@ -183,7 +183,7 @@ class VerifyOTP(APIView):
 
         return Response({
             "success": True,
-            "token": str(refresh.access_token),
+            "access": str(refresh.access_token),
             "refresh": str(refresh),
             "user": {
                 "email": user.email,
@@ -193,7 +193,7 @@ class VerifyOTP(APIView):
 
 
 class AdminLogin(APIView):
-    permission_classes = []  # Allow anyone
+    permission_classes = [AllowAny]  # Allow anyone
 
     def post(self, request):
         username = request.data.get("username")
@@ -206,7 +206,7 @@ class AdminLogin(APIView):
 
             return Response({
                 "success": True,
-                "token": str(refresh.access_token),
+                "access": str(refresh.access_token),
                 "refresh": str(refresh),
             }, status=status.HTTP_200_OK)
 

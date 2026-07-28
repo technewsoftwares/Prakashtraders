@@ -1,37 +1,43 @@
+import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AllProducts from "../Components/AllProducts";
 import CategorySlider from "../Components/CategorySlider";
 import Personalized from "../Components/Personalized";
 import Slider from "../Components/Slider";
 import BrandSlider from "../Components/BrandPartnersBanner";
+import WeekBest from "../Components/WeekBest";
+import { API_BASE } from "../config";
 
 const Home = () => {
   const [personalizedProducts, setPersonalizedProducts] = useState([]);
   const category = localStorage.getItem("category");
-  const API = import.meta.env.VITE_API_URL;
+  const location = useLocation();   
+const API = API_BASE;
 
+useEffect(() => {
+  const fetchPersonalized = async () => {
+    try {
+      let url = `${API}/api/products/random/`;
 
-  useEffect(() => {
-    const fetchPersonalized = async () => {
-      try {
-        let url = `${API}/api/products/random/`;
-
-        if (category) {
-          url += `?category=${encodeURIComponent(category)}`;
-        }
-
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to fetch");
-
-        const data = await res.json();
-        setPersonalizedProducts(data);
-      } catch (error) {
-        console.error("Home personalized fetch error:", error);
+      if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
       }
-    };
 
-    fetchPersonalized();
-  }, [category]);
+      const res = await fetch(url);
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      setPersonalizedProducts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Home personalized fetch error:", error);
+      setPersonalizedProducts([]);
+    }
+  };
+
+  fetchPersonalized();
+}, [category, location.pathname]);
+
 
   return (
     <div>
@@ -41,64 +47,26 @@ const Home = () => {
       {/* CATEGORY */}
       <CategorySlider />
 
-      <div className="container py-4">
-        <br />
+      <div className="w-full	 py-4">
 
+           
         {/* ✅ PERSONALIZED (DATA FROM HOME) */}
-        <Personalized products={personalizedProducts} />
+       <Personalized products={personalizedProducts} />
+        
 
-        <br />
 
         {/* BRAND PARTNERS */}
         <BrandSlider />
 
-        <br />
+
 
         {/* ALL PRODUCTS */}
         <AllProducts />
 
-        {/* STATIC SECTION */}
-        <center>
-          <p className="text-xl font-bold mt-16 mb-4">
-            Our New Favourites
-          </p>
-        </center>
+        {/* WEEK BEST */}
 
-        <br />
+        <WeekBest />       
 
-        <div className="flex gap-4 flex-wrap justify-center">
-           <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
-            <img
-              src="../src/assets/images/banner1.jpeg"
-              alt="offer"
-              width={250}
-            />
-          </div>
-          <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
-            <img
-              src="../src/assets/images/banner2.jpeg"
-              alt="offer"
-              width={250}
-            />
-          </div>
-          <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
-            <img
-              src="../src/assets/images/banner3.jpeg"
-              alt="offer"
-              width={250}
-            />
-          </div>
-          <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
-            <img
-              src="../src/assets/images/banner4.jpeg"
-              alt="offer"
-              width={250}
-            />
-          </div>
-         
-
-
-        </div>
       </div>
     </div>
   );

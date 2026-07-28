@@ -9,25 +9,26 @@ import { AiOutlineLogout, AiOutlineLogin } from "react-icons/ai";
 import { CiSearch } from "react-icons/ci";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ContextProvider } from "../../Context/Context"; // Ensure path is correct
+import { ShopContext } from "../../Context/Context";
 import Account from "../auth/Account";
 import axios from "axios";
 import SearchBar from "./SearchBar";
+import logo from "../../assets/images/logo.png";
+import ProductCard from "../CategoryProducts";
+import { FaInfoCircle } from "react-icons/fa";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // 🔹 Get cart and wishlist data from Context
-const {
-  isAuth,
-  setIsAuth,
-  token,
-  setToken,
-  role,
-  cartItems,
-  wishlistItems,
-  logout, 
-} = useContext(ContextProvider);
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+  const {
+    isAuth,
+    role,
+    cartItems,
+    wishlistItems,
+    logout,
+    token
+  } = useContext(ShopContext);
 
   const [isHovered, setIsHovered] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
@@ -39,7 +40,13 @@ const {
 
   const navigate = useNavigate();
 
-  // --- DATA CONFIGURATION ---
+  // --- STYLING CONSTANTS FOR UNIFORMITY ---
+  // 1. Main Menu Links (Top Brands, About, Category Names)
+  const menuLinkStyle = "text-sm font-bold tracking-wide";
+
+  // 2. Sub Menu Links (The actual brands and sub-categories)
+  const subMenuLinkStyle = "text-sm font-medium text-gray-400 hover:text-white transition-colors";
+
   const brands = [
      "Atomberg", "Blue Star", "Bosch", "Butterfly", "Crompton",
     "Daikin", "Dell", "Haier", "Havells", "HP", "IFB", "LG", "Milton",
@@ -47,72 +54,43 @@ const {
     "Samsung", "Sony", "Sujata", "TCL", "Usha", "V-Guard", "Vivo",
     "Whirlpool", "Zebronics"
   ];
-    const categories = [
+
+  const categories = [
       {
         name: "Home Appliances",
         sub: [
-          "Refrigerators",
-          "Washing Machines",
-          "Vacuum Cleaners",
-          "Air Conditioners",
-          "Air Coolers",
-          "Water Heaters",
-          "Solar Water Heaters",
-          "Room Heaters",
+          "Refrigerators", "Washing Machines", "Vacuum Cleaners", "Air Conditioners",
+          "Air Coolers", "Water Heaters", "Solar Water Heaters", "Room Heaters",
         ],
       },
       {
         name: "Kitchen Appliances",
         sub: [
-          "Mixer Grinders",
-          "Wet Grinders",
-          "Induction Stoves",
-          "Gas Stoves",
-          "Water Purifiers",
-          "Blenders",
-          "Water Bottles",
-          "Flasks",
-          "Tawas",
-          "Appachetties",
+          "Mixer Grinders", "Wet Grinders", "Induction Stoves", "Gas Stoves",
+          "Water Purifiers", "Blenders", "Water Bottles", "Flasks",
+          "Tawas", "Appachetties", "Cookers", "Electric Cookers",
         ],
       },
       {
         name: "Furniture",
         sub: [
-          "Sofas",
-          "Corner Sofas",
-          "Recliners",
-          "Centre Tables",
-          "Dining Tables",
-          "Chairs",
-          "Cots",
-          "Mattresses",
-          "Ottomans",
-          "Pillows",
-          "Bed Sheets",
-          "Office Tables",
-          "Office Chairs",
-          "Executive Chairs",
-          "Plastic Chairs",
-          "Dressing Tables",
-          "Metal Wardrobes",
-          "Wooden Wardrobes",
+          "Sofas", "Corner Sofas", "Recliners", "Centre Tables", "Dining Tables",
+          "Chairs", "Cots", "Mattresses", "Ottomans", "Pillows", "Bed Sheets",
+          "Office Tables", "Office Chairs", "Executive Chairs", "Plastic Chairs",
+          "Dressing Tables", "Metal Wardrobes", "Wooden Wardrobes",
+        ],
+      },
+      {
+       name:"Digital Products" ,
+       sub:[
+          "Mobiles" , "Laptops" ,"Tabs" , "Television"
         ],
       },
     ];
 
-
-  const categoryRoutes = {
-    Refrigerators: "/products/refrigerators",
-    "Washing Machines": "/products/washing-machines",
-    Microwaves: "/products/microwaves",
-    Mixers: "/products/mixers",
-    Grinders: "/products/grinders",
-    "Power Hobs": "/products/power-hobs",
-    Chimneys: "/products/chimneys",
-    "Tower Fans": "/products/tower-fans",
-    "E-Rice Cookers": "/products/e-rice-cookers",
-    "E-Kettles": "/products/e-kettles",
+  const getCategoryLink = (subCategory) => {
+    const slug = subCategory.toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
+    return `/products/${slug}`;
   };
 
   const dataForSidebar = [
@@ -120,17 +98,16 @@ const {
     { icon: <FaRegAddressBook className="w-5 h-5" />, name: "My Address", link: "/address" },
     { icon: <LuCodesandbox className="w-5 h-5" />, name: "My Orders", link: "/" },
     { icon: <FaRegHeart className="w-5 h-5" />, name: "My Wishlist", link: "/wishlist" },
-{ icon: <RiCustomerService2Line className="w-5 h-5" />, name: "Support Center", link: "tel:+919342916754" },  ];
-      
-      const closeUserMenu = () => {
-        setIsHovered(false);
-      };
+    { icon: <RiCustomerService2Line className="w-5 h-5" />, name: "Support Center", link: "tel:+919663418188" },
+  ];
 
+  const closeUserMenu = () => {
+    setIsHovered(false);
+  };
 
-  // --- LOGIC ---
   const fetchData = async () => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/product?q=${query}`);
+      const res = await axios.get(`${API}/api/products?q=${query}`);
       setData(res.data.product);
     } catch (err) {
       console.log(err);
@@ -148,22 +125,20 @@ const {
     setWindow(value !== "");
   };
 
-
-
   return (
     <>
       <header className="fixed top-0 left-0 w-full bg-black text-white z-50 shadow-md border-b border-gray-800">
         <nav className="container mx-auto flex items-center justify-between px-5 py-4">
-          
+
           {/* LEFT SECTION */}
           <div className="flex flex-row-reverse md:flex-row items-center gap-4 md:gap-10">
             <Link to="/">
-              <img src="../src/assets/images/logo.png" alt="logo" className="w-[150px] md:w-[260px]" />
+              <img src={logo} alt="logo" className="w-[150px] md:w-[260px]" />
             </Link>
 
             <div className="relative">
-              <button 
-                onClick={() => setIsOpen(!isOpen)} 
+              <button
+                onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 hover:text-emerald-400 transition-colors py-2"
               >
                 {isOpen ? <IoCloseOutline className="w-8 h-8" /> : <IoMenuOutline className="w-6 h-6" />}
@@ -174,7 +149,7 @@ const {
               {isOpen && (
                 <div className="absolute top-[100%] left-0 w-[320px] md:w-[400px] bg-[#1a1a1a] text-white shadow-2xl border border-gray-800 rounded-b-md animate-in fade-in slide-in-from-top-2 duration-200 z-[60]">
                   <div className="flex flex-col max-h-[80vh] overflow-y-auto custom-scrollbar">
-                    
+
                     <div className="p-2">
                       {/* TOP BRANDS ACCORDION */}
                       <div className="border-b border-gray-800">
@@ -182,43 +157,34 @@ const {
                           onClick={() => setOpenCategory(openCategory === 'brands' ? null : 'brands')}
                           className={`w-full flex justify-between items-center px-4 py-3 hover:text-black hover:bg-emerald-400 rounded-md transition-all ${openCategory === 'brands' ? 'bg-emerald-400 text-black' : ''}`}
                         >
-                          <span className="text-sm font-bold uppercase tracking-wide">Top Brands</span>
+                          {/* ✅ Applied menuLinkStyle */}
+                          <span className={menuLinkStyle}>Top Brands</span>
                           <FaChevronRight className={`w-3 h-3 transition-transform duration-300 ${openCategory === 'brands' ? 'rotate-90' : 'text-gray-500'}`} />
                         </button>
 
                         {openCategory === 'brands' && (
-                          <div className="bg-black/40 p-3 grid grid-cols-2 gap-1 animate-in fade-in zoom-in-95 duration-200">
-                            {brands.map((brand) => (
-                              <Link
-                                key={brand}
-                                   to={`/brand/${encodeURIComponent(brand)}`}
-                                onClick={() => setIsOpen(false)}
-                                className="px-3 py-2 text-[11px] text-gray-400 hover:text-white hover:bg-gray-800 rounded transition-colors"
-                              >
-                                {brand}
-                              </Link>
-                            ))}
-                          </div>
+                           <div className="bg-black/40 p-3 grid grid-cols-2 gap-2 animate-in fade-in zoom-in-95 duration-200">
+                           {brands.map((brand) => (
+  <Link
+    key={brand}
+    to={`/brand/${encodeURIComponent(brand)}`}
+    onClick={() => setIsOpen(false)}
+    className={`px-2 py-1 rounded hover:bg-gray-800 ${subMenuLinkStyle}`}
+  >
+    {brand}
+  </Link>
+))}
+
+                         </div>
                         )}
                       </div>
 
-                      {/* STORE LOCATOR LINK */}
-                      <Link 
-                        to="/about"
-                        onClick={() => {
-                          setIsOpen(false);
-                          setOpenCategory(null);
-                        }}
-                        className="flex justify-between items-center px-4 py-3 hover:text-black hover:bg-emerald-400 rounded-md group transition-all"
-                      >
-                        <span className="text-sm font-bold uppercase tracking-wide">ABOUT US</span>
-                        <FaChevronRight className="w-3 h-3 text-gray-500 group-hover:text-black" />
-                      </Link>
+
 
                     </div>
 
                     <div className="bg-gray-900/50 px-6 py-3 border-y border-gray-800">
-                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Shop by Category</h3>
+                       <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Shop by Category</h3>
                     </div>
 
                     {/* DYNAMIC CATEGORIES */}
@@ -229,25 +195,26 @@ const {
                             onClick={() => setOpenCategory(openCategory === cat.name ? null : cat.name)}
                             className={`w-full flex justify-between items-center px-4 py-3 hover:text-black hover:bg-emerald-400 rounded-md transition-all ${openCategory === cat.name ? 'text-teal-400' : ''}`}
                           >
-                            <span className="text-sm font-medium">{cat.name}</span>
+                            {/* ✅ Applied menuLinkStyle */}
+                            <span className={menuLinkStyle}>{cat.name}</span>
                             <FaChevronRight className={`w-3 h-3 transition-transform duration-300 ${openCategory === cat.name ? 'rotate-90 text-teal-400' : 'text-gray-500'}`} />
                           </button>
 
                           {openCategory === cat.name && (
-                            <div className="bg-black/40 mx-2 mb-2 rounded-md overflow-hidden">
+                            <div className="bg-black/40 mx-2 mb-2 rounded-md overflow-hidden py-2">
                               {cat.sub.map((sub) => (
                                <Link
                                   key={sub}
-                                  to={categoryRoutes[sub] || "/"}
+                                  to={getCategoryLink(sub)}
                                   onClick={() => {
                                     setIsOpen(false);
                                     setOpenCategory(null);
                                   }}
-                                  className="block px-8 py-2 text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                                  // ✅ Applied subMenuLinkStyle
+                                  className={`block px-8 py-2 hover:bg-gray-800 ${subMenuLinkStyle}`}
                                 >
                                   {sub}
                                 </Link>
-
                               ))}
                             </div>
                           )}
@@ -255,7 +222,7 @@ const {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="mt-auto border-t border-gray-800 p-4 bg-black rounded-b-md">
                     <p className="text-[10px] text-center text-gray-500 font-bold uppercase tracking-tighter">
                       © PRAKASH TRADERS
@@ -270,7 +237,7 @@ const {
           <div className="hidden md:flex flex-1 mx-12 relative">
             <SearchBar handleSearch={handleSearch} window={window} data={data} />
             {window && (
-              <div className="absolute top-full left-0 bg-white text-black w-full z-10 shadow-xl max-h-[400px] overflow-y-auto">
+              <div className="absolute top-full left-0 bg-white text-black w-full z-10 shadow-xl max-h-[400px] overflow-y-auto rounded-b-lg">
                 {data?.length ? (
                   data.map((e, i) => <ProductCard key={i} {...e} />)
                 ) : (
@@ -280,7 +247,7 @@ const {
             )}
           </div>
 
-          {/* 🔹 RIGHT ICONS (UPDATED WITH BADGES) */}
+          {/* 🔹 RIGHT ICONS */}
           <div className="flex items-center gap-3 md:gap-6">
 
             <button className="md:hidden" onClick={() => setMobileSearchOpen(!mobileSearchOpen)}>
@@ -306,107 +273,104 @@ const {
 
               {isHovered && (
                 <div className="absolute right-0 top-full bg-[#1a1a1a] p-2 w-64 z-50 shadow-2xl border border-gray-700 rounded-md">
-   {dataForSidebar.map((e, i) => {
-  if (e.link.startsWith("tel:")) {
-    return (
-      <a
-        key={i}
-        href={e.link}
-        onClick={closeUserMenu}   // ✅ ADD THIS
-        className="flex items-center gap-4 p-3 hover:bg-gray-800 rounded-md transition-all text-sm"
-      >
-        {e.icon}
-        {e.name}
-      </a>
-    );
-  }
-
-  return (
-    <Link
-      key={i}
-      to={e.link}
-      onClick={closeUserMenu}   // ✅ ADD THIS
-      className="flex items-center gap-4 p-3 hover:bg-gray-800 rounded-md transition-all text-sm"
-    >
-      {e.icon}
-      {e.name}
-    </Link>
-  );
-})}
-
+                   {dataForSidebar.map((e, i) => {
+                      if (e.link.startsWith("tel:")) {
+                        return (
+                          <a
+                            key={i}
+                            href={e.link}
+                            onClick={closeUserMenu}
+                            className="flex items-center gap-4 p-3 hover:bg-gray-800 rounded-md transition-all text-sm"
+                          >
+                            {e.icon}
+                            {e.name}
+                          </a>
+                        );
+                      }
+                      return (
+                        <Link
+                          key={i}
+                          to={e.link}
+                          onClick={closeUserMenu}
+                          className="flex items-center gap-4 p-3 hover:bg-gray-800 rounded-md transition-all text-sm"
+                        >
+                          {e.icon}
+                          {e.name}
+                        </Link>
+                      );
+                    })}
 
                   <hr className="border-gray-700 my-2" />
 
                   {token && isAuth ? (
-  <>
-    {/* ✅ ADMIN DASHBOARD LINK (ADMIN ONLY) */}
-    {role === "admin" && (
-      <Link
-        to="/dashboard"
-        className="flex items-center gap-3 w-full p-3 hover:bg-purple-900/20 text-purple-400 text-sm font-semibold"
-      >
-        <FaUserShield /> Dashboard
-      </Link>
-    )}
+                    <>
+                      {/* ADMIN DASHBOARD LINK */}
+                      {role === "admin" && (
+                        <Link
+                          to="/dashboard"
+                          className="flex items-center gap-3 w-full p-3 hover:bg-purple-900/20 text-purple-400 text-sm font-semibold"
+                        >
+                          <FaUserShield /> Dashboard
+                        </Link>
+                      )}
 
-    {/* LOGOUT */}
-    <button
-  onClick={() => {
-    logout();          // 🔥 SINGLE SOURCE OF TRUTH
-    setShowPopup(false);
-    setIsHovered(false);
-  }}
-  className="flex items-center gap-3 w-full p-3 hover:bg-red-900/20 text-red-400 text-sm"
->
-  <AiOutlineLogout /> Logout
-</button>
-  </>
-) : (
-  <>
-    {/* USER LOGIN */}
-    <button
-      onClick={() => setShowPopup(true)}
-      className="flex items-center gap-3 w-full p-3 hover:bg-teal-900/20 text-teal-400 text-sm font-semibold"
-    >
-      <AiOutlineLogin /> User Login
-    </button>
-
-    {/* ADMIN LOGIN */}
-    <Link
-      to="/admin-login"
-      className="flex items-center gap-3 w-full p-3 hover:bg-purple-900/20 text-purple-400 text-sm font-semibold"
-    >
-      <FaUserShield /> Admin Login
-    </Link>
-  </>
-)}
-
+                      {/* LOGOUT */}
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowPopup(false);
+                          setIsHovered(false);
+                        }}
+                        className="flex items-center gap-3 w-full p-3 hover:bg-red-900/20 text-red-400 text-sm"
+                      >
+                        <AiOutlineLogout /> Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {/* USER LOGIN */}
+                      <button
+                        onClick={() => setShowPopup(true)}
+                        className="flex items-center gap-3 w-full p-3 hover:bg-teal-900/20 text-teal-400 text-sm font-semibold"
+                      >
+                        <AiOutlineLogin /> User Login
+                      </button>
+                       {/* here i was removed the admin login by kabilan */}
+                     </>
+                  )}
                 </div>
               )}
             </div>
 
+
             {/* CART ICON & BADGE */}
-           {/* CART ICON & BADGE */}
-<div 
-  onClick={() => {
-    if (token && isAuth) {
-      navigate("/cart"); // Go to cart if logged in
-    } else {
-      setShowPopup(true); // Open login popup if NOT logged in
-    }
-  }} 
-  className="relative cursor-pointer hover:text-teal-400 transition-colors"
->
-  <FaShoppingCart className="w-5 h-5" />
-  
-  {/* Badge Logic */}
-  {cartItems.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-      {cartItems.length}
-    </span>
-  )}
-</div>
+            <div
+              onClick={() => {
+                if (token && isAuth) {
+                  navigate("/cart");
+                } else {
+                  setShowPopup(true);
+                }
+              }}
+              className="relative cursor-pointer hover:text-teal-400 transition-colors"
+            >
+
+              <FaShoppingCart className="w-5 h-5" />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  {cartItems.length}
+                </span>
+              )}
+            </div>
+            <Link
+              to="/about"
+              className="relative cursor-pointer hover:text-teal-400 transition-colors flex items-center gap-1"
+            >
+              <FaInfoCircle className="w-5 h-5" />
+              <span className="hidden md:block text-sm font-bold">About</span>
+            </Link>
           </div>
+
         </nav>
       </header>
 
@@ -424,13 +388,11 @@ const {
         </div>
       )}
 
-      {/* Spacing for fixed header */}
       <div className="pt-[72px]" />
-      
-      {/* Background Overlay */}
+
       {isOpen && (
-          <div 
-            className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40" 
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40"
             onClick={() => setIsOpen(false)}
           />
       )}
@@ -439,3 +401,4 @@ const {
 };
 
 export default Navbar;
+

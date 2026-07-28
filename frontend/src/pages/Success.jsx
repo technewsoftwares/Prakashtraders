@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Success = () => {
   const location = useLocation();
   const [order, setOrder] = useState(null);
+  const API = import.meta.env.VITE_API_URL;
 
   if (!location.state?.order_id) {
     return <Navigate to="/" />;
@@ -17,7 +18,7 @@ const Success = () => {
   const orderId = location.state.order_id;
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/order-details/${orderId}/`)
+    fetch(`${API}/api/order-details/${orderId}/`)
       .then(res => res.json())
       .then(data => setOrder(data));
   }, [orderId]);

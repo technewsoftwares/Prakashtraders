@@ -1,42 +1,24 @@
 import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { ContextProvider } from "../Context/Context";
+import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast"; 
 
-const Personalized = () => {
+const Personalized = ({products = []}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { addToCart, addToWishlist } = useContext(ContextProvider);
+  const API = import.meta.env.VITE_API_BASE_URL;
 
-    const API = import.meta.env.VITE_API_URL;
-
-
-  useEffect(() => {
-    const fetchRandomProducts = async () => {
-      try {
-        const res = await fetch(`${API}/api/products/random/`);
-        if (!res.ok) throw new Error("Failed to fetch products");
-
-        const result = await res.json();
-        setData(result);
-      } catch (error) {
-        console.error("Error fetching random products:", error);
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRandomProducts();
-  }, []);
+  const { addToCart, addToWishlist } = useContext(ShopContext);
 
   //  HELPER: Convert relative path to full URL
   const toFullImageUrl = (img) => {
-    if (!img) return null;
+    if (!img) {
+        return <div className="w-full h-32 bg-zinc-800 rounded-md" />;
+    }
     if (img.startsWith("http")) return img;
     const cleanPath = img.startsWith("/") ? img : `/${img}`;
-    return `${API}${cleanPath}`;
+    return API ? `${import.meta.env.VITE_API_BASE_URL}${cleanPath}`: cleanPath;
   };
 
   //  HELPER: Get the first available image
@@ -44,6 +26,10 @@ const Personalized = () => {
     const rawImage = product.image_1 || product.image_2 || product.image_3;
     return toFullImageUrl(rawImage);
   };
+
+if (!Array.isArray(products) || products.length === 0) {
+  return null;
+}
 
   // Handler for Wishlist
   const handleAddToWishlist = (e, product) => {
@@ -83,31 +69,20 @@ const Personalized = () => {
     }
   };
 
-  if (loading || !data.length) return null;
-
   return (
     <>
-      <style>
-        {`
-          .no-scrollbar::-webkit-scrollbar { display: none; }
-          .no-scrollbar {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-        `}
-      </style>
+<div className="w-full mx-auto pt-0 pb-8 md:pb-10 px-4">
 
-      <div className="container mx-auto my-10 px-4">
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold tracking-tight text-white">
-            Recommendations for You
+        {/* HEADER - Reduced mb-6 to mb-4 */}
+        <div className="flex items-center justify-center mb-4">
+          <h2 className="text-2xl font-bold uppercase tracking-wider text-center">
+            Our Recommendations
           </h2>
         </div>
 
         {/* HORIZONTAL SCROLL */}
         <div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-4">
-          {data.map((product) => {
+          {products.map((product) => {
            const {
               id,
               name,
@@ -124,7 +99,7 @@ const Personalized = () => {
             return (
               <div key={id} className="relative group shrink-0 snap-start">
                 <Link to={`/product/${id}`}>
-                  <div className="relative w-[165px] sm:w-64 bg-[#121212] border border-white/5 rounded-xl sm:rounded-2xl p-2 sm:p-4 hover:bg-white/10 transition-all flex flex-col min-h-[280px] sm:min-h-[400px]">
+                  <div className="relative w-[165px] sm:w-64 bg-[#000000] border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 hover:bg-black transition-all flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
                     
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                       
@@ -151,19 +126,20 @@ const Personalized = () => {
                       </button>
                     </div>
 
-                    {/* IMAGE */}
-                    <div className="h-32 sm:h-52 flex items-center justify-center mb-2 sm:mb-4">
-                      {displayImage ? (
-                        <img
-                          src={displayImage}
-                          alt={name}
-                          className="max-h-full object-contain transition-transform group-hover:scale-105"
-                          onError={(e) => e.target.src = "https://via.placeholder.com/150"}
-                        />
-                      ) : (
-                          <div className="text-zinc-500 text-xs">No Image</div>
-                      )}
-                    </div>
+{/* IMAGE */}
+<div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center overflow-hidden">
+  {displayImage ? (
+    <img
+      src={displayImage}
+      alt={name}
+      className="w-full h-full object-contain transition-transform group-hover:scale-105"
+      onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
+    />
+  ) : (
+    <div className="text-zinc-500 text-xs">No Image</div>
+  )}
+</div>
+
 
                     {/* DETAILS */}
                     <div className="flex flex-col gap-1 sm:gap-2">
@@ -173,17 +149,17 @@ const Personalized = () => {
 
                       {/* PRICE */}
                      <div className="flex items-center gap-2">
-                      {original_price && original_price > price && (
+                      {original_price && !isNaN(original_price) && original_price > price && (
                         <span className="text-xs sm:text-sm text-zinc-400 line-through font-medium">
                           ₹{Number(original_price).toLocaleString("en-IN")}
                         </span>
                       )}
 
                       <span className="text-sm sm:text-xl font-bold text-white">
-                        ₹{Number(price).toLocaleString("en-IN")}
+                        ₹{Number(price || 0).toLocaleString("en-IN")}
                       </span>
                     </div>
-{/* ⭐ RATING + REVIEW COUNT */}
+                    {/* ⭐ RATING + REVIEW COUNT */}
 <div className="flex items-center gap-1">
   {[...Array(5)].map((_, i) => (
     <svg

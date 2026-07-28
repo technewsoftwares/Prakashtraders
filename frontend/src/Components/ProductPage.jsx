@@ -1,45 +1,58 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { SERVER_URL } from "../config";
-import Loading from "./Loading"
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import Loading from "./Loading";
+import ProductCard from "./CategoryProducts";
+
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const ProductPage = () => {
-	const { category } = useParams()
-	const [products, setProducts] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
+  const { category } = useParams();
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-	const getCategoryWiseProduct = async () => {
-		setIsLoading(true);
-		try {
-			const res = await axios.get(`${SERVER_URL}/${category}`)
-			setProducts(res.data.products)
-			setIsLoading(false);
-		} catch (error) {
-			console.log(error)
-			setIsLoading(false);
-		}
-	}
+  const getCategoryWiseProduct = async () => {
+    setIsLoading(true);
 
-	useEffect(() => {
-		getCategoryWiseProduct();
-	}, [])
+    try {
+      const res = await axios.get(
+        `${API}/api/products/?category=${category}`
+      );
 
-	return (
-		<>
-			<div className="container py-8">{category.toUpperCase()}</div>
-			{isLoading && <div className="h-48 flex items-center justify-center"><Loading text="Loading..." /></div>}
-			{!isLoading && <div className="container py-8 flex gap-8 flex-wrap items-center">
-				{
-					products.map((e, index) => {
-						return (
-							<ProductCard key={index} {...e} />
-						)
-					})
-				}
-			</div>}
-		</>
-	)
-}
+      setProducts(res.data.products || []);
+    } catch (error) {
+      console.log(error);
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-export default ProductPage
+  useEffect(() => {
+    if (category) getCategoryWiseProduct();
+  }, [category]);
+
+  return (
+    <>
+      <div className="container py-8">
+        {category?.toUpperCase()}
+      </div>
+
+      {isLoading && (
+        <div className="h-48 flex items-center justify-center">
+          <Loading text="Loading..." />
+        </div>
+      )}
+
+      {!isLoading && (
+        <div className="container py-8 flex gap-8 flex-wrap items-center">
+          {products.map((e, index) => (
+            <ProductCard key={index} {...e} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
+
+export default ProductPage;

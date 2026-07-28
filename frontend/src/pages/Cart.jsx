@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IoTrashOutline } from "react-icons/io5";
-import { ContextProvider } from "../Context/Context";
+import { ShopContext } from "../Context/Context";
 
 const Cart = () => {
-  const { cartItems, removeFromCart } = useContext(ContextProvider);
+  const { cartItems, removeFromCart } = useContext(ShopContext);
   const navigate = useNavigate();
 
   // 🔹 Calculate total price

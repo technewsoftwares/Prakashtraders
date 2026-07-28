@@ -11,7 +11,7 @@ const Contact = () => {
     email: "",
     message: ""
   });
-
+   const API = import.meta.env.VITE_API_BASE_URL;
   // State for UI handling
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState({ type: "", msg: "" });
@@ -29,7 +29,7 @@ const Contact = () => {
 
     try {
       // Sends data to the Django Backend
-      const response = await axios.post("http://127.0.0.1:8000/api/auth/contact/", formData);
+      const response = await axios.post(`${API}/api/auth/contact/`, formData);
 
       if (response.data.success) {
         setStatus({ type: "success", msg: "Message sent! Check your email." });
@@ -142,7 +142,7 @@ const Contact = () => {
               <div>
                 <h4 className="font-bold text-lg">Email Us</h4>
                 <p className="text-gray-400 text-sm">For general & support queries</p>
-                <a href="mailto:Ptindsupplier@gmail.com" className="text-emerald-400 mt-1 block">Ptindsupplier@gmail.com</a>
+                <a href="mailto:Ptindsupplier@gmail.com" className="text-emerald-400 mt-1 block">ptindsupplier@gmail.com</a>
               </div>
             </div>
 

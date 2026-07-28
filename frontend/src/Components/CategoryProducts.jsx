@@ -1,13 +1,21 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
-import { ContextProvider } from "../Context/Context";
+import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
-
-
+import { API_BASE } from "../config";
 const CategoryProducts = () => {
   const { category } = useParams();
+  const navigate = useNavigate();
 
-  // ✅ DECODE CATEGORY
+  if (!category) {
+    return <div className="h-screen bg-[#0a0a0a]"></div>;
+  }
+
+  // 🔹 CONFIG: API URL
+  const API = API_BASE;
+
+  // ✅ DECODE CATEGORY (slug-case -> Title Case)
+  // Example: "washing-machines" -> "Washing Machines"
   const decodedCategory = category
     ? category
         .split("-")
@@ -20,7 +28,7 @@ const CategoryProducts = () => {
   const [loading, setLoading] = useState(true);
 
   // 🔹 USE CONTEXT
-  const { addToCart, addToWishlist } = useContext(ContextProvider);
+  const { addToCart, addToWishlist } = useContext(ShopContext);
 
   // 🔹 FILTER STATES
   const [minPrice, setMinPrice] = useState("");
@@ -29,19 +37,36 @@ const CategoryProducts = () => {
   const [availability, setAvailability] = useState("");
   const [sortOrder, setSortOrder] = useState("");
 
-  const API = import.meta.env.VITE_API_URL;
+  // ✅ 1. HELPER FUNCTIONS (Fixed for Production)
+  const toFullImageUrl = (img) => {
+    if (!img) return "https://via.placeholder.com/150";
+    if (img.startsWith("http")) return img;
+    const cleanPath = img.startsWith("/") ? img : `/${img}`;
+    // ❌ OLD: return `http://localhost:8000${cleanPath}`;
+    // ✅ NEW:
+    return `${API}${cleanPath}`;
+  };
+
+  const getFirstValidImage = (product) => {
+    return [product.image_1, product.image_2, product.image_3].find(Boolean);
+  };
 
   useEffect(() => {
     if (!decodedCategory) return;
 
     const fetchCategoryProducts = async () => {
       try {
+        setLoading(true);
+        // Ensure we handle cases where API might differ
         const res = await fetch(
-          `${API}/api/products/?category=${decodedCategory}`
+          `${API}/api/products/?category=${encodeURIComponent(decodedCategory)}`
         );
         if (!res.ok) throw new Error("Failed to fetch");
+        
         const result = await res.json();
-        setData(result);
+        // Handle if backend returns { products: [...] } or just [...]
+        const products = Array.isArray(result) ? result : result.products || [];
+        setData(products);
       } catch (error) {
         console.error("Error fetching category products:", error);
         setData([]);
@@ -50,7 +75,7 @@ const CategoryProducts = () => {
       }
     };
     fetchCategoryProducts();
-  }, [decodedCategory]);
+  }, [decodedCategory, API]);
 
   // 🔹 FILTER + SORT LOGIC
   const filteredData = data
@@ -65,73 +90,57 @@ const CategoryProducts = () => {
         : p.in_stock === false
     )
     .sort((a, b) => {
-      if (sortOrder === "low-high") return a.price - b.price;
-      if (sortOrder === "high-low") return b.price - a.price;
+      // Ensure prices are numbers for sorting
+      const priceA = Number(a.price) || 0;
+      const priceB = Number(b.price) || 0;
+      if (sortOrder === "low-high") return priceA - priceB;
+      if (sortOrder === "high-low") return priceB - priceA;
       return 0;
     });
 
-  // ==========================================
-  // ✅ 1. ADDED HELPER FUNCTIONS (From BrandProducts)
-  // ==========================================
-  const toFullImageUrl = (img) => {
-    if (!img) return "https://via.placeholder.com/150";
-    if (img.startsWith("http")) return img;
-    const cleanPath = img.startsWith("/") ? img : `/${img}`;
-    return `http://localhost:8000${cleanPath}`;
-  };
-
-  const getFirstValidImage = (product) => {
-    // Checks image_1, image_2, image_3 to find the first one that exists
-    return [product.image_1, product.image_2, product.image_3].find(Boolean);
-  };
-
-  // ==========================================
-  // ✅ 2. FIXED HANDLERS (Pass full object with processed image)
-  // ==========================================
+  // ✅ 2. HANDLERS
   const handleAddToWishlist = (e, product) => {
-  e.preventDefault();
-  e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-  const wishlistItem = {
-    ...product,
-    image: toFullImageUrl(getFirstValidImage(product)),
+    const wishlistItem = {
+      ...product,
+      image: toFullImageUrl(getFirstValidImage(product)),
+    };
+
+    const isAdded = addToWishlist(wishlistItem);
+
+    if (isAdded) {
+      toast.success("Added to Wishlist ❤️", { id: `wish-${product.id}` });
+    } else {
+      toast.success("Item already in Wishlist!", { id: `wish-exist-${product.id}` });
+    }
   };
-
-  const isAdded = addToWishlist(wishlistItem);
-
-  if (isAdded) {
-    toast.success("Added to Wishlist ❤️", {
-      id: `wish-${product.id}`,
-    });
-  } else {
-    toast.success("Item already in Wishlist!", {
-      id: `wish-exist-${product.id}`,
-    });
-  }
-};
 
   const handleAddToCart = (e, product) => {
-  e.preventDefault();
-  e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-  const cartItem = {
-    ...product,
-    image: toFullImageUrl(getFirstValidImage(product)),
+    const cartItem = {
+      ...product,
+      image: toFullImageUrl(getFirstValidImage(product)),
+    };
+
+    const isAdded = addToCart(cartItem);
+
+    if (isAdded) {
+      toast.success("Added to Cart 🛒", { id: `cart-${product.id}` });
+    } else {
+      toast.success("Item already in Cart", { id: `cart-exist-${product.id}` });
+    }
   };
 
-  const isAdded = addToCart(cartItem);
-
-  if (isAdded) {
-    toast.success("Added to Cart 🛒", {
-      id: `cart-${product.id}`,
-    });
-  } else {
-    toast.success("Item already in Cart", { 
-      id: `cart-exist-${product.id}`,
-    });
-  }
-};
-
+  // ✅ 3. NAVIGATION HANDLER (Better than window.location)
+  const handleViewProduct = (e, productId) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    navigate(`/product/${productId}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 pb-10">
@@ -143,7 +152,6 @@ const CategoryProducts = () => {
 
         {/* 🔥 HORIZONTAL FILTER BAR */}
         <div className="mb-4">
-          {/* FILTER TABS */}
           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pl-4 pr-2">
             {[
               { key: "price", label: "Price" },
@@ -169,7 +177,6 @@ const CategoryProducts = () => {
           {/* FILTER CONTENT */}
           {activeFilter && (
             <div className="flex mt-3 bg-zinc-900 p-4 rounded-xl text-sm">
-              {/* PRICE */}
               {activeFilter === "price" && (
                 <div className="flex gap-3">
                   <input
@@ -177,19 +184,17 @@ const CategoryProducts = () => {
                     placeholder="Min ₹"
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    className="bg-zinc-800 p-2 rounded w-full"
+                    className="bg-zinc-800 p-2 rounded w-full text-white"
                   />
                   <input
                     type="number"
                     placeholder="Max ₹"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    className="bg-zinc-800 p-2 rounded w-full"
+                    className="bg-zinc-800 p-2 rounded w-full text-white"
                   />
                 </div>
               )}
-
-              {/* RATING */}
               {activeFilter === "rating" && (
                 <div className="flex gap-3">
                   {[4, 3, 2].map((r) => (
@@ -207,19 +212,17 @@ const CategoryProducts = () => {
                   ))}
                 </div>
               )}
-
-              {/* SORT */}
               {activeFilter === "sort" && (
                 <div className="flex gap-3">
                   <button
                     onClick={() => setSortOrder("low-high")}
-                    className="px-4 py-2 bg-zinc-800 rounded-full"
+                    className={`px-4 py-2 rounded-full ${sortOrder === 'low-high' ? 'bg-emerald-500 text-black' : 'bg-zinc-800'}`}
                   >
                     Price: Low → High
                   </button>
                   <button
                     onClick={() => setSortOrder("high-low")}
-                    className="px-4 py-2 bg-zinc-800 rounded-full"
+                    className={`px-4 py-2 rounded-full ${sortOrder === 'high-low' ? 'bg-emerald-500 text-black' : 'bg-zinc-800'}`}
                   >
                     Price: High → Low
                   </button>
@@ -234,12 +237,12 @@ const CategoryProducts = () => {
           <p className="text-center text-zinc-400">Loading...</p>
         ) : filteredData.length === 0 ? (
           <p className="text-center text-zinc-400">
-            No products found for {decodedCategory}
+            No products found for "{decodedCategory}" <br/>
+            <span className="text-xs text-zinc-600">(Check backend category naming)</span>
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0.5 md:gap-6 bg-zinc-800 md:bg-transparent">
             {filteredData.map((product) => {
-              // Get the valid image for display
               const validImage = getFirstValidImage(product);
               const fullImageUrl = toFullImageUrl(validImage);
 
@@ -248,12 +251,12 @@ const CategoryProducts = () => {
                   key={product.id}
                   to={`/product/${product.id}`}
                   state={{ product }}
-                  className="group bg-zinc-900 md:rounded-2xl overflow-hidden hover:bg-zinc-800/50 transition-all duration-300 md:border md:border-zinc-800 md:hover:border-zinc-600 relative"
+                  className="group bg-zinc-900 md:rounded-2xl overflow-hidden hover:bg-zinc-800/50 transition-all duration-300 md:border md:border-zinc-800 md:hover:border-zinc-600 relative block"
                 >
                   <div className="flex flex-row md:flex-col h-full">
                     {/* IMAGE CONTAINER */}
-                    <div className="relative w-1/3 md:w-full bg-zinc-800/80 backdrop-blur-sm p-3 md:p-6 flex items-center justify-center">
-                      {/* ❤️ WISHLIST BUTTON */}
+                    <div className="relative w-1/3 md:w-full bg-black backdrop-blur-sm p-3 md:p-6 flex items-center justify-center">
+                      {/* WISHLIST BUTTON */}
                       <button
                         onClick={(e) => handleAddToWishlist(e, product)}
                         className="absolute top-2 right-2 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-red-500 transition-all transform hover:scale-110 z-10"
@@ -275,7 +278,6 @@ const CategoryProducts = () => {
                         </svg>
                       </button>
 
-                      {/* ✅ 3. FIXED IMAGE SRC */}
                       <img
                         src={fullImageUrl}
                         alt={product.name}
@@ -293,27 +295,24 @@ const CategoryProducts = () => {
                         <h2 className="text-sm md:text-base font-medium line-clamp-2 leading-snug text-zinc-200">
                           {product.name}
                         </h2>
-              {/* ⭐ Rating + Review Count */}
-{(product.rating > 0 || product.reviews_count > 0) && (
-  <div className="flex items-center mt-1.5 gap-2">
-    {product.rating > 0 && (
-      <span className="bg-green-700 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
-        {product.rating} ★
-      </span>
-    )}
+                        
+                        {/* Rating */}
+                        {(product.rating > 0 || product.reviews_count > 0) && (
+                          <div className="flex items-center mt-1.5 gap-2">
+                            {product.rating > 0 && (
+                              <span className="bg-green-700 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                {product.rating} ★
+                              </span>
+                            )}
+                            <span className="text-zinc-500 text-[11px]">
+                              ({product.reviews_count || 0} Reviews)
+                            </span>
+                          </div>
+                        )}
 
-    <span className="text-zinc-500 text-[11px]">
-      ({product.reviews_count || 0} Reviews)
-    </span>
-  </div>
-)}
-                        {/* SPECS */}
-                        <div className="mt-3">
-                          <p className="md:hidden text-[11px] text-zinc-400 line-clamp-2">
-                            {product.description || "No description available"}
-                          </p>
-
-                          <ul className="hidden md:flex flex-col gap-2 mt-2">
+                        {/* Description (Desktop) */}
+                        <div className="mt-3 hidden md:block">
+                          <ul className="flex flex-col gap-2 mt-2">
                             {product.description
                               ?.split("\n")
                               .filter((line) => line.trim() !== "")
@@ -323,8 +322,8 @@ const CategoryProducts = () => {
                                   key={index}
                                   className="text-[11px] text-zinc-400 flex items-start gap-2"
                                 >
-                                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
-                                  {line}
+                                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1 shrink-0"></div>
+                                  <span className="line-clamp-1">{line}</span>
                                 </li>
                               ))}
                           </ul>
@@ -334,34 +333,25 @@ const CategoryProducts = () => {
                       {/* PRICE + ACTIONS */}
                       <div className="mt-4 flex flex-col gap-3">
                         <div className="flex items-baseline gap-2">
-    
-                        {/* ORIGINAL PRICE (MRP) */}
-                        {product.original_price &&
-                          Number(product.original_price) > Number(product.price) && (
-                            <span className="text-[10px] md:text-xs text-zinc-500 line-through">
-                              ₹{Number(product.original_price).toLocaleString("en-IN")}
-                            </span>
-                        )}
-
-                        {/* SELLING PRICE */}
-                        <span className="text-lg md:text-xl font-bold text-white">
-                          ₹{Number(product.price).toLocaleString("en-IN")}
-                        </span>
-                      </div>
+                          {product.original_price &&
+                            Number(product.original_price) > Number(product.price) && (
+                              <span className="text-[10px] md:text-xs text-zinc-500 line-through">
+                                ₹{Number(product.original_price).toLocaleString("en-IN")}
+                              </span>
+                            )}
+                          <span className="text-lg md:text-xl font-bold text-white">
+                            ₹{Number(product.price).toLocaleString("en-IN")}
+                          </span>
+                        </div>
 
                         <div className="hidden md:flex gap-2">
                           <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              window.location.href = `/product/${product.id}`;
-                            }}
+                            onClick={(e) => handleViewProduct(e, product.id)}
                             className="flex-1 text-[11px] py-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition"
                           >
                             View
                           </button>
 
-                          {/* ✅ ADD TO CART BUTTON */}
                           <button
                             onClick={(e) => handleAddToCart(e, product)}
                             className="flex-1 text-[11px] py-2 rounded-lg bg-emerald-500 text-black font-semibold hover:bg-emerald-400 transition"

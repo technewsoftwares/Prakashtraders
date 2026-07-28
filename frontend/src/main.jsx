@@ -6,6 +6,8 @@ import { Toaster } from "react-hot-toast";
 import App from "./App.jsx";
 import "./index.css";
 import ShopContextProvider from "./Context/Context.jsx"; // Import default export
+import ErrorBoundary from "./ErrorBoundary.jsx";
+
 
 const globalStyles = css`
   body {
@@ -17,24 +19,26 @@ const globalStyles = css`
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-    <ShopContextProvider>
-      <ChakraProvider>
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 2000,
-            style: {
-              background: "#18181b",
-              color: "#fff",
-              borderRadius: "9999px",
-              padding: "10px 16px",
-              fontSize: "14px",
-            },
-          }}
-        />
-        <Global styles={globalStyles} />
-        <App />
-      </ChakraProvider>
-    </ShopContextProvider>
+    <ErrorBoundary>
+      <ShopContextProvider>
+        <ChakraProvider>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 2000,
+              style: {
+                background: "#18181b",
+                color: "#fff",
+                borderRadius: "9999px",
+                padding: "10px 16px",
+                fontSize: "14px",
+              },
+            }}
+          />
+          <Global styles={globalStyles} />
+          <App />
+        </ChakraProvider>
+      </ShopContextProvider>
+    </ErrorBoundary>
   </BrowserRouter>
 );

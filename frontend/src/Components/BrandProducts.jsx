@@ -1,14 +1,13 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
-import { ContextProvider } from "../Context/Context";
+import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
-
-  const API = import.meta.env.VITE_API_URL;
-
 
 // --- HELPER FUNCTIONS ---
 const toFullImageUrl = (img) => {
-  if (!img) return "https://via.placeholder.com/150";
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+  if (!img) return "https://prakashtraders.com/150";
   if (img.startsWith("http")) return img;
   const cleanPath = img.startsWith("/") ? img : `/${img}`;
   return `${API}${cleanPath}`;
@@ -19,10 +18,10 @@ const getFirstValidImage = (product) => {
 };
 
 // --- SUB-COMPONENT: ProductCard ---
-// Handles individual card logic, hover state, and auto-scrolling
 const ProductCard = ({ product, addToCart, addToWishlist }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   // Extract valid images
   const productImages = [
@@ -31,7 +30,7 @@ const ProductCard = ({ product, addToCart, addToWishlist }) => {
     product.image_3,
   ].filter(Boolean);
 
-  // 🔄 AUTO-SCROLL EFFECT
+  // 🔄 AUTO-SCROLL EFFECT (FIXED)
   useEffect(() => {
     let interval;
     // Only scroll if hovered and there is more than 1 image
@@ -40,7 +39,7 @@ const ProductCard = ({ product, addToCart, addToWishlist }) => {
         setActiveIdx((prev) => (prev + 1) % productImages.length);
       }, 1200); // Change image every 1.2 seconds
     } else {
-      // Optional: Reset to first image when not hovering
+      // Reset to first image when not hovering
       setActiveIdx(0);
     }
     return () => clearInterval(interval);
@@ -74,22 +73,30 @@ const ProductCard = ({ product, addToCart, addToWishlist }) => {
     }
   };
 
+  const handleViewClick = (e) => {
+    e.preventDefault();
+    // Since the parent is a Link, we prevent default to stop the parent 
+    // from triggering and handle navigation manually here to be safe, 
+    // or just let the event bubble if you prefer.
+    navigate(`/product/${product.id}`, { state: { product } });
+  };
+
   return (
     <Link
       to={`/product/${product.id}`}
       state={{ product }}
-      className="group bg-zinc-900 md:rounded-2xl overflow-hidden hover:bg-zinc-800/50 transition-all duration-300 md:border md:border-zinc-800 md:hover:border-zinc-600 relative"
-      onMouseEnter={() => setIsHovered(true)} // Start Scroll
-      onMouseLeave={() => setIsHovered(false)} // Stop Scroll
+      className="group bg-zinc-900 md:rounded-2xl overflow-hidden hover:bg-zinc-800/50 transition-all duration-300 md:border md:border-zinc-800 md:hover:border-zinc-700 block h-full"
+      onMouseEnter={() => setIsHovered(true)} 
+      onMouseLeave={() => setIsHovered(false)} 
     >
       <div className="flex flex-row md:flex-col h-full">
         {/* IMAGE SECTION */}
-        <div className="relative w-1/3 md:w-full bg-zinc-800/80 backdrop-blur-sm p-3 md:p-6 flex items-center justify-center">
-          
+        <div className="relative w-1/3 md:w-full bg-black backdrop-blur-sm p-3 md:p-6 flex items-center justify-center">
+
           {/* Wishlist Button */}
           <button
             onClick={handleWishlistClick}
-            className="absolute top-2 right-2 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-red-500 transition-all transform hover:scale-110 z-10"
+            className="absolute top-2 right-2 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-red-500 transition-all z-10"
             title="Add to Wishlist"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
@@ -102,17 +109,17 @@ const ProductCard = ({ product, addToCart, addToWishlist }) => {
             src={toFullImageUrl(productImages[activeIdx] || productImages[0])}
             alt={product.name}
             className="h-28 md:h-48 w-full object-contain transition-all duration-500"
-            onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/150"; }}
+            onError={(e) => { e.currentTarget.src = "https://prakashtraders.com/150"; }}
           />
-
+          
           {/* Slider Dots */}
           {productImages.length > 1 && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
               {productImages.map((_, idx) => (
                 <div
                   key={idx}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    activeIdx === idx ? "bg-emerald-400 w-3" : "bg-zinc-600"
+                  className={`h-1.5 rounded-full transition-all ${
+                    activeIdx === idx ? "bg-emerald-400 w-3" : "bg-zinc-600 w-1.5"
                   }`}
                 />
               ))}
@@ -169,18 +176,14 @@ const ProductCard = ({ product, addToCart, addToWishlist }) => {
 
             <div className="hidden md:flex gap-2">
               <button
-                 onClick={(e) => {
-                    e.preventDefault(); 
-                    // Let the Link handle navigation usually, but if you want explicit button nav:
-                    // window.location.href = `/product/${product.id}`;
-                 }}
-                 className="flex-1 text-[11px] py-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition"
+                 onClick={handleViewClick}
+                 className="flex-1 text-[11px] py-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition z-10 relative"
               >
                 View
               </button>
               <button
                 onClick={handleCartClick}
-                className="flex-1 text-[11px] py-2 rounded-lg bg-emerald-500 text-black font-semibold hover:bg-emerald-400 transition"
+                className="flex-1 text-[11px] py-2 rounded-lg bg-emerald-500 text-black font-semibold hover:bg-emerald-400 transition z-10 relative"
               >
                 Add to Cart
               </button>
@@ -200,7 +203,7 @@ const BrandProducts = () => {
   const [loading, setLoading] = useState(true);
 
   // Context
-  const { addToCart, addToWishlist } = useContext(ContextProvider);
+  const { addToCart, addToWishlist } = useContext(ShopContext);
 
   // Filter States
   const [minPrice, setMinPrice] = useState("");
@@ -210,13 +213,22 @@ const BrandProducts = () => {
   const [sortOrder, setSortOrder] = useState("");
   const [activeFilter, setActiveFilter] = useState(null);
 
+  // Define API variable here
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     const fetchBrandProducts = async () => {
       try {
         const res = await fetch(
-          `${API}/api/products/?brand=${decodedBrand}`
+             `${API}/api/products/?q=${decodedBrand}`
         );
-        if (!res.ok) throw new Error("Failed to fetch");
+        const contentType = res.headers.get("content-type");
+        if (!res.ok || !contentType || !contentType.includes("application/json")) {
+          const errorText = await res.text();
+          console.error("Server returned non-JSON or error:", errorText);
+          setData([]);
+          return;
+        }
         const result = await res.json();
         setData(result);
       } catch (error) {
@@ -226,8 +238,10 @@ const BrandProducts = () => {
         setLoading(false);
       }
     };
-    fetchBrandProducts();
-  }, [decodedBrand]);
+    if (decodedBrand) {
+        fetchBrandProducts();
+    }
+  }, [decodedBrand, API]);
 
   // Filter Logic
   const filteredData = data
@@ -242,8 +256,10 @@ const BrandProducts = () => {
         : p.in_stock === false
     )
     .sort((a, b) => {
-      if (sortOrder === "low-high") return a.price - b.price;
-      if (sortOrder === "high-low") return b.price - a.price;
+      const priceA = Number(a.price) || 0;
+      const priceB = Number(b.price) || 0;
+      if (sortOrder === "low-high") return priceA - priceB;
+      if (sortOrder === "high-low") return priceB - priceA;
       return 0;
     });
 
@@ -253,7 +269,7 @@ const BrandProducts = () => {
         <h1 className="text-xl md:text-3xl font-bold text-center py-8 tracking-tight uppercase">
           {decodedBrand} <span className="text-emerald-400">Products</span>
         </h1>
-        
+
         {/* 🔥 HORIZONTAL FILTER BAR */}
         <div className="mb-4">
           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pl-4 pr-2">
@@ -288,14 +304,14 @@ const BrandProducts = () => {
                     placeholder="Min ₹"
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    className="bg-zinc-800 p-2 rounded w-full"
+                    className="bg-zinc-800 p-2 rounded w-full text-white"
                   />
                   <input
                     type="number"
                     placeholder="Max ₹"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    className="bg-zinc-800 p-2 rounded w-full"
+                    className="bg-zinc-800 p-2 rounded w-full text-white"
                   />
                 </div>
               )}
@@ -320,13 +336,13 @@ const BrandProducts = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setSortOrder("low-high")}
-                    className="px-4 py-2 bg-zinc-800 rounded-full"
+                    className={`px-4 py-2 rounded-full ${sortOrder === 'low-high' ? 'bg-emerald-500 text-black' : 'bg-zinc-800'}`}
                   >
                     Price: Low → High
                   </button>
                   <button
                     onClick={() => setSortOrder("high-low")}
-                    className="px-4 py-2 bg-zinc-800 rounded-full"
+                    className={`px-4 py-2 rounded-full ${sortOrder === 'high-low' ? 'bg-emerald-500 text-black' : 'bg-zinc-800'}`}
                   >
                     Price: High → Low
                   </button>
@@ -346,11 +362,11 @@ const BrandProducts = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0.5 md:gap-6 bg-zinc-800 md:bg-transparent">
             {filteredData.map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                addToCart={addToCart} 
-                addToWishlist={addToWishlist} 
+              <ProductCard
+                key={product.id}
+                product={product}
+                addToCart={addToCart}
+                addToWishlist={addToWishlist}
               />
             ))}
           </div>

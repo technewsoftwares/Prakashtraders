@@ -1,10 +1,11 @@
 import axios from "axios";
 import { useContext, useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
-import { ContextProvider } from "../../Context/Context";
+import { ShopContext } from "../../Context/Context";
 import { useNavigate } from "react-router-dom";
 import Loading from "../Loading";
 
+const API = import.meta.env.VITE_API_BASE_URL;
 const Login = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -12,9 +13,10 @@ const Login = () => {
   const [stage, setStage] = useState("email");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
 
   // ✅ USE ONLY login()
-  const { login } = useContext(ContextProvider);
+  const { login } = useContext(ShopContext);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -31,13 +33,13 @@ const Login = () => {
       setIsLoading(true);
       try {
         const response = await axios.post(
-          "http://127.0.0.1:8000/api/auth/admin-login/",
+          `{API}/api/auth/admin-login/`,
           { email, password }
         );
 
         if (response.data.success) {
           // ✅ ADMIN ROLE
-          login(response.data.token, "admin");
+          login(response.data.access, "admin");
           navigate("/dashboard", { replace: true });
         } else {
           setError(response.data.message || "Invalid credentials");
@@ -55,7 +57,7 @@ const Login = () => {
       setIsLoading(true);
       try {
         const res = await axios.post(
-          "http://127.0.0.1:8000/api/auth/login-type/",
+          `{API}/api/auth/login-type/`,
           { email }
         );
 
@@ -65,7 +67,7 @@ const Login = () => {
         }
 
         await axios.post(
-          "http://127.0.0.1:8000/api/auth/send-otp/",
+          `{API}/api/auth/send-otp/`,
           { email }
         );
 
@@ -82,7 +84,7 @@ const Login = () => {
     if (stage === "otp") {
       try {
         const response = await axios.post(
-          "http://127.0.0.1:8000/api/auth/verify-otp/",
+          `{API}/api/auth/verify-otp/`,
           { email, otp }
         );
 

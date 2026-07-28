@@ -2,21 +2,21 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+
+const API = import.meta.env.VITE_API_BASE_URL;
 const UserAddress = () => {
   const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+    if (!token) return;
 
     axios
-      .get("http://127.0.0.1:8000/api/auth/addresses/", {
+      .get(`${API}/api/auth/addresses/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -29,14 +29,14 @@ const UserAddress = () => {
         setLoading(false);
         alert("Failed to load addresses");
       });
-  }, [token, navigate]);
+  }, [token]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this address?")) return;
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/api/auth/addresses/${id}/`,
+        `${API}/api/auth/addresses/${id}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -84,7 +84,6 @@ const UserAddress = () => {
             <h2 className="text-emerald-400 font-semibold mb-2">
               {addr.full_name}
             </h2>
-
             <p className="text-sm mb-2">{addr.mobile}</p>
             <p className="text-sm text-gray-300 mb-4">{addr.address}</p>
 

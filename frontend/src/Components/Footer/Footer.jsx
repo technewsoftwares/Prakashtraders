@@ -4,7 +4,17 @@ import {
   FaYoutube,
   FaTwitter,
   FaFacebookF,
+  FaCcVisa, 
+  FaCcMastercard, 
+  FaCcPaypal, 
+  FaShieldAlt, 
+  FaLock,
 } from "react-icons/fa";
+import { 
+  SiGooglepay, 
+  SiPhonepe, 
+  SiPaytm 
+} from "react-icons/si";
 import { Link } from "react-router-dom"; // ✅ Import Link to prevent page reload
 import { useState } from "react";
 
@@ -30,17 +40,17 @@ const Footer = () => {
   const usefulLinks = [
     { name: "About Prakash Traders", path: "/about" },
     { name: "Contact / Support", path: "/contact" },
-    { name: "FAQs", path: "/faqs" },
     { name: "Buying Guide", path: "/buying-guide" },
-    { name: "Return Policy", path: "/return-policy" },
-    { name: "Store Locator", path: "/about" },
+    { name: "Return & Refund Policy", path: "/return-policy" },
+    { name: "Careers", path: "/careers" },
+     { name: "Blog", path: "/blog" },
   ];
 
   const policyLinks = [
-    { name: "Careers", path: "/careers" },
     { name: "Terms of Use", path: "/terms" },
-    { name: "Privacy Policy", path: "/privacy" },
     { name: "Disclaimer", path: "/disclaimer" },
+    { name: "Privacy Policy", path: "/termsandconditions" },
+    { name: "Shipping & Delivery policy", path: "/shippingdelivery" },
   ];
 
   // ✅ Matches your Navbar routes
@@ -158,6 +168,50 @@ const Footer = () => {
               ))}
             </ul>
           </div>
+      
+           {/* --- CENTERED TRUST & PAYMENT BAR --- */}
+<div className="border-t border-zinc-800 mt-12 pt-10 flex flex-col items-center">
+  
+  {/* Container for both Badge and Payments */}
+  <div className="flex flex-col md:flex-row items-center justify-center gap-10 w-full max-w-4xl">
+    
+    {/* SSL Certificate Badge (Centered Left) */}
+    <div className="flex items-center gap-4 bg-zinc-900/50 p-4 px-6 rounded-xl border border-zinc-800">
+      <div className="bg-emerald-500/10 p-2 rounded-lg">
+        <FaShieldAlt className="text-emerald-400 text-2xl" />
+      </div>
+      <div className="text-left">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Safe & Secure</span>
+        </div>
+        <p className="text-sm font-bold text-white uppercase">SSL Certified</p>
+        <p className="text-[9px] text-gray-500 italic">256-bit Encryption</p>
+      </div>
+    </div>
+
+    {/* Payment Icons in ROW format (Centered Right) */}
+    <div className="flex flex-col items-center md:items-start gap-3">
+      <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">
+        Secure Checkout Via
+      </span>
+      {/* This div forces the icons into a row layout */}
+      <div className="flex flex-row items-center gap-6 text-3xl text-gray-400">
+        <SiGooglepay className="hover:text-white transition-colors" title="Google Pay" />
+        <SiPhonepe className="hover:text-[#5f259f] transition-colors" title="PhonePe" />
+        <SiPaytm className="hover:text-[#00baf2] transition-colors" title="Paytm" />
+        <FaCcMastercard className="hover:text-[#eb001b] transition-colors" title="Mastercard" />
+        <FaCcVisa className="hover:text-[#1a1f71] transition-colors" title="Visa" />
+        <FaCcPaypal className="hover:text-[#003087] transition-colors" title="PayPal" />
+      </div>
+    </div>
+
+  </div>
+
+  {/* Centered Copyright */}
+  <div className="mt-12 text-center text-[10px] text-gray-600 tracking-wide">
+    © 2026 Prakash Traders. All rights reserved.
+  </div>
+</div>
 
         </div>
       </div>

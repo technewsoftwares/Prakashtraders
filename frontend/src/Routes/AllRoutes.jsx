@@ -28,10 +28,14 @@ import PaymentFailed from "../pages/PaymentFailed";
 
 
 import Contact from "../pages/info/Contact";
-import FAQs from "../pages/info/FAQs";
 import BuyingGuide from "../pages/info/BuyingGuide";
 import ReturnPolicy from "../pages/info/ReturnPolicy";
-import StoreLocator from "../pages/info/StoreLocator";
+import Careers from "../pages/info/Careers";
+import Blog from "../pages/info/Blog";
+
+import Terms from "../pages/info/Terms";
+import Privacy from "../pages/info/TermsAndConditions"
+import Shipping from "../pages/info/ShippingDelivery"
 
 const AllRoutes = () => {
   return (
@@ -109,11 +113,13 @@ const AllRoutes = () => {
 
       {/* INFO */}
       <Route path="/contact" element={<Contact />} />
-      <Route path="/faqs" element={<FAQs />} />
       <Route path="/buying-guide" element={<BuyingGuide />} />
       <Route path="/return-policy" element={<ReturnPolicy />} />
-      <Route path="/store-locator" element={<StoreLocator />} />
-
+      <Route path="/careers" element={<Careers />} />
+         <Route path="/blog" element={<Blog />} />
+      <Route path="/Terms" element={<Terms />} />
+      <Route path="/TermsAndConditions" element={<Privacy />} />
+      <Route path="/ShippingDelivery" element={<Shipping />} />
     </Routes>
   );
 };

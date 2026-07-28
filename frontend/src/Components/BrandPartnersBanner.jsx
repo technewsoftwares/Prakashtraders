@@ -19,7 +19,7 @@ const BrandPartnersBanner = () => {
   ];
 
   return (
-    <div className="w-full bg-orange-400 py-1 px-3 md:py-2 md:px-4 rounded-lg">
+    <div className="w-full bg-neutral-900 py-1 px-3 md:py-2 md:px-4 rounded-lg">
 
       {/*  Animation CSS */}
       <style>
@@ -42,10 +42,10 @@ const BrandPartnersBanner = () => {
       </style>
 
       {/*  Banner Wrapper */}
-      <div className="relative bg-white border-4 border-orange-200 rounded-xl overflow-hidden flex items-center h-12 md:h-20">
+      <div className="relative bg-white border-4 border-white-200 rounded-xl overflow-hidden flex items-center h-12 md:h-20">
 
         {/* Fixed Text (OUTSIDE animation) */}
-        <div className="bg-orange-400 text-black px-3 py-1 md:px-6 md:py-6 font-semibold whitespace-nowrap z-10 h-full flex items-center justify-center rounded-l-xl text-sm md:text-base">
+        <div className="bg-black text-white px-3 py-1 md:px-6 md:py-6 font-semibold whitespace-nowrap z-10 h-full flex items-center justify-center rounded-l-xl text-sm md:text-base">
           BRAND PARTNERS
         </div>
 
