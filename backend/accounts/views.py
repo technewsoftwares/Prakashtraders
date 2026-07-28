@@ -1,4 +1,5 @@
 import random
+import traceback
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -151,15 +152,18 @@ Thank you for choosing us!
                 fail_silently=False,
             )
 
-        except Exception as e:
-            print("MAIL ERROR:", repr(e))
-            return Response(
-                {
-                    "success": False,
-                    "message": str(e)
-                },
-                status=500
-            )
+        
+except Exception as e:
+    print("MAIL ERROR:", repr(e))
+    traceback.print_exc()
+
+    return Response(
+        {
+            "success": False,
+            "message": str(e)
+        },
+        status=500
+    )
 
         return Response({
             "success": True,
