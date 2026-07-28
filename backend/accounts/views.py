@@ -153,13 +153,14 @@ Thank you for choosing us!
             )
 
         except Exception as e:
-            print("MAIL ERROR:", repr(e))
+            import traceback
+        
             traceback.print_exc()
-
+        
             return Response(
                 {
                     "success": False,
-                    "message": str(e)
+                    "message": repr(e)
                 },
                 status=500
             )
