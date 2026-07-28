@@ -2,14 +2,15 @@ import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast"; 
+import { API_BASE } from "../Config";
+
+const API = API_BASE;
 
 const WeekBest = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { addToCart, addToWishlist } = useContext(ShopContext);
-
-  const API = import.meta.env.VITE_API_URL;
 
 
   useEffect(() => {

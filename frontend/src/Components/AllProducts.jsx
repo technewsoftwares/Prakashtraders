@@ -2,15 +2,16 @@ import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
+import { API_BASE } from "../Config";
+
+const API = API_BASE;
 
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = import.meta.env.VITE_API_URL;
+  
 
-  console.log("VITE_API_URL =", import.meta.env.VITE_API_URL);
-
-  console.log("API =", API);
+  
   
   // 1. Get Context Functions
   const { addToCart, addToWishlist } = useContext(ShopContext);
