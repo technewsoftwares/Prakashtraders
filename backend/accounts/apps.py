@@ -23,9 +23,6 @@ class AccountsConfig(AppConfig):
             user.is_active = True
 
             # THIS IS THE IMPORTANT LINE
-            user.set_password("Password@123")
-
-            user.save()
 
             print("✅ Admin password reset successfully")
 
