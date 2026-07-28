@@ -127,11 +127,12 @@ class SendOTP(APIView):
 
         otp = str(random.randint(100000, 999999))
 
-        OTP.objects.create(email=email, otp=otp)
+OTP.objects.create(email=email, otp=otp)
 
-        send_mail(
-            subject="Your Login OTP - Prakash Traders",
-            message=f"""
+try:
+    send_mail(
+        subject="Your Login OTP - Prakash Traders",
+        message=f"""
 Welcome to Prakash Traders! 🎉
 
 Your secure OTP is:
@@ -142,15 +143,25 @@ Stay safe — never share your OTP.
 
 Thank you for choosing us!
 """,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email],
-            fail_silently=False,
-        )
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email],
+        fail_silently=False,
+    )
 
-        return Response({
-            "success": True,
-            "message": "OTP sent successfully"
-        })
+except Exception as e:
+    print("MAIL ERROR:", repr(e))
+    return Response(
+        {
+            "success": False,
+            "message": str(e)
+        },
+        status=500
+    )
+
+return Response({
+    "success": True,
+    "message": "OTP sent successfully"
+})
 
 
 class VerifyOTP(APIView):
