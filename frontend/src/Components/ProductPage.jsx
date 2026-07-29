@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Loading from "./Loading";
 import ProductCard from "./CategoryProducts";
+import { API_BASE } from "../Config";
 
-const API = import.meta.env.VITE_API_URL;
+const API = API_BASE;
 
 const ProductPage = () => {
   const { category } = useParams();

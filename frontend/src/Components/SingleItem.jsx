@@ -2,7 +2,9 @@ import axios from "axios";
 import { useContext, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShopContext } from "../Context/Context";
+import { API_BASE } from "../Config";
 
+const API = API_BASE;
 const SingleItem = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,8 +15,6 @@ const SingleItem = () => {
   const [activeImage, setActiveImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-
-  const API = import.meta.env.VITE_API_URL;
   const { addToCart: contextAddToCart } = useContext(ShopContext);
 
   // ✅ FIX: This useEffect is now at the TOP, before any conditional return

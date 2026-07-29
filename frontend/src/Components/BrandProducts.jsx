@@ -2,10 +2,12 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
+import { API_BASE } from "../Config";
 
+const API = API_BASE;
 // --- HELPER FUNCTIONS ---
 const toFullImageUrl = (img) => {
-  const API = import.meta.env.VITE_API_URL;
+
 
   if (!img) return "https://prakashtraders.com/150";
   if (img.startsWith("http")) return img;
