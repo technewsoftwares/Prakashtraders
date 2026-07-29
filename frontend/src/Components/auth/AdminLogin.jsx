@@ -4,8 +4,9 @@ import axios from "axios";
 import { ShopContext } from "../../Context/Context";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { API_BASE } from "../../Config";
 
-const API = import.meta.env.VITE_API_URL;
+const API = API_BASE;
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

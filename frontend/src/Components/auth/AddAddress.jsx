@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { API_BASE } from "../../Config";
 
-
-const API = import.meta.env.VITE_API_URL;
+const API = API_BASE;
 const AddAddress = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");

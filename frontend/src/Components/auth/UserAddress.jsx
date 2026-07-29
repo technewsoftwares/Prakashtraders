@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { API_BASE } from "../../Config";
 
-
-const API = import.meta.env.VITE_API_URL;
+const API = API_BASE;
 const UserAddress = () => {
   const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
