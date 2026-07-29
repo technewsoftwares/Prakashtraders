@@ -1,6 +1,5 @@
 import random
 import traceback
-import smtplib
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -128,52 +127,36 @@ class SendOTP(APIView):
             return Response({
                 "success": False,
                 "message": "Email is required"
-            })
+            }, status=400)
 
         otp = str(random.randint(100000, 999999))
 
         OTP.objects.create(email=email, otp=otp)
 
-
         try:
-            print("STEP 1")
-        
-            server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10)
-        
-            print("STEP 2")
-        
-            server.login(
-                settings.EMAIL_HOST_USER,
-                settings.EMAIL_HOST_PASSWORD
+            send_mail(
+                subject="Your OTP - Prakash Traders",
+                message=f"Your OTP is: {otp}\n\nDo not share this OTP with anyone.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
             )
-        
-            print("STEP 3")
-        
-            server.sendmail(
-                settings.EMAIL_HOST_USER,
-                email,
-                f"Subject: OTP\n\nYour OTP is {otp}"
-            )
-        
-            print("STEP 4")
-        
-            server.quit()
-        
+
+            return Response({
+                "success": True,
+                "message": "OTP sent successfully"
+            })
+
         except Exception as e:
-            import traceback
-        
             traceback.print_exc()
-        
+
             return Response(
                 {
-                    "error": str(e)
+                    "success": False,
+                    "message": str(e)
                 },
                 status=500
             )
-        return Response({
-            "success": True,
-            "message": "OTP sent successfully"
-        })
 
 
 class VerifyOTP(APIView):
