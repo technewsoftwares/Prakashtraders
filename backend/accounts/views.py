@@ -149,10 +149,14 @@ class SendOTP(APIView):
 
         except Exception as e:
             traceback.print_exc()
-
+        
+            print("Exception type:", type(e).__name__)
+            print("Exception:", repr(e))
+        
             return Response(
                 {
                     "success": False,
+                    "error_type": type(e).__name__,
                     "message": str(e)
                 },
                 status=500
