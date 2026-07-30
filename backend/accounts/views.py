@@ -82,10 +82,19 @@ class ContactSupportView(APIView):
                 message=owner_message,
             )
             # 2. Send Acknowledgement Email to USER
+                        # 2. Send Acknowledgement Email to USER
             user_subject = "We received your message - Prakash Traders"
-            user_message = f"Dear {name},\n\nThank you for contacting Prakash Traders. We have received your inquiry regarding:\n'{message}'\n\nOur team will get back to you shortly.\n\nBest Regards,\nPrakash Traders Team"
+            user_message = (
+                f"Dear {name},\n\n"
+                f"Thank you for contacting Prakash Traders. "
+                f"We have received your inquiry regarding:\n"
+                f"'{message}'\n\n"
+                f"Our team will get back to you shortly.\n\n"
+                f"Best Regards,\n"
+                f"Prakash Traders Team"
+            )
 
-           send_brevo_email(
+            send_brevo_email(
                 to_email=user_email,
                 subject=user_subject,
                 message=user_message,
