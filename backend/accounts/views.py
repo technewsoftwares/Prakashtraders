@@ -1,6 +1,7 @@
 import random
 import traceback
-from django.core.mail import send_mail
+import os
+import requests
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -25,6 +26,38 @@ from .serializers import (
 # ---------------------------------------------------------
 #  CONTACT SUPPORT VIEW (NEW ADDITION)
 # ---------------------------------------------------------
+def send_brevo_email(to_email, subject, message):
+    url = "https://api.brevo.com/v3/smtp/email"
+
+    headers = {
+        "accept": "application/json",
+        "api-key": os.getenv("BREVO_API_KEY"),
+        "content-type": "application/json",
+    }
+
+    payload = {
+        "sender": {
+            "name": "Prakash Traders",
+            "email": "technewsoftwares@gmail.com"
+        },
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "textContent": message,
+    }
+
+    print("BREVO API KEY FOUND:", os.getenv("BREVO_API_KEY") is not None)
+
+    response = requests.post(
+        url,
+        json=payload,
+        headers=headers,
+        timeout=15
+    )
+
+    print("Status Code:", response.status_code)
+    print("Response:", response.text)
+
+    response.raise_for_status()
 class ContactSupportView(APIView):
     permission_classes = [AllowAny]
 
@@ -43,26 +76,20 @@ class ContactSupportView(APIView):
             owner_subject = f"New Inquiry from {name}"
             owner_message = f"Name: {name}\nEmail: {user_email}\n\nMessage:\n{message}"
             
-            send_mail(
+            send_brevo_email(
+                to_email=settings.EMAIL_HOST_USER,
                 subject=owner_subject,
                 message=owner_message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[settings.EMAIL_HOST_USER], 
-                fail_silently=False,
             )
-
             # 2. Send Acknowledgement Email to USER
             user_subject = "We received your message - Prakash Traders"
             user_message = f"Dear {name},\n\nThank you for contacting Prakash Traders. We have received your inquiry regarding:\n'{message}'\n\nOur team will get back to you shortly.\n\nBest Regards,\nPrakash Traders Team"
 
-            send_mail(
+           send_brevo_email(
+                to_email=user_email,
                 subject=user_subject,
                 message=user_message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user_email], 
-                fail_silently=False,
             )
-
             return Response({'success': True, 'message': 'Message sent successfully!'})
 
         except Exception as e:
@@ -127,46 +154,40 @@ class SendOTP(APIView):
 
     def post(self, request):
         email = request.data.get("email")
-
+    
         if not email:
             return Response({
                 "success": False,
                 "message": "Email is required"
             }, status=400)
-
+    
         otp = str(random.randint(100000, 999999))
-
+    
         OTP.objects.create(email=email, otp=otp)
-
+    
         try:
-            send_mail(
+    
+            send_brevo_email(
+                to_email=email,
                 subject="Your OTP - Prakash Traders",
-                message=f"Your OTP is: {otp}\n\nDo not share this OTP with anyone.",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
+                message=f"Your OTP is: {otp}\n\nDo not share this OTP with anyone."
             )
-
+    
             return Response({
                 "success": True,
                 "message": "OTP sent successfully"
             })
-
+    
         except Exception as e:
             traceback.print_exc()
-        
-            print("Exception type:", type(e).__name__)
-            print("Exception:", repr(e))
-        
+    
             return Response(
                 {
                     "success": False,
-                    "error_type": type(e).__name__,
                     "message": str(e)
                 },
                 status=500
             )
-
 
 class VerifyOTP(APIView):
     permission_classes = [AllowAny]
