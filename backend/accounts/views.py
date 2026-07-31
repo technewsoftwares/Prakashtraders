@@ -127,51 +127,42 @@ class UserProfileView(APIView):
 
 
 class SendOTP(APIView):
-    print("EMAIL_HOST =", settings.EMAIL_HOST)
-    print("EMAIL_PORT =", settings.EMAIL_PORT)
-    print("EMAIL_USE_TLS =", settings.EMAIL_USE_TLS)
-    print("EMAIL_HOST_USER =", settings.EMAIL_HOST_USER)
-    print("DEFAULT_FROM_EMAIL =", settings.DEFAULT_FROM_EMAIL)
     permission_classes = [AllowAny]
 
     def post(self, request):
+        print("========== SEND OTP API HIT ==========")
+
         email = request.data.get("email")
-    
-        if not email:
-            return Response({
-                "success": False,
-                "message": "Email is required"
-            }, status=400)
-    
+        print("Email:", email)
+
         otp = str(random.randint(100000, 999999))
-    
-        OTP.objects.create(email=email, otp=otp)
-    
+        print("OTP:", otp)
+
         try:
-    
             send_mail(
                 subject="Your OTP - Prakash Traders",
-                message=f"Your OTP is: {otp}\n\nDo not share this OTP with anyone.",
+                message=f"Your OTP is: {otp}",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[email],
                 fail_silently=False,
             )
-    
+
+            print("EMAIL SENT SUCCESSFULLY")
+
             return Response({
                 "success": True,
-                "message": "OTP sent successfully"
+                "message": "OTP sent"
             })
-    
+
         except Exception as e:
+            import traceback
             traceback.print_exc()
-    
-            return Response(
-                {
-                    "success": False,
-                    "message": str(e)
-                },
-                status=500
-            )
+            print("EMAIL ERROR:", str(e))
+
+            return Response({
+                "success": False,
+                "message": str(e)
+            }, status=500)
 
 class VerifyOTP(APIView):
     permission_classes = [AllowAny]
