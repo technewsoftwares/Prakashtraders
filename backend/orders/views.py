@@ -151,3 +151,9 @@ def admin_orders(request):
 
     return JsonResponse(response, safe=False)
 
+@csrf_exempt
+def payment_webhook(request):
+    return JsonResponse({
+        "status": "Webhook received"
+    })
+
