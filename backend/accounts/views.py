@@ -4,7 +4,7 @@ import os
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.conf import settings
-from django.core.mail import send_mail
+from .brevo import send_brevo_email
 # Rest Framework Imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
