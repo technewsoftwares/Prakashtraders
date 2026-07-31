@@ -161,7 +161,7 @@ const totalMRP = cartItems.reduce(
     // 🔥 CASHFREE CHECKOUT START
     if (data.payment_session_id) {
 
-      const cashfree = await load({ mode: "sandbox" });
+      const cashfree = await load({ mode: "production" });
 
       await cashfree.checkout({
         paymentSessionId: data.payment_session_id
