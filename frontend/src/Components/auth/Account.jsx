@@ -64,9 +64,15 @@ if (response.data.success) {
         } else {
           setError(response.data.message || "Invalid OTP");
         }
-      } catch (err) {
-        setError("Error verifying OTP. Please try again.");
-      } finally {
+      }catch (err) {
+          console.log("========== OTP ERROR ==========");
+          console.log("Full Error:", err);
+          console.log("Response:", err.response);
+          console.log("Data:", err.response?.data);
+          console.log("Status:", err.response?.status);
+        
+          setError(err.response?.data?.message || "Error sending OTP. Please try again.");
+        } finally {
         setIsLoading(false);
       }
     }
