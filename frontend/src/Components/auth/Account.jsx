@@ -21,63 +21,69 @@ const Account = ({ onClose, onSuccess }) => {
   const { login } = useContext(ShopContext);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    // ================= SEND OTP =================
-    if (stage === "email") {
-      setIsLoading(true);
-      try {
-        await axios.post(`${API}/api/auth/send-otp/`, { email });
-        setStage("otp");
-      } catch (err) {
-        setError("Error sending OTP. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
+  // ================= SEND OTP =================
+  if (stage === "email") {
+    setIsLoading(true);
+
+    try {
+      await axios.post(`${API}/api/auth/send-otp/`, { email });
+
+      setStage("otp");
+
+    } catch (err) {
+      console.log("========== SEND OTP ERROR ==========");
+      console.log("Full Error:", err);
+      console.log("Response:", err.response);
+      console.log("Data:", err.response?.data);
+      console.log("Status:", err.response?.status);
+
+      setError(err.response?.data?.message || "Error sending OTP. Please try again.");
+
+    } finally {
+      setIsLoading(false);
     }
 
-    // ================= VERIFY OTP =================
-    if (stage === "otp") {
-      setIsLoading(true);
-      try {
-        const response = await axios.post(`${API}/api/auth/verify-otp/`, { email, otp });
+    return;
+  }
 
-if (response.data.success) {
-  login(response.data.token, "user");
+  // ================= VERIFY OTP =================
+  if (stage === "otp") {
+    setIsLoading(true);
 
-  setSuccess("Login successful 🎉");
+    try {
+      const response = await axios.post(
+        `${API}/api/auth/verify-otp/`,
+        { email, otp }
+      );
 
-  setTimeout(() => {
-    setEmail("");
-    setOtp("");
-    setStage("email");
+      if (response.data.success) {
+        login(response.data.token, "user");
 
-    onSuccess?.();   // ✅ THIS LINE
-  }, 1000);
+        setSuccess("Login successful 🎉");
 
+        setTimeout(() => {
+          setEmail("");
+          setOtp("");
+          setStage("email");
+          onSuccess?.();
+        }, 1000);
 
-
-
-        } else {
-          setError(response.data.message || "Invalid OTP");
-        }
-      }catch (err) {
-          console.log("========== OTP ERROR ==========");
-          console.log("Full Error:", err);
-          console.log("Response:", err.response);
-          console.log("Data:", err.response?.data);
-          console.log("Status:", err.response?.status);
-        
-          setError(err.response?.data?.message || "Error sending OTP. Please try again.");
-        } finally {
-        setIsLoading(false);
+      } else {
+        setError(response.data.message || "Invalid OTP");
       }
-    }
-  };
 
+    } catch (err) {
+      setError("Error verifying OTP. Please try again.");
+
+    } finally {
+      setIsLoading(false);
+    }
+  }
+};
   return (
     <div className="bg-black p-12 w-[500px] shadow-lg rounded-md text-white relative">
       <button className="absolute top-4 right-4" onClick={onClose}>
