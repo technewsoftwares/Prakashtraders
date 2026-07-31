@@ -13,6 +13,8 @@ from django.contrib.auth.models import User
 
 # CREATE ORDER
 
+import traceback
+
 @csrf_exempt
 def create_order(request):
     if request.method != "POST":
@@ -20,6 +22,7 @@ def create_order(request):
 
     try:
         data = json.loads(request.body)
+        print("REQUEST DATA:", data)
 
         amount = float(data.get("amount", 0))
 
@@ -37,6 +40,8 @@ def create_order(request):
             }
         }
 
+        print("CASHFREE PAYLOAD:", payload)
+
         headers = {
             "x-client-id": settings.CASHFREE_CLIENT_ID,
             "x-client-secret": settings.CASHFREE_CLIENT_SECRET,
@@ -47,13 +52,17 @@ def create_order(request):
         response = requests.post(
             "https://api.cashfree.com/pg/orders",
             json=payload,
-            headers=headers
+            headers=headers,
+            timeout=30
         )
+
+        print("CASHFREE STATUS:", response.status_code)
+        print("CASHFREE RESPONSE:", response.text)
 
         result = response.json()
 
         if response.status_code != 200:
-            return JsonResponse(result, status=400)
+            return JsonResponse(result, status=response.status_code)
 
         Order.objects.create(
             order_id=order_id,
@@ -70,7 +79,14 @@ def create_order(request):
         })
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        print("========== CREATE ORDER ERROR ==========")
+        traceback.print_exc()
+        print("ERROR TYPE:", type(e).__name__)
+        print("ERROR:", str(e))
+
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
 
 
 
