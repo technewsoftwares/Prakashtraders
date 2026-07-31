@@ -182,9 +182,9 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
+    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    }
 }
 
 # Required because django-cloudinary-storage 0.3.0 still expects this setting
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
