@@ -67,6 +67,7 @@ def create_order(request):
         Order.objects.create(
             order_id=order_id,
             name=data.get("name", ""),
+            mobile=data.get("mobile", ""),
             address=data.get("address", ""),
             pincode=data.get("pincode", ""),
             total_amount=amount,
