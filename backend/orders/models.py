@@ -27,32 +27,6 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Order(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="orders"
-    )
-
-    order_id = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100)
-    address = models.TextField()
-    pincode = models.CharField(max_length=10)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(
-        max_length=10,
-        choices=[
-            ("PENDING", "Pending"),
-            ("PAID", "Paid"),
-            ("FAILED", "Failed"),
-        ],
-        default="PENDING"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
 class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,

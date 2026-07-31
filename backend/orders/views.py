@@ -1,5 +1,7 @@
 import json
-import razorpay
+import uuid
+import requests
+import os
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -9,13 +11,6 @@ from .models import Order, OrderItem, Transaction
 from django.contrib.auth.models import User
 
 
-
-
-client = razorpay.Client(
-    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-)
-
-
 # CREATE ORDER
 
 @csrf_exempt
@@ -23,62 +18,59 @@ def create_order(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST required"}, status=400)
 
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
 
-    amount_rupees = int(data["amount"])
-    payment_mode = data.get("payment_mode", "ONLINE")
-    items = data.get("items", [])
+        amount = float(data.get("amount", 0))
 
-    user = None
-    if data.get("user_id"):
-       user = User.objects.filter(id=data["user_id"]).first()
+        order_id = f"ORD_{uuid.uuid4().hex[:10]}"
 
+        payload = {
+            "order_id": order_id,
+            "order_amount": amount,
+            "order_currency": "INR",
+            "customer_details": {
+                "customer_id": order_id,
+                "customer_name": data.get("name", "Customer"),
+                "customer_email": data.get("email", "customer@example.com"),
+                "customer_phone": data.get("phone", "9999999999")
+            }
+        }
 
-    # 🔹 CREATE ORDER ID
-    if payment_mode == "ONLINE":
-        razorpay_order = client.order.create({
-            "amount": amount_rupees * 100,
-            "currency": "INR",
-            "payment_capture": 1
-        })
-        order_id = razorpay_order["id"]
-    else:
-        order_id = f"COD-{Order.objects.count()+1}"
+        headers = {
+            "x-client-id": settings.CASHFREE_CLIENT_ID,
+            "x-client-secret": settings.CASHFREE_CLIENT_SECRET,
+            "x-api-version": "2023-08-01",
+            "Content-Type": "application/json"
+        }
 
-    # 🔹 SAVE ORDER
-    order = Order.objects.create(
-    user=user,              # 👈 ADD THIS LINE
-    order_id=order_id,
-    name=data["name"],
-    mobile=data["mobile"], 
-    address=data["address"],
-    pincode=data["pincode"],
-    total_amount=amount_rupees,
-    status="PENDING"
-)
-
-
-    # 🔹 SAVE ORDER ITEMS (THIS WAS MISSING ❗)
-    for item in items:
-        OrderItem.objects.create(
-            order=order,
-            product_name=item.get("name", "Product"),
-            price=item.get("price", amount_rupees),
-            quantity=item.get("qty", 1)
+        response = requests.post(
+            "https://api.cashfree.com/pg/orders",
+            json=payload,
+            headers=headers
         )
 
-    # 🔹 IF COD → RETURN DIRECTLY
-    if payment_mode == "COD":
+        result = response.json()
+
+        if response.status_code != 200:
+            return JsonResponse(result, status=400)
+
+        Order.objects.create(
+            order_id=order_id,
+            name=data.get("name", ""),
+            address=data.get("address", ""),
+            pincode=data.get("pincode", ""),
+            total_amount=amount,
+            status="PENDING"
+        )
+
         return JsonResponse({
-            "status": "COD_PLACED",
-            "order_id": order.order_id
+            "order_id": order_id,
+            "payment_session_id": result["payment_session_id"]
         })
 
-    # 🔹 ONLINE PAYMENT RESPONSE
-    return JsonResponse({
-        "razorpay_order_id": order_id,
-        "amount": amount_rupees * 100
-    })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 
@@ -86,32 +78,44 @@ def create_order(request):
 
 @csrf_exempt
 def verify_payment(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=400)
-
-    data = json.loads(request.body)
-
     try:
-        client.utility.verify_payment_signature(data)
-    except razorpay.errors.SignatureVerificationError:
+        data = json.loads(request.body)
+
+        order_id = data.get("order_id")
+
+        headers = {
+            "x-client-id": settings.CASHFREE_CLIENT_ID,
+            "x-client-secret": settings.CASHFREE_CLIENT_SECRET,
+            "x-api-version": "2023-08-01"
+        }
+
+        response = requests.get(
+            f"https://api.cashfree.com/pg/orders/{order_id}/payments",
+            headers=headers
+        )
+
+        payments = response.json()
+
+        if payments and payments[0]["payment_status"] == "SUCCESS":
+
+            order = Order.objects.get(order_id=order_id)
+
+            Transaction.objects.create(
+                order=order,
+                transaction_id=payments[0]["cf_payment_id"],
+                amount=order.total_amount,
+                status="PAID"
+            )
+
+            order.status = "PAID"
+            order.save()
+
+            return JsonResponse({"status": "PAID"})
+
         return JsonResponse({"status": "FAILED"})
 
-    order = Order.objects.get(order_id=data["razorpay_order_id"])
-
-    Transaction.objects.create(
-        order=order,
-        transaction_id=data["razorpay_payment_id"],
-        amount=order.total_amount,
-        status="PAID"
-    )
-
-    order.status = "PAID"
-    order.save()
-
-    return JsonResponse({
-        "status": "PAID",
-        "order_id": order.order_id
-    })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 def admin_orders(request):
     if request.method != "GET":
