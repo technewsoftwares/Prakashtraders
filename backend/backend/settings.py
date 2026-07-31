@@ -186,5 +186,6 @@ STORAGES = {
     }
 }
 
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 # Required because django-cloudinary-storage 0.3.0 still expects this setting
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
