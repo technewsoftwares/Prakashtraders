@@ -126,17 +126,19 @@ class UserProfileView(APIView):
         return Response(serializer.errors, status=400)
 
 
+from django.core.mail import send_mail
+
 class SendOTP(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        print("========== SEND OTP API HIT ==========")
-
         email = request.data.get("email")
-        print("Email:", email)
+
+        if not email:
+            return Response({"success": False, "message": "Email required"}, status=400)
 
         otp = str(random.randint(100000, 999999))
-        print("OTP:", otp)
+        OTP.objects.create(email=email, otp=otp)
 
         try:
             send_mail(
@@ -147,21 +149,13 @@ class SendOTP(APIView):
                 fail_silently=False,
             )
 
-            print("EMAIL SENT SUCCESSFULLY")
-
-            return Response({
-                "success": True,
-                "message": "OTP sent"
-            })
+            return Response({"success": True})
 
         except Exception as e:
-            import traceback
             traceback.print_exc()
-            print("EMAIL ERROR:", str(e))
-
             return Response({
                 "success": False,
-                "message": str(e)
+                "error": str(e)
             }, status=500)
 
 class VerifyOTP(APIView):
