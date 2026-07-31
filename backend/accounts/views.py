@@ -151,12 +151,21 @@ class SendOTP(APIView):
 
             return Response({"success": True})
 
-        except Exception as e:
-            traceback.print_exc()
-            return Response({
+       except Exception as e:
+        import traceback
+        traceback.print_exc()
+    
+        print("ERROR TYPE:", type(e).__name__)
+        print("ERROR MESSAGE:", str(e))
+    
+        return Response(
+            {
                 "success": False,
-                "error": str(e)
-            }, status=500)
+                "error": type(e).__name__,
+                "message": str(e),
+            },
+            status=500,
+        )
 
 class VerifyOTP(APIView):
     permission_classes = [AllowAny]
