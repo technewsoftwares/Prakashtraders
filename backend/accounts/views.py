@@ -45,12 +45,10 @@ class ContactSupportView(APIView):
             owner_message = f"Name: {name}\nEmail: {user_email}\n\nMessage:\n{message}"
             
             
-            send_mail(
+            send_brevo_email(
+                to_email=settings.EMAIL_HOST_USER,
                 subject=owner_subject,
-                message=owner_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.EMAIL_HOST_USER],
-                fail_silently=False,
+                message=owner_message
             )
             # 2. Send Acknowledgement Email to USER
                         # 2. Send Acknowledgement Email to USER
@@ -65,12 +63,10 @@ class ContactSupportView(APIView):
                 f"Prakash Traders Team"
             )
 
-            send_mail(
+            send_brevo_email(
+                to_email=user_email,
                 subject=user_subject,
-                message=user_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user_email],
-                fail_silently=False,
+                message=user_message
             )
             return Response({'success': True, 'message': 'Message sent successfully!'})
 
