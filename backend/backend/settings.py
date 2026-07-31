@@ -186,4 +186,5 @@ STORAGES = {
     },
 }
 
-
+# Required because django-cloudinary-storage 0.3.0 still expects this setting
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
