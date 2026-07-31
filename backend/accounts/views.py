@@ -147,12 +147,10 @@ class SendOTP(APIView):
         OTP.objects.create(email=email, otp=otp)
 
         try:
-            send_mail(
+            send_brevo_email(
+                to_email=email,
                 subject="Your OTP - Prakash Traders",
-                message=f"Your OTP is: {otp}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
+                message=f"Your OTP is {otp}"
             )
 
             return Response(
