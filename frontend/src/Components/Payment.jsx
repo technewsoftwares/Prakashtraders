@@ -133,7 +133,7 @@ const totalMRP = cartItems.reduce(
   const token = localStorage.getItem("access_token");
 
   try {
-    const res = await fetch(`${API}/api/orders/create-order/`, {
+    const res = await fetch(`${API}/api/create-order/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
