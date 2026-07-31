@@ -12,6 +12,7 @@ const Payment = () => {
   
   const [address, setAddress] = useState({
     name: "",
+    mobile: "",
     pincode: "",
     fullAddress: "",
     city: "",
@@ -142,6 +143,7 @@ const totalMRP = cartItems.reduce(
       body: JSON.stringify({
         amount: totalPayable,
         name: address.name,
+        mobile: address.mobile,
         address: address.fullAddress,
         pincode: address.pincode,
         city: address.city,
@@ -249,6 +251,19 @@ useEffect(() => {
                 {isPincodeValid && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
     
+                <input
+                  type="text"
+                  placeholder="Mobile Number"
+                  maxLength={10}
+                  className="w-full bg-zinc-800 p-4 rounded-xl border border-transparent focus:border-emerald-500 outline-none transition-all"
+                  onChange={(e) =>
+                    setAddress({
+                      ...address,
+                      mobile: e.target.value.replace(/\D/g, ""),
+                    })
+                  }
+                />
+
                 <input
                   type="text"
                   value={address.city}
