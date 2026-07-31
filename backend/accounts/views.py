@@ -1,11 +1,10 @@
 import random
 import traceback
 import os
-import requests
 from django.contrib.auth.models import User
-from django.conf import settings
 from django.contrib.auth import authenticate
-
+from django.conf import settings
+from django.core.mail import send_mail
 # Rest Framework Imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -26,38 +25,7 @@ from .serializers import (
 # ---------------------------------------------------------
 #  CONTACT SUPPORT VIEW (NEW ADDITION)
 # ---------------------------------------------------------
-def send_brevo_email(to_email, subject, message):
-    url = "https://api.brevo.com/v3/smtp/email"
 
-    headers = {
-        "accept": "application/json",
-        "api-key": os.getenv("BREVO_API_KEY"),
-        "content-type": "application/json",
-    }
-
-    payload = {
-        "sender": {
-            "name": "Prakash Traders",
-            "email": "contact@brevo.com"
-        },
-        "to": [{"email": to_email}],
-        "subject": subject,
-        "textContent": message,
-    }
-
-    print("BREVO API KEY FOUND:", os.getenv("BREVO_API_KEY") is not None)
-
-    response = requests.post(
-        url,
-        json=payload,
-        headers=headers,
-        timeout=15
-    )
-
-    print("Status Code:", response.status_code)
-    print("Response:", response.text)
-
-    response.raise_for_status()
 class ContactSupportView(APIView):
     permission_classes = [AllowAny]
 
@@ -76,10 +44,13 @@ class ContactSupportView(APIView):
             owner_subject = f"New Inquiry from {name}"
             owner_message = f"Name: {name}\nEmail: {user_email}\n\nMessage:\n{message}"
             
-            send_brevo_email(
-                to_email=settings.EMAIL_HOST_USER,
+            
+            send_mail(
                 subject=owner_subject,
                 message=owner_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.EMAIL_HOST_USER],
+                fail_silently=False,
             )
             # 2. Send Acknowledgement Email to USER
                         # 2. Send Acknowledgement Email to USER
@@ -94,10 +65,12 @@ class ContactSupportView(APIView):
                 f"Prakash Traders Team"
             )
 
-            send_brevo_email(
-                to_email=user_email,
+            send_mail(
                 subject=user_subject,
                 message=user_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user_email],
+                fail_silently=False,
             )
             return Response({'success': True, 'message': 'Message sent successfully!'})
 
@@ -176,10 +149,12 @@ class SendOTP(APIView):
     
         try:
     
-            send_brevo_email(
-                to_email=email,
+            send_mail(
                 subject="Your OTP - Prakash Traders",
-                message=f"Your OTP is: {otp}\n\nDo not share this OTP with anyone."
+                message=f"Your OTP is: {otp}\n\nDo not share this OTP with anyone.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
             )
     
             return Response({
