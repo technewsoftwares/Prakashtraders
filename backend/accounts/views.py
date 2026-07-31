@@ -126,7 +126,6 @@ class UserProfileView(APIView):
         return Response(serializer.errors, status=400)
 
 
-from django.core.mail import send_mail
 
 class SendOTP(APIView):
     permission_classes = [AllowAny]
@@ -135,9 +134,16 @@ class SendOTP(APIView):
         email = request.data.get("email")
 
         if not email:
-            return Response({"success": False, "message": "Email required"}, status=400)
+            return Response(
+                {
+                    "success": False,
+                    "message": "Email required"
+                },
+                status=400
+            )
 
         otp = str(random.randint(100000, 999999))
+
         OTP.objects.create(email=email, otp=otp)
 
         try:
@@ -149,15 +155,19 @@ class SendOTP(APIView):
                 fail_silently=False,
             )
 
-            return Response({"success": True})
+            return Response(
+                {
+                    "success": True,
+                    "message": "OTP sent successfully"
+                }
+            )
 
-       except Exception as e:
-
+        except Exception as e:
             traceback.print_exc()
-        
+
             print("ERROR TYPE:", type(e).__name__)
             print("ERROR MESSAGE:", str(e))
-        
+
             return Response(
                 {
                     "success": False,
