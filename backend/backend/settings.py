@@ -141,10 +141,11 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
 
 EMAIL_TIMEOUT = 10
 
-
 # Temporary debug (remove later)
 print("EMAIL_HOST =", EMAIL_HOST)
 print("EMAIL_PORT =", EMAIL_PORT)
+print("EMAIL_USE_TLS =", EMAIL_USE_TLS)
+print("EMAIL_USE_SSL =", EMAIL_USE_SSL)
 print("EMAIL_HOST_USER =", EMAIL_HOST_USER)
 print("EMAIL_HOST_PASSWORD =", EMAIL_HOST_PASSWORD is not None)
 
