@@ -833,12 +833,6 @@ export default function AdminDashboard() {
 
   // --- 2. DATA STATES ---
   const [products, setProducts] = useState([]);
-  const [dashboardStats, setDashboardStats] = useState({
-   total_users: 0,
-    active_orders: 0,
-    total_revenue: 0,
-    stock_units: 0,
-  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -1000,6 +994,13 @@ const orderStatusSeries = orderStatusData.map((d) => d.value);
 
   fetchDashboardStats();
 }, []);
+
+const [dashboardStats, setDashboardStats] = useState({
+   total_users: 0,
+    active_orders: 0,
+    total_revenue: 0,
+    stock_units: 0,
+  });
 
   // --- 5. LOGIC HELPERS ---
   const stats = useMemo(() => {
