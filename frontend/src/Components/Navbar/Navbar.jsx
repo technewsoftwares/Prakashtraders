@@ -385,7 +385,10 @@ const Navbar = () => {
       {/* LOGIN POPUP */}
       {showPopup && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex justify-center items-center">
-          <Account onClose={() => setShowPopup(false)} />
+          <Account 
+              onClose={() => setShowPopup(false)}
+              onSuccess={() => setShowPopup(false)}
+          />
         </div>
       )}
 

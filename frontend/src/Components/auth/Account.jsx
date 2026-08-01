@@ -61,16 +61,16 @@ const Account = ({ onClose, onSuccess }) => {
       );
 
       if (response.data.success) {
-        login(response.data.token, "user");
+        localStorage.setItem("refresh_token", response.data.refresh);
+
+        login(response.data.access, "user");
 
         setSuccess("Login successful 🎉");
 
-        setTimeout(() => {
-          setEmail("");
-          setOtp("");
-          setStage("email");
-          onSuccess?.();
-        }, 1000);
+        setEmail("");
+        setOtp("");
+        setStage("email");
+        onSuccess?.();
 
       } else {
         setError(response.data.message || "Invalid OTP");
