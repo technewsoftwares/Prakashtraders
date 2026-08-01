@@ -61,7 +61,43 @@ useEffect(() => {
   fetchCustomers();
 }, []);
 
+const deleteCustomer = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this customer?"
+  );
 
+  if (!confirmDelete) return;
+
+  try {
+    const token = localStorage.getItem("access_token");
+
+    const res = await fetch(
+      `${API}/api/auth/admin-customers/${id}/`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Customer deleted successfully.");
+
+      setCustomers((prev) =>
+        prev.filter((customer) => customer.id !== id)
+      );
+    } else {
+      alert(data.message || "Failed to delete customer.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong.");
+  }
+};
 
   const filteredCustomers = customers.filter((c) => {
   const fullName = (c.name || "").toLowerCase();
@@ -151,9 +187,21 @@ useEffect(() => {
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <button className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all">
-                      <Eye size={18} />
-                    </button>
+                    <div className="flex justify-end gap-2">
+
+                      <button
+                        className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteCustomer(c.id)}
+                          className="text-red-500 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
+                        >
+                          <Trash size={18} />
+                      </button>
+
+                    </div>
                   </td>
                 </tr>
               ))
