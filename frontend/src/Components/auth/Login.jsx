@@ -90,14 +90,19 @@ const Login = () => {
         );
 
         if (response.data.success) {
-          // ✅ USER ROLE
-          console.log("VERIFY OTP RESPONSE", response.data);
-          console.log("ACCESS", response.data.access);
+    alert(JSON.stringify(response.data));
 
-          localStorage.setItem("refresh_token", response.data.refresh);
-          login(response.data.access, "user");
-          navigate("/", { replace: true });
-        } else {
+    console.log("VERIFY OTP RESPONSE:", response.data);
+    console.log("ACCESS:", response.data.access);
+
+    localStorage.setItem("access_token", response.data.access);
+    localStorage.setItem("refresh_token", response.data.refresh);
+    localStorage.setItem("role", "user");
+
+    alert("Saved access token: " + localStorage.getItem("access_token"));
+
+    navigate("/", { replace: true });
+} else {
           setError(response.data.message || "Invalid OTP");
         }
       } catch {
