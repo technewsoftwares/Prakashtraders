@@ -122,11 +122,12 @@ const totalMRP = cartItems.reduce(
 
   const handlePayment = async () => {
 
-  if (
-    address.name.trim().length < 3 ||
-    !isPincodeValid ||   // 🔥 USE THIS
-    address.fullAddress.trim().length < 10
-   ) {
+    if (
+        address.name.trim().length < 3 ||
+        address.mobile.length !== 10 ||
+        !isPincodeValid ||
+        address.fullAddress.trim().length < 10
+    ) {
     alert("Please enter valid Name, Pincode and Address.");
     return;
    }  
@@ -192,7 +193,8 @@ useEffect(() => {
   
   const isFormValid =
   address.name.trim().length >= 3 &&
-  isPincodeValid &&   // 🔥 REAL VALIDATION
+  address.mobile.length === 10 &&
+  isPincodeValid &&
   address.fullAddress.trim().length >= 10;
 
   return (
