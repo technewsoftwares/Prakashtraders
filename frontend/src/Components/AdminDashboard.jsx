@@ -262,6 +262,8 @@ if (authorized === null || loading) {
               <th className="px-8 py-5">Order ID</th>
               <th className="px-6 py-5">Date</th>
               <th className="px-6 py-5">Customer</th>
+              <th className="px-6 py-5">Mobile</th>
+              <th className="px-6 py-5">Address</th>
               <th className="px-6 py-5">Total Amount</th>
               <th className="px-6 py-5">Status</th>
               <th className="px-8 py-5 text-right">Actions</th>
@@ -298,6 +300,16 @@ if (authorized === null || loading) {
                         </span>
                       )}
                     </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className="text-sm font-semibold">
+                     {o.mobile || "N/A"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className="text-sm text-slate-700">
+                     {o.address || "N/A"}
+                    </span>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2">

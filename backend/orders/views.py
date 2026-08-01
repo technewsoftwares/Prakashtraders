@@ -148,7 +148,9 @@ def admin_orders(request):
         response.append({
             "order_id": order.order_id,
             "name": order.name,
-            "mobile": order.mobile,  
+            "mobile": order.mobile, 
+            "address": order.address,
+             "pincode": order.pincode, 
             "total_amount": float(order.total_amount),
             "status": order.status,
             "created_at": order.created_at.isoformat(),
