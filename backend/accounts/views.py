@@ -321,20 +321,16 @@ class AdminDashboardStats(APIView):
 
         total_users = User.objects.count()
 
-        active_orders = Order.objects.filter(
-            status="PAID"
-        ).count()
+        # Count all orders
+        active_orders = Order.objects.count()
 
+        # Sum all order amounts
         total_revenue = (
-            sum(order.total_amount for order in Order.objects.filter(status="PAID"))
+            Order.objects.aggregate(total=Sum("total_amount"))["total"] or 0
         )
 
-        stock_units = 0
-
-        from products.models import Product
-
-        stock_units = sum(
-            Product.objects.values_list("stock", flat=True)
+        stock_units = (
+            Product.objects.aggregate(total=Sum("stock"))["total"] or 0
         )
 
         return Response({
