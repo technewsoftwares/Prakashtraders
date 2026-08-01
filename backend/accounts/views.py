@@ -8,7 +8,7 @@ from .brevo import send_brevo_email
 # Rest Framework Imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status, generics, viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -243,19 +243,32 @@ class AdminLogin(APIView):
     
 
 class AdminCustomerListView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         users = User.objects.all().order_by("-id")
-
         data = []
 
         for user in users:
             profile = UserProfile.objects.filter(user=user).first()
 
+            full_name = user.username
+
+            if profile:
+                name_parts = [
+                    profile.first_name,
+                    profile.middle_name,
+                    profile.last_name,
+                ]
+                full_name = " ".join(filter(None, name_parts))
+
+                if not full_name:
+                    full_name = user.username
+
             data.append({
                 "id": user.id,
-                "name": profile.full_name if profile and profile.full_name else user.username,
+                "name": full_name,
                 "email": user.email,
                 "mobile": profile.mobile if profile else "",
                 "gender": profile.gender if profile else "",

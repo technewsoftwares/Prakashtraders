@@ -11,7 +11,11 @@ class Order(models.Model):
     )
     order_id = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=100)
-    mobile = models.CharField(max_length=15)
+    mobile = models.CharField(
+    max_length=15,
+    default="",
+    blank=True
+)
     address = models.TextField()
     pincode = models.CharField(max_length=10)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
