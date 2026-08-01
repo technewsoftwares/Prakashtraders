@@ -998,8 +998,6 @@ const orderStatusSeries = orderStatusData.map((d) => d.value);
 const [dashboardStats, setDashboardStats] = useState({
    total_users: 0,
     active_orders: 0,
-    total_revenue: 0,
-    stock_units: 0,
   });
 
   // --- 5. LOGIC HELPERS ---
@@ -1007,8 +1005,8 @@ const [dashboardStats, setDashboardStats] = useState({
     const totalRev = products.reduce((s, p) => s + (Number(p.price) || 0), 0);
     return [
       { title: "Total Revenue", value: `₹${totalRev.toLocaleString()}`, icon: DollarSign, trend: "+12.5%", color: "text-emerald-600", bg: "bg-emerald-50" },
-      { title: "Active Orders", value: stats.active_orders, icon: ShoppingBag, trend: "+3.2%", color: "text-blue-600", bg: "bg-blue-50" },
-      { title: "Total Users", value: stats.total_users, icon: Users, trend: "+18%", color: "text-purple-600", bg: "bg-purple-50" },
+      { title: "Active Orders", value: dashboardStats.active_orders, icon: ShoppingBag, trend: "+3.2%", color: "text-blue-600", bg: "bg-blue-50" },
+      { title: "Total Users", value: dashboardStats.total_users, icon: Users, trend: "+18%", color: "text-purple-600", bg: "bg-purple-50" },
       { title: "Stock Units", value: products.length, icon: Package, trend: "-2%", color: "text-amber-600", bg: "bg-amber-50" },
     ];
   }, [products]);
