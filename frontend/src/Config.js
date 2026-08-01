@@ -1,1 +1,1 @@
-export const API_BASE = "https://prakashtraders-backend.onrender.com";
+export const API_BASE = "https://api.prakashtraders.com";
