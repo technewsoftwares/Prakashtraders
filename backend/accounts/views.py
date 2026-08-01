@@ -192,12 +192,12 @@ class VerifyOTP(APIView):
                 "message": "Invalid OTP"
             })
 
-        user, created = User.objects.get_or_create(
+            user, created = User.objects.get_or_create(
             username=email,
             defaults={"email": email}
         )
 
-        refresh = RefreshToken.for_user(user)
+        UserProfile.objects.get_or_create(user=user)
 
         return Response({
             "success": True,
