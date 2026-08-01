@@ -87,7 +87,7 @@ def create_order(request):
         """
         
         send_brevo_email(
-            to_email="technewsoftwares@gmail.com",   # Your admin email
+            to_email="kabilandina11@@gmail.com",   # Your admin email
             subject="🛒 New Order Received",
             message=admin_message
         )
