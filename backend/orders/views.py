@@ -22,6 +22,7 @@ def create_order(request):
 
     try:
         data = json.loads(request.body)
+        items = data.get("items", [])
         print("REQUEST DATA:", data)
 
         amount = float(data.get("amount", 0))
