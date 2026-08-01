@@ -91,6 +91,9 @@ const Login = () => {
 
         if (response.data.success) {
           // ✅ USER ROLE
+          console.log("VERIFY OTP RESPONSE", response.data);
+          console.log("ACCESS", response.data.access);
+
           localStorage.setItem("refresh_token", response.data.refresh);
           login(response.data.access, "user");
           navigate("/", { replace: true });
