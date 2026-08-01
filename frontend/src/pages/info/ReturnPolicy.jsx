@@ -25,7 +25,7 @@ const ReturnPolicy = () => {
         <p>Thank you for your understanding and continued support.</p>
           <section>
             <h2 className="text-xl font-bold text-white mb-2"> Contact Us</h2>
-            <p>To initiate a return, please contact us at <span className="text-emerald-400">support@prakashtraders.com</span> within 3 days of receiving the product, along with your order details and reason for return.</p>
+            <p>To initiate a return, please contact us at <span className="text-emerald-400">ptindsupplier@gmail.com</span> within 3 days of receiving the product, along with your order details and reason for return.</p>
           </section>
         </div>
       </div>
