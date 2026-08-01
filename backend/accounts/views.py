@@ -13,6 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status, generics, viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from accounts.brevo import send_brevo_email
 
 # Local Imports
 from .models import OTP, UserProfile, UserAddress, Product
