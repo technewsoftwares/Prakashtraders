@@ -17,8 +17,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", 'django-insecure-wrixg0)#!-cky4s73@qf(eamflu*)!4g6sug4!)z_ud5z4*y0w')
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-
 INSTALLED_APPS = [
     "cloudinary_storage",
     
@@ -113,7 +111,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://www.prakashtraders.com",
+    "https://prakashtraders.com",
+    "https://prakashtraders-frontend.onrender.com",
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -155,7 +157,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
-    "https://prakashtraders.onrender.com",
+    "https://www.prakashtraders.com",
+    "https://prakashtraders.com",
+    
     "https://prakashtraders-frontend.onrender.com",
 ]
 
@@ -170,7 +174,7 @@ CASHFREE_CLIENT_ID = os.getenv("CASHFREE_CLIENT_ID")
 CASHFREE_CLIENT_SECRET = os.getenv("CASHFREE_CLIENT_SECRET")
 CASHFREE_ENV = os.getenv("CASHFREE_ENV", "PRODUCTION")
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com",]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com", "api.prakashtraders.com"]
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 
