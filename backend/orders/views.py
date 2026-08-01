@@ -9,6 +9,7 @@ from .models import Order, Transaction
 from django.http import JsonResponse
 from .models import Order, OrderItem, Transaction
 from django.contrib.auth.models import User
+from accounts.brevo import send_brevo_email
 
 
 # CREATE ORDER
@@ -49,6 +50,48 @@ def create_order(request):
             "x-api-version": "2023-08-01",
             "Content-Type": "application/json"
         }
+
+        # ================= ADMIN EMAIL =================
+        
+        items_html = ""
+        
+        for item in items:
+            items_html += f"""
+            • {item.get('name')}<br>
+            Qty : {item.get('qty', 1)}<br>
+            Price : ₹{item.get('price')}<br><br>
+            """
+        
+        admin_message = f"""
+        <h2>🛒 New Order Received</h2>
+        
+        <b>Name:</b> {data.get("name")}<br>
+        <b>Mobile:</b> {data.get("mobile")}<br>
+        <b>Email:</b> {data.get("email")}<br><br>
+        
+        <b>Address</b><br>
+        
+        {data.get("address")}<br>
+        {data.get("city")}<br>
+        {data.get("district")}<br>
+        {data.get("state")}<br>
+        {data.get("pincode")}<br><br>
+        
+        <h3>Products</h3>
+        
+        {items_html}
+        
+        <hr>
+        
+        <h3>Total : ₹{amount}</h3>
+        """
+        
+        send_brevo_email(
+            to_email="technewsoftwares@gmail.com",   # Your admin email
+            subject="🛒 New Order Received",
+            message=admin_message
+        )
+                
 
         response = requests.post(
             "https://api.cashfree.com/pg/orders",
