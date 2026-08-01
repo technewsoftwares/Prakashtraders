@@ -198,7 +198,7 @@ const deleteCustomer = async (id) => {
                         onClick={() => deleteCustomer(c.id)}
                           className="text-red-500 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
                         >
-                          <Trash size={18} />
+                          <Trash2 size={18} />
                       </button>
 
                     </div>
