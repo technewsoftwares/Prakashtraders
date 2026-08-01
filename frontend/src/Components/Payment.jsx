@@ -141,15 +141,19 @@ const totalMRP = cartItems.reduce(
         "Authorization": `Bearer ${token}` // ✅ FIX
       },
       body: JSON.stringify({
-        amount: totalPayable,
-        name: address.name,
-        mobile: address.mobile,
-        address: address.fullAddress,
-        pincode: address.pincode,
-        city: address.city,
-        district: address.district,
-        state: address.state,
-        email: "customer@email.com", // You can later make dynamic
+          amount: totalPayable,
+      
+          name: address.name,
+          mobile: address.mobile,
+          email: localStorage.getItem("user_email") || "",
+      
+          address: address.fullAddress,
+          pincode: address.pincode,
+          city: address.city,
+          district: address.district,
+          state: address.state,
+      
+          items: cartItems
       }),
     });
 
