@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import Chart from "react-apexcharts";
 import toast from "react-hot-toast";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 /* ===================== CONFIG ===================== */
 import { API_BASE } from "../Config";
@@ -236,6 +238,35 @@ if (authorized === null || loading) {
   );
 }  
 
+const exportOrdersToExcel = () => {
+  const excelData = orders.map((o) => ({
+    "Order ID": o.order_id,
+    "Date": new Date(o.created_at).toLocaleDateString(),
+    "Customer": o.name,
+    "Mobile": o.mobile,
+    "Address": o.address,
+    "Pincode": o.pincode,
+    "Amount": o.total_amount,
+    "Status": o.status,
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const file = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(file, `Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+};
+
 const handleDeleteOrder = async (orderId) => {
   const token = localStorage.getItem("access_token");
 
@@ -281,16 +312,30 @@ const handleDeleteOrder = async (orderId) => {
           <h3 className="text-xl font-black text-slate-900">Order Management</h3>
           <p className="text-slate-500 text-xs font-bold mt-1">Track and update customer orders.</p>
         </div>
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="Search Order ID or Status..."
-            className="w-full rounded-xl border-none bg-slate-100 py-3 pl-11 pr-4 text-sm font-medium outline-none ring-2 ring-transparent focus:ring-indigo-100 transition-all"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <div className="flex items-center gap-3">
+
+  <button
+    onClick={exportOrdersToExcel}
+    className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl font-bold"
+  >
+    Export Excel
+  </button>
+
+  <div className="relative w-full max-w-sm">
+    <Search
+      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+      size={18}
+    />
+    <input
+      type="text"
+      placeholder="Search Order ID or Status..."
+      className="w-full rounded-xl border-none bg-slate-100 py-3 pl-11 pr-4 text-sm font-medium outline-none ring-2 ring-transparent focus:ring-indigo-100 transition-all"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+  </div>
+
+</div>
       </div>
 
       <div className="overflow-x-auto">
