@@ -281,3 +281,31 @@ class AdminCustomerListView(APIView):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by('-id')
     serializer_class = ProductSerializer
+    
+class DeleteCustomerView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def delete(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+
+            # Don't allow deleting yourself
+            if user == request.user:
+                return Response(
+                    {"success": False, "message": "You cannot delete your own account."},
+                    status=400,
+                )
+
+            user.delete()
+
+            return Response({
+                "success": True,
+                "message": "Customer deleted successfully."
+            })
+
+        except User.DoesNotExist:
+            return Response({
+                "success": False,
+                "message": "Customer not found."
+            }, status=404)
