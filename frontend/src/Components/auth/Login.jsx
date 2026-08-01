@@ -91,7 +91,8 @@ const Login = () => {
 
         if (response.data.success) {
           // ✅ USER ROLE
-          login(response.data.token, "user");
+          localStorage.setItem("refresh_token", response.data.refresh);
+          login(response.data.access, "user");
           navigate("/", { replace: true });
         } else {
           setError(response.data.message || "Invalid OTP");
