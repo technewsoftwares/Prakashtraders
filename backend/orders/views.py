@@ -108,7 +108,7 @@ def create_order(request):
         if response.status_code != 200:
             return JsonResponse(result, status=response.status_code)
 
-        Order.objects.create(
+        order = Order.objects.create(
             order_id=order_id,
             name=data.get("name", ""),
             mobile=data.get("mobile", ""),
@@ -117,6 +117,14 @@ def create_order(request):
             total_amount=amount,
             status="PENDING"
         )
+
+        for item in items:
+            OrderItem.objects.create(
+                order=order,
+                product_name=item.get("name", ""),
+                price=item.get("price", 0),
+                quantity=item.get("qty", 1),
+            )
 
         return JsonResponse({
             "order_id": order_id,
