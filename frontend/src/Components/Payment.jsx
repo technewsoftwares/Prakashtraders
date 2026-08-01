@@ -241,6 +241,20 @@ useEffect(() => {
                     validatePincode(value); // 🔥 API call
                   }}
                 /> 
+                <input
+                  type="text"
+                  placeholder="Mobile Number"
+                  maxLength={10}
+                  className="w-full bg-zinc-800 p-4 rounded-xl border border-transparent focus:border-emerald-500 outline-none transition-all"
+                  value={address.mobile}
+                  onChange={(e) =>
+                    setAddress({
+                      ...address,
+                      mobile: e.target.value.replace(/\D/g, ""),
+                    })
+                  }
+                />
+                
                 {/* ✅ PASTE HERE */}
                 {address.pincode.length === 6 && (
                   <p className={`text-sm mt-1 ${isPincodeValid ? "text-green-500" : "text-red-500"}`}>
