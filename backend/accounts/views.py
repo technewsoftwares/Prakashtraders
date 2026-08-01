@@ -234,10 +234,27 @@ class AdminLogin(APIView):
         }, status=status.HTTP_401_UNAUTHORIZED)
     
 
-class AdminCustomerListView(generics.ListAPIView):
-    permission_classes = [AllowAny] 
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+class AdminCustomerListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        users = User.objects.all().order_by("-id")
+
+        data = []
+
+        for user in users:
+            profile = UserProfile.objects.filter(user=user).first()
+
+            data.append({
+                "id": user.id,
+                "name": profile.full_name if profile and profile.full_name else user.username,
+                "email": user.email,
+                "mobile": profile.mobile if profile else "",
+                "gender": profile.gender if profile else "",
+                "dob": profile.dob if profile else "",
+            })
+
+        return Response(data)
 
     
 class ProductViewSet(viewsets.ModelViewSet):
