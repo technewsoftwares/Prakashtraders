@@ -9,6 +9,7 @@ from .views import (
     ProductViewSet, 
     AdminCustomerListView,
     DeleteCustomerView,
+    AdminDashboardStats,
     ContactSupportView  # <--- ✅ IMPORT ADDED
 )
 
@@ -24,7 +25,7 @@ urlpatterns = [
     path("addresses/<int:pk>/", UserAddressView.as_view()),
     path('admin-customers/', AdminCustomerListView.as_view(), name='admin-customers'),
     path("admin-customers/<int:pk>/", DeleteCustomerView.as_view(), name="delete-customer"),
-
+    path("admin-dashboard/", AdminDashboardStats.as_view(), ),
     # ✅ ADD THIS LINE
     path("contact/", ContactSupportView.as_view(), name="contact-support"),
     

@@ -309,3 +309,37 @@ class DeleteCustomerView(APIView):
                 "success": False,
                 "message": "Customer not found."
             }, status=404)
+
+
+from orders.models import Order
+
+class AdminDashboardStats(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+
+        total_users = User.objects.count()
+
+        active_orders = Order.objects.filter(
+            status="PAID"
+        ).count()
+
+        total_revenue = (
+            sum(order.total_amount for order in Order.objects.filter(status="PAID"))
+        )
+
+        stock_units = 0
+
+        from products.models import Product
+
+        stock_units = sum(
+            Product.objects.values_list("stock", flat=True)
+        )
+
+        return Response({
+            "total_users": total_users,
+            "active_orders": active_orders,
+            "total_revenue": total_revenue,
+            "stock_units": stock_units,
+        })
