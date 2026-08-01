@@ -182,7 +182,7 @@ class VerifyOTP(APIView):
             return Response({
                 "success": False,
                 "message": "Email and OTP are required"
-            })
+            }, status=400)
 
         record = OTP.objects.filter(email=email, otp=otp).last()
 
@@ -190,14 +190,22 @@ class VerifyOTP(APIView):
             return Response({
                 "success": False,
                 "message": "Invalid OTP"
-            })
+            }, status=400)
 
-            user, created = User.objects.get_or_create(
+        # Create user if doesn't exist
+        user, created = User.objects.get_or_create(
             username=email,
             defaults={"email": email}
         )
 
+        # Create profile if doesn't exist
         UserProfile.objects.get_or_create(user=user)
+
+        # Create JWT tokens
+        refresh = RefreshToken.for_user(user)
+
+        # Optional: delete OTP after successful login
+        record.delete()
 
         return Response({
             "success": True,
