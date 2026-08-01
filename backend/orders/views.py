@@ -176,3 +176,26 @@ def payment_webhook(request):
         "status": "Webhook received"
     })
 
+@csrf_exempt
+def delete_order(request, order_id):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "DELETE required"}, status=400)
+
+    try:
+        order = Order.objects.get(order_id=order_id)
+        order.delete()
+
+        return JsonResponse({
+            "success": True,
+            "message": "Order deleted successfully"
+        })
+
+    except Order.DoesNotExist:
+        return JsonResponse({
+            "error": "Order not found"
+        }, status=404)
+
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
