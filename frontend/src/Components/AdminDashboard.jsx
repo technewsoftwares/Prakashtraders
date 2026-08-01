@@ -63,12 +63,17 @@ useEffect(() => {
 
 
 
-  const filteredCustomers = customers.filter(c => {
-    const fullName = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
-    const mobile = c.mobile || '';
-    const search = searchTerm.toLowerCase();
-    return fullName.includes(search) || mobile.includes(search) || c.user_id?.toString().includes(search);
-  });
+  const filteredCustomers = customers.filter((c) => {
+  const fullName = (c.name || "").toLowerCase();
+  const mobile = c.mobile || "";
+  const search = searchTerm.toLowerCase();
+
+  return (
+    fullName.includes(search) ||
+    mobile.includes(search) ||
+    c.id?.toString().includes(search)
+  );
+});
 
   return (
     <div className="rounded-[2rem] bg-white border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
@@ -119,7 +124,10 @@ useEffect(() => {
                       </div>
                       <div>
                         <p className="font-bold text-slate-900 text-sm">
-                          {c.title} {c.first_name} {c.last_name}
+                          {c.name || "Guest User"}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {c.email}
                         </p>
                       </div>
                     </div>
