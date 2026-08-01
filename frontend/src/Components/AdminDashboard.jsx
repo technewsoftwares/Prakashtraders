@@ -1037,7 +1037,6 @@ const orderStatusSeries = orderStatusData.map((d) => d.value);
               { name: 'Products', icon: LayoutGrid },
               { name: 'Orders', icon: ShoppingBag },
               { name: 'Customers', icon: Users },
-              { name: 'Payments', icon: CreditCard },
               { name: 'Redeem', icon: Users }
             ].map((item) => (
               <button
