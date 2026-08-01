@@ -236,6 +236,44 @@ if (authorized === null || loading) {
   );
 }  
 
+const handleDeleteOrder = async (orderId) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!window.confirm("Are you sure you want to delete this order?")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${API}/api/admin-orders/delete/${orderId}/`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Delete failed");
+    }
+
+    // Remove deleted order from table
+    setOrders((prev) =>
+      prev.filter((o) => o.order_id !== orderId)
+    );
+
+    toast.success("Order deleted successfully");
+
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message);
+  }
+};
+
   return (
     <div className="rounded-[2rem] bg-white border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
       <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -324,9 +362,17 @@ if (authorized === null || loading) {
                     </span>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <button className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all">
-                      <Eye size={18} />
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all">
+                       <Eye size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteOrder(o.order_id)}
+                        className="text-slate-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div> 
                   </td>
                 </tr>
               ))
