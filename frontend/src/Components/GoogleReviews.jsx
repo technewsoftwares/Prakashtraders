@@ -1,12 +1,14 @@
 const GoogleReviews = () => {
   return (
-    <section className="bg-black py-12">
+    <section className="bg-black py-10">
       <div className="max-w-[94%] mx-auto">
 
-        <h2 className="text-2xl font-bold tracking-tight text-white uppercase">
+        {/* Title */}
+        <h2 className="text-white text-2xl md:text-3xl font-bold text-center mb-8">
           ⭐ What Our Customers Say
         </h2>
 
+        {/* Widget */}
         <div
           className="elfsight-app-5fb4cbd2-9173-4c11-aa2b-71eb9e22c56a"
           data-elfsight-app-lazy
