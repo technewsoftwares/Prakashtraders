@@ -121,6 +121,7 @@ const AllRoutes = () => {
       <Route path="/Terms" element={<Terms />} />
       <Route path="/TermsAndConditions" element={<Privacy />} />
       <Route path="/ShippingDelivery" element={<Shipping />} />
+      <Route path="/Disclaimer" element={<Disclaimer />} />
     </Routes>
   );
 };
