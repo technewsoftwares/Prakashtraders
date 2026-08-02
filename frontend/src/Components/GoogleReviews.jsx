@@ -1,7 +1,7 @@
 const GoogleReviews = () => {
   return (
     <section className="bg-black py-12">
-      <div className="max-w-[96%] px-1">
+      <div className="w-full px-2">
 
         <h2 className="text-white text-4xl font-bold text-center uppercase mb-10">
           ⭐ What Our Customers Say
