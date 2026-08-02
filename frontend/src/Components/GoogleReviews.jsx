@@ -1,7 +1,7 @@
 const GoogleReviews = () => {
   return (
     <section className="bg-black py-10">
-      <div className="max-w-[94%] mx-auto">
+      <div className="max-w-[88%] mx-auto">
 
         {/* Title */}
         <h2 className="text-white text-2xl md:text-3xl font-bold text-center mb-8">
