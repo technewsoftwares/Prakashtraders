@@ -7,6 +7,7 @@ import Slider from "../Components/Slider";
 import BrandSlider from "../Components/BrandPartnersBanner";
 import WeekBest from "../Components/WeekBest";
 import { API_BASE } from "../Config";
+import GoogleReviews from "../components/GoogleReviews";
 
 const Home = () => {
   const [personalizedProducts, setPersonalizedProducts] = useState([]);
@@ -65,7 +66,10 @@ useEffect(() => {
 
         {/* WEEK BEST */}
 
-        <WeekBest />       
+        <WeekBest />  
+
+        {/* GOOGLE REVIEWS */}
+        <GoogleReviews />     
 
       </div>
     </div>
