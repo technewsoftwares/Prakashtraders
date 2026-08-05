@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_order, verify_payment, payment_webhook, admin_orders, delete_order, UserOrdersView,
+from .views import create_order, verify_payment, payment_webhook, admin_orders, delete_order, UserOrdersView
 
 urlpatterns = [
     path("create-order/", create_order),
