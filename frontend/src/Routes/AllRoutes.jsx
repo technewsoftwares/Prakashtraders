@@ -9,12 +9,12 @@ import UserAddress from "../Components/auth/UserAddress";
 import AddAddress from "../Components/auth/AddAddress";
 import Login from "../Components/auth/Login";
 import Disclaimer from "../pages/info/Disclaimer";
+import MyOrders from "../pages/MyOrders";
 
 import AdminLogin from "../Components/auth/AdminLogin";
 import AdminProtectedRoute from "./AdminProtectedRoute"; 
 import Dashboard from "../Components/AdminDashboard";
 import About from "../pages/About";
-
 
 import ProductList from "../Components/ProductList";
 import BrandProducts from "../Components/BrandProducts";
@@ -87,6 +87,15 @@ const AllRoutes = () => {
         element={
           <PrivateRoute>
             <Cart />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/orders"
+        element={
+          <PrivateRoute>
+            <MyOrders />
           </PrivateRoute>
         }
       />
