@@ -222,7 +222,7 @@ const BrandProducts = () => {
     const fetchBrandProducts = async () => {
       try {
         const res = await fetch(
-             `${API}/api/products/?q=${decodedBrand}`
+             `${API}/api/products/?brand=${decodedBrand}`
         );
         const contentType = res.headers.get("content-type");
         if (!res.ok || !contentType || !contentType.includes("application/json")) {
