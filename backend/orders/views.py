@@ -4,13 +4,16 @@ import requests
 import os
 from django.conf import settings
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from .models import Order, Transaction
-from django.http import JsonResponse
-from .models import Order, OrderItem, Transaction
+from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from accounts.brevo import send_brevo_email
-
+from rest_framework.response import Response
+from .models import Order, OrderItem, Transaction
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.decorators import login_required
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # CREATE ORDER
 
@@ -109,6 +112,7 @@ def create_order(request):
             return JsonResponse(result, status=response.status_code)
 
         order = Order.objects.create(
+            user=request.user,
             order_id=order_id,
             name=data.get("name", ""),
             mobile=data.get("mobile", ""),
@@ -251,3 +255,33 @@ def delete_order(request, order_id):
         return JsonResponse({
             "error": str(e)
         }, status=500)
+
+class UserOrdersView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        orders = Order.objects.filter(user=request.user).order_by("-created_at")
+
+        data = []
+
+        for order in orders:
+            items = OrderItem.objects.filter(order=order)
+
+            data.append({
+                "order_id": order.order_id,
+                "status": order.status,
+                "total_amount": float(order.total_amount),
+                "created_at": order.created_at,
+                "items": [
+                    {
+                        "product_name": item.product_name,
+                        "price": float(item.price),
+                        "quantity": item.quantity,
+                    }
+                    for item in items
+                ]
+            })
+
+        return Response(data)
