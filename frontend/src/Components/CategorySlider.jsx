@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "react-multi-carousel/lib/styles.css";
 import Carousel from "react-multi-carousel";
 import { Link } from "react-router-dom";
@@ -10,6 +10,8 @@ const USE_DEMO_DATA = true;
 const CategorySlider = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const videoRef = useRef(null);
 
   //  CATEGORY DATA (Add your data here)
   const categories =  [
@@ -156,16 +158,26 @@ return (
             </h2>
           </div>
 
-          <div className="overflow-hidden rounded-xl shadow-md transition-transform duration-300 hover:scale-[1.01]">
-            <Link to="/latest-launch">
-              <video
-                className="w-full aspect-video md:h-[320px] object-contain mx-auto"
-                src="/videos/latest-launch.mp4"
-                controls
-                playsInline
-                poster={latest_launch}
-              />
-            </Link>
+          <div
+            className="overflow-hidden rounded-xl shadow-md cursor-pointer transition-transform duration-300 hover:scale-[1.01]"
+            onClick={() => {
+              if (videoRef.current) {
+                videoRef.current.play();
+              }
+            }}
+          >
+            <video
+              ref={videoRef}
+              className="w-full aspect-video md:h-[320px] object-contain mx-auto"
+              src="/videos/latest-launch.mp4"
+              poster={latest_launch}
+              controls
+              playsInline
+              preload="metadata"
+              onEnded={() => {
+                videoRef.current.currentTime = 0;
+              }}
+           />
           </div>
         </div>
       )}
