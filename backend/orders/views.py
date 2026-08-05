@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
 
 # CREATE ORDER
 
