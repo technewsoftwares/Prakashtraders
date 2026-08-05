@@ -526,7 +526,7 @@ const RedeemView = () => {
   }, [redeems]);
 
   // 🔹 ADD / EDIT
-  const handleSaveCustomer = () => {
+  const handleSaveRedeem = () => {
   const { customerId, name, points, startDate, expiryDate } = formData;
 
   if (!customerId || !name || points === "" || !startDate || !expiryDate) {
@@ -538,7 +538,7 @@ const RedeemView = () => {
   const status = expiryDate >= today ? "Active" : "Expired";
 
   if (editIndex !== null) {
-    const updated = [...customers];
+    const updated = [...redeems];
     updated[editIndex] = {
       ...updated[editIndex],
       customerId,
@@ -548,12 +548,12 @@ const RedeemView = () => {
       expiryDate,
       status,
     };
-    setCustomers(updated);
+    setRedeems(updated);
   } else {
-    setCustomers([
-      ...customers,
+    setRedeems([
+      ...redeems,
       {
-        id: customers.length + 1,
+        id: redeems.length + 1,
         customerId,
         name,
         points: Number(points),
@@ -566,12 +566,13 @@ const RedeemView = () => {
   }
 
   setFormData({
-  customerId: c.customerId,
-  name: c.name,
-  points: c.points,
-  startDate: c.startDate,
-  expiryDate: c.expiryDate,
-  });
+  customerId: "",
+  name: "",
+  points: "",
+  startDate: "",
+  expiryDate: "",
+  status: "",
+});
 
   setEditIndex(null);
   setShowForm(false);
@@ -623,9 +624,9 @@ const RedeemView = () => {
       "Customer ID,Name,Points,Start Date,Expiry Date,Status,Last Purchase\n" +
       redeems
         .map(
-          (r) =>
-            `${c.customerId},${c.name},${c.points},${c.startDate},${c.expiryDate},${c.status},${c.lastPurchase}`
-        )
+  (r) =>
+    `${r.customerId},${r.name},${r.points},${r.startDate},${r.expiryDate},${r.status},${r.lastPurchase}`
+)
         .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -652,7 +653,7 @@ const RedeemView = () => {
           <button
             onClick={() => {
               setEditIndex(null);
-              setFormData({ customerId: "", name: "", points: "" });
+              setFormData({ customerId: "", name: "", points: "", startDate: "", expiryDate: "", status: "", });
               setShowForm(true);
             }}
             className="bg-indigo-600 text-white px-4 py-2 rounded"
@@ -707,6 +708,9 @@ const RedeemView = () => {
                       customerId: r.customerId,
                       name: r.name,
                       points: r.points,
+                      startDate: r.startDate,
+                      expiryDate: r.expiryDate,
+                      status: r.status,
                     });
                     setShowForm(true);
                   }}
