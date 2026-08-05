@@ -7,4 +7,5 @@ urlpatterns = [
     path("webhook/", payment_webhook, name="payment-webhook"),
     path("admin-orders/", admin_orders),
     path("admin-orders/delete/<str:order_id>/", delete_order),
+    path("my-orders/", UserOrdersView.as_view()),
 ]
