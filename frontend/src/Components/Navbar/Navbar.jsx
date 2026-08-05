@@ -97,7 +97,7 @@ const Navbar = () => {
   const dataForSidebar = [
     { icon: <FaRegUserCircle className="w-5 h-5" />, name: "My Profile", link: "/profile" },
     { icon: <FaRegAddressBook className="w-5 h-5" />, name: "My Address", link: "/address" },
-    { icon: <LuCodesandbox className="w-5 h-5" />, name: "My Orders", link: "/" },
+    { icon: <LuCodesandbox className="w-5 h-5" />, name: "My Orders", link: "/orders" },
     { icon: <FaRegHeart className="w-5 h-5" />, name: "My Wishlist", link: "/wishlist" },
     { icon: <RiCustomerService2Line className="w-5 h-5" />, name: "Support Center", link: "tel:+919663418188" },
   ];
