@@ -31,7 +31,7 @@ const Navbar = () => {
     token
   } = useContext(ShopContext);
 
-  const [isHovered, setIsHovered] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [query, setQuery] = useState("");
   const [window, setWindow] = useState(false);
@@ -103,7 +103,7 @@ const Navbar = () => {
   ];
 
   const closeUserMenu = () => {
-    setIsHovered(false);
+    setShowProfileMenu(false);
   };
 
   const fetchData = async () => {
@@ -266,13 +266,13 @@ const Navbar = () => {
             </Link>
 
             <div
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
               className="relative py-2"
             >
-              <FaUser className="w-5 h-5 cursor-pointer hover:text-teal-400" />
+              <FaUser className="w-5 h-5 cursor-pointer hover:text-teal-400"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+              />
 
-              {isHovered && (
+              {showProfileMenu && (
                 <div className="absolute right-0 top-full bg-[#1a1a1a] p-2 w-64 z-50 shadow-2xl border border-gray-700 rounded-md">
                    {dataForSidebar.map((e, i) => {
                       if (e.link.startsWith("tel:")) {
@@ -320,7 +320,7 @@ const Navbar = () => {
                         onClick={() => {
                           logout();
                           setShowPopup(false);
-                          setIsHovered(false);
+                          setShowProfileMenu(false);
                         }}
                         className="flex items-center gap-3 w-full p-3 hover:bg-red-900/20 text-red-400 text-sm"
                       >
