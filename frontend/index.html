@@ -34,30 +34,64 @@
   <!-- Elfsight Google Reviews -->
   <script src="https://elfsightcdn.com/platform.js" async></script>
 
-  <style>
-    .whatsapp-float {
-      position: fixed;
-      width: 60px;
-      height: 60px;
-      bottom: 20px;
-      right: 20px;
-      background: #25D366;
-      color: #fff;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 60px;
-      font-size: 34px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      z-index: 99999;
-      text-decoration: none;
-      transition: 0.3s;
+ ```html
+<style>
+  .whatsapp-float {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 20px;
+    right: 20px;
+
+    background: #25D366;
+    color: #fff;
+
+    border-radius: 50%;
+    text-decoration: none;
+
+    /* Perfectly center the WhatsApp icon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+
+    z-index: 99999;
+
+    /* Blinking / pulse effect */
+    animation: whatsappPulse 1.5s infinite;
+  }
+
+  .whatsapp-float i {
+    /* No fixed font-size */
+    display: block;
+  }
+
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+    background: #1ebe5d;
+  }
+
+  /* Blinking effect */
+  @keyframes whatsappPulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .whatsapp-float:hover {
-      transform: scale(1.1);
-      background: #1ebe5d;
+    50% {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 12px rgba(37, 211, 102, 0.25);
     }
-  </style>
+
+    100% {
+      transform: scale(1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+  }
+</style>
+```
+
 </head>
 
 <body>
