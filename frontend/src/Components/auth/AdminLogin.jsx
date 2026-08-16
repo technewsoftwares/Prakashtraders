@@ -52,7 +52,7 @@ const AdminLogin = () => {
       console.log("Saved refresh:", localStorage.getItem("refresh_token"));
 
       // ✅ UPDATE CONTEXT AFTER TOKEN SAVE
-      login(access, "admin");
+      login(access, refresh, "admin");
 
       setIsLoading(false);
       setIsRedirecting(true);
