@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../axiosInstance";
 import { API_BASE } from "../Config";
 import toast from "react-hot-toast";
 
@@ -159,8 +159,8 @@ const addToWishlist = async (product) => {
 
   try {
     // ✅ THEN SAVE TO BACKEND
-    await axios.post(
-      `${API_BASE}/api/auth/wishlist/`,
+    await axiosInstance.post(
+      "/api/auth/wishlist/",
       { product_id: product.id },
       { headers: { Authorization: `Bearer ${token}` } }
     );
