@@ -57,18 +57,24 @@ useEffect(() => {
 
   // ================= LOGIN =================
 
-  const login = (token, role) => {
-    setIsAuth(true);
-    setToken(token);
-    setRole(role);
+ const login = (accessToken, refreshToken, role) => {
+  setIsAuth(true);
+  setToken(accessToken);
+  setRole(role);
 
-    if (role === "admin") {
-      localStorage.setItem("adminToken", token);
-    } else {
-      localStorage.setItem("access_token", token);
-    }
-    localStorage.setItem("role", role);
-  };
+  if (role === "admin") {
+    localStorage.setItem("adminToken", accessToken);
+  } else {
+    localStorage.setItem("access_token", accessToken);
+  }
+
+  // Save refresh token
+  if (refreshToken) {
+    localStorage.setItem("refresh_token", refreshToken);
+  }
+
+  localStorage.setItem("role", role);
+};
 
   // ================= LOGOUT =================
 
