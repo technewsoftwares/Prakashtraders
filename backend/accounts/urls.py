@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     SendOTP, 
     VerifyOTP, 
@@ -25,6 +26,7 @@ urlpatterns = [
     path("addresses/<int:pk>/", UserAddressView.as_view()),
     path('admin-customers/', AdminCustomerListView.as_view(), name='admin-customers'),
     path("admin-customers/<int:pk>/", DeleteCustomerView.as_view(), name="delete-customer"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("admin-dashboard/", AdminDashboardStats.as_view(), ),
     # ✅ ADD THIS LINE
     path("contact/", ContactSupportView.as_view(), name="contact-support"),
