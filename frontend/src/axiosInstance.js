@@ -22,9 +22,12 @@ const clearAuthAndRedirect = () => {
   }
 };
 
+// =====================================================
+// REFRESH ACCESS TOKEN
+// =====================================================
+
 const refreshAccessToken = async () => {
-  // If another request is already refreshing the token,
-  // wait for that same refresh request.
+  // Prevent multiple refresh calls from the SAME browser.
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -57,10 +60,25 @@ const refreshAccessToken = async () => {
         );
       }
 
-      localStorage.setItem("access_token", newAccessToken);
+      localStorage.setItem(
+        "access_token",
+        newAccessToken
+      );
 
-      // Keep old key temporarily for older components.
-      localStorage.setItem("adminToken", newAccessToken);
+      localStorage.setItem(
+        "adminToken",
+        newAccessToken
+      );
+
+      // IMPORTANT:
+      // If backend ever returns a new refresh token,
+      // save it too.
+      if (response.data?.refresh) {
+        localStorage.setItem(
+          "refresh_token",
+          response.data.refresh
+        );
+      }
 
       return newAccessToken;
     })
@@ -71,15 +89,20 @@ const refreshAccessToken = async () => {
   return refreshPromise;
 };
 
-// ================= REQUEST INTERCEPTOR =================
+// =====================================================
+// REQUEST INTERCEPTOR
+// =====================================================
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("access_token");
+    const accessToken =
+      localStorage.getItem("access_token");
 
     if (accessToken) {
       config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${accessToken}`;
+
+      config.headers.Authorization =
+        `Bearer ${accessToken}`;
     }
 
     return config;
@@ -89,7 +112,9 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// ================= RESPONSE INTERCEPTOR =================
+// =====================================================
+// RESPONSE INTERCEPTOR
+// =====================================================
 
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -97,7 +122,7 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Not a 401 error
+    // No response / not 401
     if (
       !error.response ||
       error.response.status !== 401 ||
@@ -106,15 +131,17 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't retry the same request more than once.
+    // Don't retry twice
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // Never try to refresh the refresh request itself.
+    // Never refresh the refresh request itself
     if (
       originalRequest.url &&
-      originalRequest.url.includes("/api/auth/token/refresh/")
+      originalRequest.url.includes(
+        "/api/auth/token/refresh/"
+      )
     ) {
       clearAuthAndRedirect();
       return Promise.reject(error);
@@ -123,7 +150,8 @@ axiosInstance.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      const newAccessToken = await refreshAccessToken();
+      const newAccessToken =
+        await refreshAccessToken();
 
       originalRequest.headers =
         originalRequest.headers || {};
@@ -131,7 +159,7 @@ axiosInstance.interceptors.response.use(
       originalRequest.headers.Authorization =
         `Bearer ${newAccessToken}`;
 
-      // Retry original request with the new token.
+      // Retry original request
       return axiosInstance(originalRequest);
 
     } catch (refreshError) {
