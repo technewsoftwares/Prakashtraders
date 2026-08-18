@@ -948,22 +948,6 @@ const orderStatusOptions = {
 const orderStatusSeries = orderStatusData.map((d) => d.value);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // ✅ Updated to your requested format
-        const res = await axiosInstance.get("/api/auth/admin-dashboard/");
-
-        setDashboardStats(res.data);
-        } catch (err) {
-          console.error("Failed to fetch products:", err);
-          setProducts([]);
-          setLoading(false);
-        }
-     };
-     fetchProducts();
-   }, []);
-
-  useEffect(() => {
   const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem("access_token");
@@ -991,6 +975,22 @@ const orderStatusSeries = orderStatusData.map((d) => d.value);
   fetchDashboardStats();
 }, []);
 
+  useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosInstance.get("/api/products/");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, []);
+
 const [dashboardStats, setDashboardStats] = useState({
    total_users: 0,
     active_orders: 0,
@@ -1005,7 +1005,7 @@ const [dashboardStats, setDashboardStats] = useState({
       { title: "Total Users", value: dashboardStats.total_users, icon: Users, trend: "+18%", color: "text-purple-600", bg: "bg-purple-50" },
       { title: "Stock Units", value: products.length, icon: Package, trend: "-2%", color: "text-amber-600", bg: "bg-amber-50" },
     ];
-  }, [products]);
+}, [products, dashboardStats]);
 
   const filteredProducts = products.filter(p =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
