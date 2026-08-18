@@ -35,6 +35,8 @@ class Product(models.Model):
     image_1 = models.ImageField(upload_to="products/", blank=True, null=True)
     image_2 = models.ImageField(upload_to="products/", blank=True, null=True)
     image_3 = models.ImageField(upload_to="products/", blank=True, null=True)
+    image_4 = models.ImageField(upload_to="products/", blank=True, null=True)
+    image_5 = models.ImageField(upload_to="products/", blank=True, null=True)
 
     def __str__(self):
         return self.name
