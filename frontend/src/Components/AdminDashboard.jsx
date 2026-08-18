@@ -38,20 +38,11 @@ useEffect(() => {
 
       console.log("Token:", token); // debug
 
-      const res = await fetch(`${API}/api/auth/admin-customers/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+const res = await axiosInstance.get(
+  "/api/auth/admin-customers/"
+);
 
-      if (!res.ok) {
-        throw new Error("Unauthorized");
-      }
-
-      const data = await res.json();
-      setCustomers(data);
+setCustomers(res.data);
     } catch (error) {
       console.error("Error fetching customers:", error);
     } finally {
@@ -72,25 +63,13 @@ const deleteCustomer = async (id) => {
   try {
     const token = localStorage.getItem("access_token");
 
-    const res = await fetch(
-      `${API}/api/auth/admin-customers/${id}/`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const res = await axiosInstance.delete(
+  `/api/auth/admin-customers/${id}/`
+);
 
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("Customer deleted successfully.");
-
-      setCustomers((prev) =>
-        prev.filter((customer) => customer.id !== id)
-      );
+setCustomers((prev) =>
+  prev.filter((customer) => customer.id !== id)
+);
     } else {
       alert(data.message || "Failed to delete customer.");
     }
@@ -232,33 +211,26 @@ const OrdersView = () => {
   }
 
   const fetchOrders = async () => {
-    try {
-      const res = await fetch(
-        `${API}/api/admin-orders/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  try {
+    const res = await axiosInstance.get(
+      "/api/admin-orders/"
+    );
 
-      if (!res.ok) throw new Error("Unauthorized");
+    setOrders(res.data);
+    setAuthorized(true);
 
-      const data = await res.json();
-      setOrders(data);
-      setAuthorized(true);
+  } catch (error) {
+    console.error(
+      "Error fetching orders:",
+      error
+    );
 
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      setAuthorized(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setAuthorized(false);
 
-  fetchOrders();
-}, []);  
+  } finally {
+    setLoading(false);
+  }
+};  
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -1043,7 +1015,10 @@ const handleSaveProduct = async (e) => {
     Object.keys(formData).forEach((key) => {
       const value = formData[key];
 
-      if (value !== null && value !== undefined) {
+      if (
+        value !== null &&
+        value !== undefined
+      ) {
         if (imageKeys.includes(key)) {
           if (value instanceof File) {
             form.append(key, value);
@@ -1054,9 +1029,6 @@ const handleSaveProduct = async (e) => {
       }
     });
 
-    // IMPORTANT:
-    // Use axiosInstance so your JWT interceptor can handle
-    // expired access tokens.
     const response = await axiosInstance({
       url,
       method,
@@ -1068,7 +1040,9 @@ const handleSaveProduct = async (e) => {
     setProducts((prev) =>
       isEditing
         ? prev.map((p) =>
-            p.id === savedProduct.id ? savedProduct : p
+            p.id === savedProduct.id
+              ? savedProduct
+              : p
           )
         : [savedProduct, ...prev]
     );
@@ -1083,7 +1057,10 @@ const handleSaveProduct = async (e) => {
     );
 
   } catch (err) {
-    console.error("PRODUCT SAVE ERROR:", err);
+    console.error(
+      "PRODUCT SAVE ERROR:",
+      err
+    );
 
     console.error(
       "STATUS:",
@@ -1106,23 +1083,38 @@ const handleSaveProduct = async (e) => {
   }
 };
 
-  const handleDeleteProduct = async (id) => {
-    if (!window.confirm("❗ Delete this product?")) return;
-    try {
-      const token = localStorage.getItem("access_token");
-      // ✅ Updated to your requested format
-      const res = await fetch(`${API}/api/products/${id}/`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Delete failed");
-      setProducts(prev => prev.filter(p => p.id !== id));
-      toast.success("🗑️ Product deleted successfully");
-    } catch (err) {
-      console.error(err);
-      toast.error("❌ Failed to delete product");
-    }
-  };
+const handleDeleteProduct = async (id) => {
+  if (!window.confirm("❗ Delete this product?")) {
+    return;
+  }
+
+  try {
+    await axiosInstance.delete(
+      `/api/products/${id}/`
+    );
+
+    setProducts((prev) =>
+      prev.filter((p) => p.id !== id)
+    );
+
+    toast.success(
+      "🗑️ Product deleted successfully"
+    );
+
+  } catch (err) {
+    console.error(
+      "DELETE PRODUCT ERROR:",
+      err
+    );
+
+    const message =
+      err?.response?.data?.detail ||
+      err?.response?.data?.error ||
+      "Failed to delete product";
+
+    toast.error(`❌ ${message}`);
+  }
+};
 
   const handleEditClick = (product) => {
     setFormData({ ...product });
