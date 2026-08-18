@@ -54,28 +54,34 @@ setCustomers(res.data);
 }, []);
 
 const deleteCustomer = async (id) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this customer?"
-  );
-
-  if (!confirmDelete) return;
+  if (!window.confirm("Are you sure you want to delete this customer?")) {
+    return;
+  }
 
   try {
-    const token = localStorage.getItem("access_token");
+    const response = await axiosInstance.delete(
+      `/api/auth/admin-customers/${id}/`
+    );
 
-    const res = await axiosInstance.delete(
-  `/api/auth/admin-customers/${id}/`
-);
+    if (response.status >= 200 && response.status < 300) {
+      setCustomers((prev) =>
+        prev.filter((customer) => customer.id !== id)
+      );
 
-setCustomers((prev) =>
-  prev.filter((customer) => customer.id !== id)
-);
+      toast.success("Customer deleted successfully");
     } else {
-      alert(data.message || "Failed to delete customer.");
+      toast.error("Failed to delete customer");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong.");
+  } catch (error) {
+    console.error("Delete customer error:", error);
+
+    const message =
+      error?.response?.data?.detail ||
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to delete customer.";
+
+    toast.error(message);
   }
 };
 
