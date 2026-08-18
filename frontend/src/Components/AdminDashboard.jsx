@@ -1012,60 +1012,99 @@ const [dashboardStats, setDashboardStats] = useState({
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   console.log("ACCESS TOKEN:", localStorage.getItem("access_token"));
-  const handleSaveProduct = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        toast.error("Session expired. Please login again.");
-        setIsAuthenticated(false);
-        return; 
-      }
+const handleSaveProduct = async (e) => {
+  e.preventDefault();
 
-      // ✅ Updated to your requested format
-      const url = isEditing
-        ? `${API}/api/products/${formData.id}/`
-        : `${API}/api/products/`;
+  try {
+    const token = localStorage.getItem("access_token");
 
-      const method = isEditing ? "PUT" : "POST";
-      const form = new FormData();
-      
-      const imageKeys = ["image_1", "image_2", "image_3", "image_4", "image_5"];
-
-      Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null && formData[key] !== undefined) {
-          if (imageKeys.includes(key) && formData[key] instanceof File) {
-            form.append(key, formData[key]);
-          } else if (!imageKeys.includes(key)) {
-            form.append(key, formData[key]);
-          }
-        }
-      });
-
-      const res = await fetch(url, {
-        method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-
-      if (!res.ok) throw new Error("Save failed");
-      const savedProduct = await res.json();
-
-      setProducts((prev) =>
-        isEditing
-          ? prev.map((p) => (p.id === savedProduct.id ? savedProduct : p))
-          : [savedProduct, ...prev]
-      );
-
-      setShowModal(false);
-      setIsEditing(false);
-
-      toast.success(isEditing ? "✏️ Product updated successfully" : "✅ Product added successfully");
-    } catch (err) {
-      console.error(err);
-      toast.error("❌ Error saving product");
+    if (!token) {
+      toast.error("Session expired. Please login again.");
+      setIsAuthenticated(false);
+      return;
     }
-  };
+
+    const url = isEditing
+      ? `/api/products/${formData.id}/`
+      : "/api/products/";
+
+    const method = isEditing ? "PUT" : "POST";
+
+    const form = new FormData();
+
+    const imageKeys = [
+      "image_1",
+      "image_2",
+      "image_3",
+      "image_4",
+      "image_5",
+    ];
+
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key];
+
+      if (value !== null && value !== undefined) {
+        if (imageKeys.includes(key)) {
+          if (value instanceof File) {
+            form.append(key, value);
+          }
+        } else {
+          form.append(key, value);
+        }
+      }
+    });
+
+    // IMPORTANT:
+    // Use axiosInstance so your JWT interceptor can handle
+    // expired access tokens.
+    const response = await axiosInstance({
+      url,
+      method,
+      data: form,
+    });
+
+    const savedProduct = response.data;
+
+    setProducts((prev) =>
+      isEditing
+        ? prev.map((p) =>
+            p.id === savedProduct.id ? savedProduct : p
+          )
+        : [savedProduct, ...prev]
+    );
+
+    setShowModal(false);
+    setIsEditing(false);
+
+    toast.success(
+      isEditing
+        ? "✏️ Product updated successfully"
+        : "✅ Product added successfully"
+    );
+
+  } catch (err) {
+    console.error("PRODUCT SAVE ERROR:", err);
+
+    console.error(
+      "STATUS:",
+      err?.response?.status
+    );
+
+    console.error(
+      "SERVER RESPONSE:",
+      err?.response?.data
+    );
+
+    const message =
+      err?.response?.data?.detail ||
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Unable to save product";
+
+    toast.error(`❌ ${message}`);
+  }
+};
 
   const handleDeleteProduct = async (id) => {
     if (!window.confirm("❗ Delete this product?")) return;
