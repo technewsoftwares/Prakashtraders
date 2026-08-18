@@ -951,11 +951,9 @@ const orderStatusSeries = orderStatusData.map((d) => d.value);
     const fetchProducts = async () => {
       try {
         // ✅ Updated to your requested format
-        const res = await axiosInstance.get("/api/products/");
+        const res = await axiosInstance.get("/api/auth/admin-dashboard/");
 
-        const data = res.data;
-        setProducts(Array.isArray(data) ? data : data.results || []);
-        setLoading(false);
+        setDashboardStats(res.data);
         } catch (err) {
           console.error("Failed to fetch products:", err);
           setProducts([]);
