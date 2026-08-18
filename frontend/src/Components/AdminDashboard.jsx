@@ -306,43 +306,46 @@ const exportOrdersToExcel = () => {
 };
 
 const handleDeleteOrder = async (orderId) => {
-  const token = localStorage.getItem("access_token");
 
-  if (!window.confirm("Are you sure you want to delete this order?")) {
+  if (
+    !window.confirm(
+      "Are you sure you want to delete this order?"
+    )
+  ) {
     return;
   }
 
   try {
-    const res = await fetch(
-      `${API}/api/admin-orders/delete/${orderId}/`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
+
+    await axiosInstance.delete(
+      `/api/admin-orders/delete/${orderId}/`
     );
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Delete failed");
-    }
-
-    // Remove deleted order from table
     setOrders((prev) =>
-      prev.filter((o) => o.order_id !== orderId)
+      prev.filter(
+        (o) => o.order_id !== orderId
+      )
     );
 
-    toast.success("Order deleted successfully");
+    toast.success(
+      "Order deleted successfully"
+    );
 
   } catch (err) {
-    console.error(err);
-    toast.error(err.message);
+
+    console.error(
+      "Delete order error:",
+      err?.response?.data || err
+    );
+
+    const message =
+      err?.response?.data?.detail ||
+      err?.response?.data?.error ||
+      "Failed to delete order";
+
+    toast.error(message);
   }
 };
-
   return (
     <div className="rounded-[2rem] bg-white border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
       <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -928,34 +931,30 @@ const orderStatusOptions = {
 };
 const orderStatusSeries = orderStatusData.map((d) => d.value);
 
-  useEffect(() => {
+ useEffect(() => {
   const fetchDashboardStats = async () => {
     try {
-      const token = localStorage.getItem("access_token");
-
-      const res = await fetch(
-        `${API}/api/auth/admin-dashboard/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const res = await axiosInstance.get(
+        "/api/auth/admin-dashboard/"
       );
 
-      if (!res.ok) throw new Error("Failed");
+      console.log(
+        "📊 Dashboard Stats:",
+        res.data
+      );
 
-      const data = await res.json();
-
-      setDashboardStats(data);
+      setDashboardStats(res.data);
 
     } catch (err) {
-      console.error(err);
+      console.error(
+        "❌ Dashboard stats error:",
+        err?.response?.data || err
+      );
     }
   };
 
   fetchDashboardStats();
 }, []);
-
   useEffect(() => {
   const fetchProducts = async () => {
     try {
