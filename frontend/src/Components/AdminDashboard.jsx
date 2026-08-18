@@ -206,10 +206,10 @@ const OrdersView = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
+ useEffect(() => {
   const token = localStorage.getItem("access_token");
 
-  // 🔐 AUTH GUARD (IMPORTANT)
+  // 🔐 AUTH GUARD
   if (!token) {
     setAuthorized(false);
     setLoading(false);
@@ -217,26 +217,29 @@ const OrdersView = () => {
   }
 
   const fetchOrders = async () => {
-  try {
-    const res = await axiosInstance.get(
-      "/api/admin-orders/"
-    );
+    try {
+      const res = await axiosInstance.get(
+        "/api/admin-orders/"
+      );
 
-    setOrders(res.data);
-    setAuthorized(true);
+      setOrders(res.data);
+      setAuthorized(true);
 
-  } catch (error) {
-    console.error(
-      "Error fetching orders:",
-      error
-    );
+    } catch (error) {
+      console.error(
+        "Error fetching orders:",
+        error
+      );
 
-    setAuthorized(false);
+      setAuthorized(false);
 
-  } finally {
-    setLoading(false);
-  }
-};  
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOrders();
+}, []); 
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
