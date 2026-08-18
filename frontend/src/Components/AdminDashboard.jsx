@@ -9,6 +9,7 @@ import Chart from "react-apexcharts";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import axiosInstance from "../axiosInstance";
 
 /* ===================== CONFIG ===================== */
 import { API_BASE } from "../Config";
@@ -950,26 +951,19 @@ const orderStatusSeries = orderStatusData.map((d) => d.value);
     const fetchProducts = async () => {
       try {
         // ✅ Updated to your requested format
-        const token = localStorage.getItem("access_token");
-        if (!token) throw new Error("No token");
-         
-        const res = await fetch(`${API}/api/products/`,{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!res.ok) throw new Error("Fetch failed");
-        const data = await res.json();
+        const res = await axiosInstance.get("/api/products/");
+
+        const data = res.data;
         setProducts(Array.isArray(data) ? data : data.results || []);
         setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch products:", err);
-        setProducts([]);
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+        } catch (err) {
+          console.error("Failed to fetch products:", err);
+          setProducts([]);
+          setLoading(false);
+        }
+     };
+     fetchProducts();
+   }, []);
 
   useEffect(() => {
   const fetchDashboardStats = async () => {
