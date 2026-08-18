@@ -78,7 +78,7 @@ const Slider = () => {
 
                 {/* SLIDE 0: Product Link 1 */}
 
-                <a href="https://www.prakashtraders.com/products/washing-machines">
+                <a href="https://www.prakashtraders.com/products/all-products">
 
                     <img
 
@@ -96,7 +96,7 @@ const Slider = () => {
 
                 {/* SLIDE 1: Product Link 2 */}
 
-                <a href="https://www.prakashtraders.com/products/refrigerators">
+                <a href="https://www.prakashtraders.com/products/kitchen-appliances">
 
                     <img
 
@@ -114,7 +114,7 @@ const Slider = () => {
 
                 {/* SLIDE 2: Product Link 3 */}
 
-                <a href="https://www.prakashtraders.com/products/air-conditioners">
+                <a href="https://www.prakashtraders.com/products/furnitures">
 
                     <img
 
