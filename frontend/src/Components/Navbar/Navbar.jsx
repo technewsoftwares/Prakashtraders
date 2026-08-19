@@ -61,7 +61,7 @@ const Navbar = () => {
         name: "Home Appliances",
         sub: [
           "Refrigerators", "Washing Machines", "Vacuum Cleaners", "Air Conditioners",
-          "Air Coolers", "Water Heaters", "Solar Water Heaters", "Room Heaters", "Sofas",
+          "Air Coolers", "Water Heaters", "Solar Water Heaters", "Room Heaters", "Electric Kettles","Sofas",
         ],
       },
       {
