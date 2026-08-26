@@ -992,6 +992,78 @@ const [dashboardStats, setDashboardStats] = useState({
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   console.log("ACCESS TOKEN:", localStorage.getItem("access_token"));
+// new changes by kabi 26/8 for img size reduce purpose
+const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("Invalid image file"));
+      return;
+    }
+
+    const img = new Image();
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      // Resize while maintaining aspect ratio
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(
+          maxWidth / width,
+          maxHeight / height
+        );
+
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Better image quality when resizing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to WebP
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Image compression failed"));
+            return;
+          }
+
+          const compressedFile = new File(
+            [blob],
+            file.name.replace(/\.[^/.]+$/, "") + ".webp",
+            {
+              type: "image/webp",
+              lastModified: Date.now(),
+            }
+          );
+
+          console.log(
+            `Image compressed: ${(file.size / 1024 / 1024).toFixed(2)} MB → ${(compressedFile.size / 1024).toFixed(0)} KB`
+          );
+
+          resolve(compressedFile);
+        },
+        "image/webp",
+        quality
+      );
+    };
+
+    img.onerror = () => {
+      reject(new Error("Unable to load image"));
+    };
+
+    img.src = URL.createObjectURL(file);
+  });
+};
+  
 const handleSaveProduct = async (e) => {
   e.preventDefault();
 
@@ -1516,12 +1588,46 @@ const handleDeleteProduct = async (id) => {
 
               {/* ✅ UPDATED IMAGE SECTION: 5 SLOTS */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Product Images (Max 5)</label>
-                {["image_1", "image_2", "image_3", "image_4", "image_5"].map((key, index) => (
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
+                Product Images (Max 5)
+              </label>
+            
+              {["image_1", "image_2", "image_3", "image_4", "image_5"].map(
+                (key, index) => (
                   <div key={key} className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold text-slate-400 w-4">{index + 1}.</span>
-                    <input type="file" accept="image/*" className="flex-1 rounded-xl bg-slate-100 border-none p-3 text-sm font-bold cursor-pointer"
-                      onChange={(e) => setFormData({ ...formData, [key]: e.target.files[0] })} />
+            
+                    <span className="text-[10px] font-bold text-slate-400 w-4">
+                      {index + 1}.
+                    </span>
+            
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="flex-1 rounded-xl bg-slate-100 border-none p-3 text-sm font-bold cursor-pointer"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+            
+                        if (!file) return;
+            
+                        try {
+                          const compressedFile = await compressImage(file);
+            
+                          setFormData((prev) => ({
+                            ...prev,
+                            [key]: compressedFile,
+                          }));
+            
+                          toast.success(
+                            `${key.replace("_", " ").toUpperCase()} compressed successfully`
+                          );
+            
+                        } catch (error) {
+                          console.error("Image compression error:", error);
+                          toast.error("Failed to process image");
+                        }
+                      }}
+                    />
+            
                     {formData[key] && (
                       <img
                         src={getImageUrl(formData[key])}
@@ -1529,9 +1635,11 @@ const handleDeleteProduct = async (id) => {
                         alt={`preview-${index + 1}`}
                       />
                     )}
+            
                   </div>
-                ))}
-              </div>
+                )
+              )}
+            </div>
 
               <div className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                 <div className="flex items-center gap-3">
