@@ -3,7 +3,6 @@ import { API_BASE } from "./Config";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
 });
 
 let refreshPromise = null;
