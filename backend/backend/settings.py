@@ -115,6 +115,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.prakashtraders.com",
     "https://prakashtraders.com",
     "https://prakashtraders-frontend.onrender.com",
+    "https://prakashtraders-dq06.onrender.com",
 ]
 
 REST_FRAMEWORK = {
@@ -167,6 +168,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://prakashtraders.com",
     
     "https://prakashtraders-frontend.onrender.com",
+     "https://prakashtraders-dq06.onrender.com",
 ]
 
 CORS_ALLOW_HEADERS = [
