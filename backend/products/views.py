@@ -1,4 +1,5 @@
 import random
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -20,10 +21,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         category = self.request.query_params.get("category")
 
         if brand:
-            qs = qs.filter(brand__iexact=brand)
+            qs = qs.filter(brand__iexact=brand.strip())
 
         if category:
-            qs = qs.filter(category__iexact=category)
+            qs = qs.filter(category__iexact=category.strip())
 
         return qs
 
@@ -33,16 +34,28 @@ class ProductViewSet(viewsets.ModelViewSet):
         qs = Product.objects.all()
 
         category = request.query_params.get("category")
+
         if category:
-            qs = qs.filter(category__iexact=category)
+            qs = qs.filter(category__iexact=category.strip())
 
-        products = list(qs)
-        random.shuffle(products)
+        # Get only IDs instead of loading every Product object
+        product_ids = list(qs.values_list("id", flat=True))
 
-        serializer = self.get_serializer(products[:10], many=True)
+        if not product_ids:
+            return Response([])
+
+        selected_ids = random.sample(
+            product_ids,
+            min(10, len(product_ids))
+        )
+
+        products = qs.filter(id__in=selected_ids)
+
+        serializer = self.get_serializer(products, many=True)
+
         return Response(serializer.data)
 
-    # ⭐ BEST PRODUCTS (FIXED)
+    # ⭐ BEST PRODUCTS
     @action(detail=False, methods=["get"], url_path="best")
     def best_products(self, request):
         qs = Product.objects.filter(
@@ -50,8 +63,19 @@ class ProductViewSet(viewsets.ModelViewSet):
             is_active=True
         )
 
-        products = list(qs)
-        random.shuffle(products)
+        # Get only IDs instead of loading/shuffling all products
+        product_ids = list(qs.values_list("id", flat=True))
 
-        serializer = self.get_serializer(products[:10], many=True)
+        if not product_ids:
+            return Response([])
+
+        selected_ids = random.sample(
+            product_ids,
+            min(10, len(product_ids))
+        )
+
+        products = qs.filter(id__in=selected_ids)
+
+        serializer = self.get_serializer(products, many=True)
+
         return Response(serializer.data)
