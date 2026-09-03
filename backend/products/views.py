@@ -79,3 +79,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
 
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="debug-count")
+    def debug_count(self, request):
+       return Response({
+          "total_products": Product.objects.count(),
+          "active_products": Product.objects.filter(is_active=True).count(),
+          "inactive_products": Product.objects.filter(is_active=False).count(),
+      })
