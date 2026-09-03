@@ -215,9 +215,6 @@ const BrandProducts = () => {
   const [sortOrder, setSortOrder] = useState("");
   const [activeFilter, setActiveFilter] = useState(null);
 
-  // Define API variable here
-  const API = import.meta.env.VITE_API_URL;
-
   useEffect(() => {
     const fetchBrandProducts = async () => {
       try {
