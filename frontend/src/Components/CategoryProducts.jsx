@@ -44,7 +44,7 @@ const CategoryProducts = () => {
     const cleanPath = img.startsWith("/") ? img : `/${img}`;
     // ❌ OLD: return `http://localhost:8000${cleanPath}`;
     // ✅ NEW:
-    return `${API}${cleanPath}`;
+    return `${API.replace(/\/$/, "")}${cleanPath}`;
   };
 
   const getFirstValidImage = (product) => {
@@ -53,29 +53,50 @@ const CategoryProducts = () => {
 
   useEffect(() => {
     if (!decodedCategory) return;
-
+  
+    const controller = new AbortController();
+  
     const fetchCategoryProducts = async () => {
       try {
         setLoading(true);
-        // Ensure we handle cases where API might differ
+  
         const res = await fetch(
-          `${API}/api/products/?category=${encodeURIComponent(decodedCategory)}`
+          `${API}/api/products/?category=${encodeURIComponent(decodedCategory)}`,
+          {
+            signal: controller.signal,
+          }
         );
-        if (!res.ok) throw new Error("Failed to fetch");
-        
+  
+        if (!res.ok) {
+          throw new Error(`Request failed: ${res.status}`);
+        }
+  
         const result = await res.json();
-        // Handle if backend returns { products: [...] } or just [...]
-        const products = Array.isArray(result) ? result : result.products || [];
+  
+        const products = Array.isArray(result)
+          ? result
+          : result.results || result.products || [];
+  
         setData(products);
       } catch (error) {
-        console.error("Error fetching category products:", error);
-        setData([]);
+        if (error.name !== "AbortError") {
+          console.error(
+            "Error fetching category products:",
+            error
+          );
+          setData([]);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
+  
     fetchCategoryProducts();
-  }, [decodedCategory, API]);
+  
+    return () => controller.abort();
+  }, [decodedCategory]);
 
   // 🔹 FILTER + SORT LOGIC
   const filteredData = data
