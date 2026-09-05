@@ -97,11 +97,7 @@ const SearchBar = ({ autoFocus = false }) => {
     ).slice(0, 3);
 
     // Filter Products
-    const prods = dbProducts.filter((p) =>
-      p.name?.toLowerCase().includes(lowerQuery) ||
-      p.category?.toLowerCase().includes(lowerQuery) ||
-      p.brand?.toLowerCase().includes(lowerQuery)
-    ).slice(0, 5);
+   
 
     setMatchedCategories(cats);
     setMatchedBrands(brands);
