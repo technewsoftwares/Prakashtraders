@@ -1,5 +1,5 @@
 import random
-
+from django.db import models
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,17 +15,25 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        qs = Product.objects.all()
-
+        qs = Product.objects.filter(is_active=True)
+    
         brand = self.request.query_params.get("brand")
         category = self.request.query_params.get("category")
-
+        search = self.request.query_params.get("q")
+    
         if brand:
             qs = qs.filter(brand__iexact=brand.strip())
-
+    
         if category:
             qs = qs.filter(category__iexact=category.strip())
-
+    
+        if search:
+            qs = qs.filter(
+                models.Q(name__icontains=search) |
+                models.Q(category__icontains=search) |
+                models.Q(brand__icontains=search)
+            )
+    
         return qs
 
     # 🔹 RANDOM PRODUCTS
