@@ -35,7 +35,7 @@ const getCategoryLink = (subCategory) => {
 };
 
 const SearchBar = ({ autoFocus = false }) => {
-  const [dbProducts, setDbProducts] = useState([]);
+ 
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
@@ -50,17 +50,29 @@ const SearchBar = ({ autoFocus = false }) => {
   const [matchedProducts, setMatchedProducts] = useState([]);
 
   // 1. FETCH PRODUCTS
-  useEffect(() => {
-    const fetchProducts = async () => {
+   useEffect(() => {
+    const query = searchTerm.trim();
+  
+    if (!query) {
+      setMatchedProducts([]);
+      return;
+    }
+  
+    const fetchSearchResults = async () => {
       try {
-        const res = await axios.get(`${API}/api/products/`);
-        setDbProducts(res.data);
+        const res = await axios.get(
+          `${API}/api/products/?q=${encodeURIComponent(query)}`
+        );
+  
+        setMatchedProducts(res.data);
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+        console.error("Search error:", err);
+        setMatchedProducts([]);
       }
     };
-    fetchProducts();
-  }, [API]);
+  
+    fetchSearchResults();
+  }, [searchTerm]);
 
   // 2. SEARCH LOGIC
   const handleSearch = (e) => {
