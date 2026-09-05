@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CiSearch } from "react-icons/ci";
 import { useNavigate } from "react-router-dom"; // Removed Link, using useNavigate
 import { FaChevronRight, FaTag, FaBuilding } from "react-icons/fa";
@@ -38,6 +38,10 @@ const SearchBar = ({ autoFocus = false }) => {
  
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  
+  const searchTimer = useRef(null);
+  
   const navigate = useNavigate();
 
   
@@ -50,61 +54,82 @@ const SearchBar = ({ autoFocus = false }) => {
   const [matchedProducts, setMatchedProducts] = useState([]);
 
   // 1. FETCH PRODUCTS
-   useEffect(() => {
+ // Fetch matching products after the user stops typing
+  useEffect(() => {
     const query = searchTerm.trim();
   
+    // Cancel the previous timer
+    clearTimeout(searchTimer.current);
+  
+    // Empty search
     if (!query) {
+      setMatchedProducts([]);
+      setSearchLoading(false);
+      return;
+    }
+  
+    // Wait 400ms before making the API request
+    searchTimer.current = setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+  
+        const response = await axios.get(`${API}/api/products/`, {
+          params: {
+            q: query,
+          },
+        });
+  
+        const result = response.data;
+  
+        const products = Array.isArray(result)
+          ? result
+          : result.results || result.products || [];
+  
+        // Display only five suggestions
+        setMatchedProducts(products.slice(0, 5));
+      } catch (error) {
+        console.error("Search error:", error);
+        setMatchedProducts([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+  
+    // Clear timer when the user types again
+    return () => {
+      clearTimeout(searchTimer.current);
+    };
+  }, [searchTerm]);
+  // 2. SEARCH LOGIC
+   const handleSearch = (e) => {
+    const query = e.target.value;
+  
+    setSearchTerm(query);
+  
+    if (query.trim() === "") {
+      setShowResults(false);
+      setMatchedCategories([]);
+      setMatchedBrands([]);
       setMatchedProducts([]);
       return;
     }
   
-    const fetchSearchResults = async () => {
-      try {
-        const res = await axios.get(
-          `${API}/api/products/?q=${encodeURIComponent(query)}`
-        );
-  
-        setMatchedProducts(res.data);
-      } catch (err) {
-        console.error("Search error:", err);
-        setMatchedProducts([]);
-      }
-    };
-  
-    fetchSearchResults();
-  }, [searchTerm]);
-
-  // 2. SEARCH LOGIC
-  const handleSearch = (e) => {
-    const query = e.target.value;
-    setSearchTerm(query);
-
-    if (query.trim() === "") {
-      setShowResults(false);
-      return;
-    }
-
     const lowerQuery = query.toLowerCase();
-
-    // Filter Categories
-    const cats = CATEGORIES_LIST.filter(cat =>
+  
+    // Search categories locally
+    const cats = CATEGORIES_LIST.filter((cat) =>
       cat.toLowerCase().includes(lowerQuery)
     ).slice(0, 3);
-
-    // Filter Brands
-    const brands = BRANDS_LIST.filter(brand =>
+  
+    // Search brands locally
+    const brands = BRANDS_LIST.filter((brand) =>
       brand.toLowerCase().includes(lowerQuery)
     ).slice(0, 3);
-
-    // Filter Products
-   
-
+  
     setMatchedCategories(cats);
     setMatchedBrands(brands);
-    setMatchedProducts(prods);
     setShowResults(true);
   };
-
   // 3. NAVIGATION HANDLER (The "Old" Code Logic)
   // We use this instead of <Link> to ensure it works with onMouseDown
   const handleNavigate = (path) => {
@@ -160,7 +185,11 @@ const SearchBar = ({ autoFocus = false }) => {
       {showResults && searchTerm && (
         <div className="absolute top-full left-0 bg-white border border-gray-100 shadow-2xl w-full mt-2 rounded-2xl max-h-[500px] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
 
-          {hasResults ? (
+       {searchLoading ? (
+            <div className="px-4 py-6 text-center text-gray-500">
+              Searching products...
+            </div>
+          ) : hasResults ? (
             <div className="py-2">
 
               {/* CATEGORIES */}
