@@ -254,7 +254,9 @@ const SearchBar = ({ autoFocus = false }) => {
                         <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{item.name}</h4>
                         <p className="text-[10px] text-slate-500 font-bold uppercase">{item.category}</p>
                       </div>
-                      <span className="text-sm font-black text-indigo-600">₹{item.price}</span>
+                      <span className="text-sm font-black text-indigo-600">
+                        ₹{item.discount_price || item.selling_price || item.price}
+                      </span>
                     </div>
                   ))}
                 </div>
