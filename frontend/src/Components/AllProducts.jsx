@@ -6,25 +6,40 @@ import { API_BASE } from "../Config";
 
 const API = API_BASE;
 
-const API = "https://backend-mc2q.onrender.com";
+const toFullImageUrl = (img) => {
+  if (!img || typeof img !== "string") return "";
 
-const getProductImage = (item) => {
-  const image =
-    item.image ||
-    item.image_url ||
-    item.imageUrl ||
-    item.product_image ||
-    item.productImage;
+  if (img.startsWith("http")) {
+    if (
+      img.includes("res.cloudinary.com") &&
+      img.includes("/upload/")
+    ) {
+      return img.replace(
+        "/upload/",
+        "/upload/f_auto,q_auto,w_500/"
+      );
+    }
 
-  if (!image || typeof image !== "string") return "";
+    return img;
+  }
 
-  if (image.startsWith("http")) return image;
-
-  const cleanPath = image.startsWith("/") ? image : `/${image}`;
-
+  const cleanPath = img.startsWith("/") ? img : `/${img}`;
   return `${API.replace(/\/$/, "")}${cleanPath}`;
 };
 
+const getProductImage = (product) => {
+  const rawImage =
+    product.image_1 ||
+    product.image_2 ||
+    product.image_3 ||
+    product.image ||
+    product.image_url ||
+    product.imageUrl ||
+    product.product_image ||
+    product.productImage;
+
+  return toFullImageUrl(rawImage);
+};
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,28 +67,7 @@ const AllProducts = () => {
     fetchBestProducts();
   }, []);
 
-  //  HELPER: Convert relative path to full URL
-  const toFullImageUrl = (img) => {
-    if (!img) return "";
-  
-    if (img.startsWith("http")) {
-      // Optimize Cloudinary image
-      if (
-        img.includes("res.cloudinary.com") &&
-        img.includes("/upload/")
-      ) {
-        return img.replace(
-          "/upload/",
-          "/upload/f_auto,q_auto,w_500/"
-        );
-      }
-  
-      return img;
-    }
-  
-    const cleanPath = img.startsWith("/") ? img : `/${img}`;
-    return `${API}${cleanPath}`;
-  };
+ 
 
   // ✅ UPDATED HANDLERS
   const handleAddToWishlist = (e, product) => {
