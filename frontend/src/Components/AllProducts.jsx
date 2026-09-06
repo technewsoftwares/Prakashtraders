@@ -6,6 +6,25 @@ import { API_BASE } from "../Config";
 
 const API = API_BASE;
 
+const API = "https://backend-mc2q.onrender.com";
+
+const getProductImage = (item) => {
+  const image =
+    item.image ||
+    item.image_url ||
+    item.imageUrl ||
+    item.product_image ||
+    item.productImage;
+
+  if (!image || typeof image !== "string") return "";
+
+  if (image.startsWith("http")) return image;
+
+  const cleanPath = image.startsWith("/") ? image : `/${image}`;
+
+  return `${API.replace(/\/$/, "")}${cleanPath}`;
+};
+
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
