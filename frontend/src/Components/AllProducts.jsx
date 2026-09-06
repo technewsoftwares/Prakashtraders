@@ -31,22 +31,29 @@ const AllProducts = () => {
       }
     };
     fetchBestProducts();
-  }, [API]);
+  }, []);
 
   //  HELPER: Convert relative path to full URL
   const toFullImageUrl = (img) => {
-    if (!img) {
-      return <div className="w-full h-40 bg-zinc-900" />;
+    if (!img) return "";
+  
+    if (img.startsWith("http")) {
+      // Optimize Cloudinary image
+      if (
+        img.includes("res.cloudinary.com") &&
+        img.includes("/upload/")
+      ) {
+        return img.replace(
+          "/upload/",
+          "/upload/f_auto,q_auto,w_500/"
+        );
+      }
+  
+      return img;
     }
-    if (img.startsWith("http")) return img;
+  
     const cleanPath = img.startsWith("/") ? img : `/${img}`;
     return `${API}${cleanPath}`;
-  };
-
-  //  HELPER: Get the first available image
-  const getProductImage = (product) => {
-    const rawImage = product.image_1 || product.image_2 || product.image_3;
-    return toFullImageUrl(rawImage);
   };
 
   // ✅ UPDATED HANDLERS
@@ -163,11 +170,17 @@ const AllProducts = () => {
 {/* IMAGE */}
 <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
 
-  <img
+   <img
     src={displayImage}
     alt={name}
+    width="220"
+    height="220"
+    loading="lazy"
+    decoding="async"
     className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
-    onError={(e) => (e.target.src = "https://via.placeholder.com/300")}
+    onError={(e) => {
+      e.currentTarget.style.display = "none";
+    }}
   />
 
 </div>
