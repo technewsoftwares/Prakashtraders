@@ -6,40 +6,6 @@ import { API_BASE } from "../Config";
 
 const API = API_BASE;
 
-const toFullImageUrl = (img) => {
-  if (!img || typeof img !== "string") return "";
-
-  if (img.startsWith("http")) {
-    if (
-      img.includes("res.cloudinary.com") &&
-      img.includes("/upload/")
-    ) {
-      return img.replace(
-        "/upload/",
-        "/upload/f_auto,q_auto,w_500/"
-      );
-    }
-
-    return img;
-  }
-
-  const cleanPath = img.startsWith("/") ? img : `/${img}`;
-  return `${API.replace(/\/$/, "")}${cleanPath}`;
-};
-
-const getProductImage = (product) => {
-  const rawImage =
-    product.image_1 ||
-    product.image_2 ||
-    product.image_3 ||
-    product.image ||
-    product.image_url ||
-    product.imageUrl ||
-    product.product_image ||
-    product.productImage;
-
-  return toFullImageUrl(rawImage);
-};
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,9 +31,23 @@ const AllProducts = () => {
       }
     };
     fetchBestProducts();
-  }, []);
+  }, [API]);
 
- 
+  //  HELPER: Convert relative path to full URL
+  const toFullImageUrl = (img) => {
+    if (!img) {
+      return <div className="w-full h-40 bg-zinc-900" />;
+    }
+    if (img.startsWith("http")) return img;
+    const cleanPath = img.startsWith("/") ? img : `/${img}`;
+    return `${API}${cleanPath}`;
+  };
+
+  //  HELPER: Get the first available image
+  const getProductImage = (product) => {
+    const rawImage = product.image_1 || product.image_2 || product.image_3;
+    return toFullImageUrl(rawImage);
+  };
 
   // ✅ UPDATED HANDLERS
   const handleAddToWishlist = (e, product) => {
@@ -183,17 +163,11 @@ const AllProducts = () => {
 {/* IMAGE */}
 <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
 
-   <img
+  <img
     src={displayImage}
     alt={name}
-    width="220"
-    height="220"
-    loading="lazy"
-    decoding="async"
     className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
-    onError={(e) => {
-      e.currentTarget.style.display = "none";
-    }}
+    onError={(e) => (e.target.src = "https://via.placeholder.com/300")}
   />
 
 </div>
@@ -270,3 +244,4 @@ const AllProducts = () => {
 };
 
 export default AllProducts;
+what i have to change hre
