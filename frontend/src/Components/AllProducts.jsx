@@ -160,23 +160,17 @@ const AllProducts = () => {
                 {/* CARD CONTAINER */}
                 <Link to={`/product/${id}`}>
                   <div className="relative w-[165px] sm:w-64 bg-[#000000] border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 hover:bg-black transition-all flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
-                    {/* IMAGE */}
-                    <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
-                    
-                     <img
-                        src={displayImage}
-                        alt={name || "Product image"}
-                        width="400"
-                        height="400"
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    
-                    </div>
+{/* IMAGE */}
+<div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
+
+  <img
+    src={displayImage}
+    alt={name}
+    className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
+    onError={(e) => (e.target.src = "https://via.placeholder.com/300")}
+  />
+
+</div>
 
 
                     {/* DETAILS */}
