@@ -1,78 +1,96 @@
-import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+
 import AllProducts from "../Components/AllProducts";
 import CategorySlider from "../Components/CategorySlider";
 import Personalized from "../Components/Personalized";
 import Slider from "../Components/Slider";
 import BrandSlider from "../Components/BrandPartnersBanner";
 import WeekBest from "../Components/WeekBest";
-import { API_BASE } from "../Config";
 import GoogleReviews from "../Components/GoogleReviews";
+
+import { API_BASE } from "../Config";
+
+const API = API_BASE;
 
 const Home = () => {
   const [personalizedProducts, setPersonalizedProducts] = useState([]);
-  const category = localStorage.getItem("category");
-  const location = useLocation();   
-const API = API_BASE;
+  const [isLoading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  const fetchPersonalized = async () => {
-    try {
-      let url = `${API}/api/products/random/`;
+  useEffect(() => {
+    const controller = new AbortController();
 
-      if (category) {
-        url += `?category=${encodeURIComponent(category)}`;
+    const fetchPersonalizedProducts = async () => {
+      try {
+        setIsLoading(true);
+
+        const category = localStorage.getItem("category");
+
+        const url = new URL(`${API}/api/products/random/`);
+
+        if (category) {
+          url.searchParams.set("category", category);
+        }
+
+        const response = await fetch(url, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch personalized products");
+        }
+
+        const data = await response.json();
+
+        if (!controller.signal.aborted) {
+          setPersonalizedProducts(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Home personalized fetch error:", error);
+          setPersonalizedProducts([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
+    };
 
-      const res = await fetch(url);
+    fetchPersonalizedProducts();
 
-      if (!res.ok) return;
-
-      const data = await res.json();
-      setPersonalizedProducts(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Home personalized fetch error:", error);
-      setPersonalizedProducts([]);
-    }
-  };
-
-  fetchPersonalized();
-}, [category, location.pathname]);
-
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   return (
-    <div>
+    <main>
       {/* HERO SLIDER */}
       <Slider />
 
       {/* CATEGORY */}
       <CategorySlider />
 
-      <div className="w-full	 py-4">
-
-           
-        {/* ✅ PERSONALIZED (DATA FROM HOME) */}
-       <Personalized products={personalizedProducts} />
-        
-
+      <div className="w-full py-4">
+        {/* PERSONALIZED PRODUCTS */}
+        <Personalized
+          products={personalizedProducts}
+          isLoading={isLoading}
+        />
 
         {/* BRAND PARTNERS */}
         <BrandSlider />
-
-
 
         {/* ALL PRODUCTS */}
         <AllProducts />
 
         {/* WEEK BEST */}
-
-        <WeekBest />  
+        <WeekBest />
 
         {/* GOOGLE REVIEWS */}
-        <GoogleReviews />     
-
+        <GoogleReviews />
       </div>
-    </div>
+    </main>
   );
 };
 
