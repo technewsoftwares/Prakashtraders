@@ -27,8 +27,35 @@ const Slider = () => {
 
   const whatsappNumber = "919663418188";
 
+  const slides = [
+    {
+      image: slider1,
+      alt: "Mobile deals",
+      link: "/products/all-products",
+      external: false,
+    },
+    {
+      image: slider2,
+      alt: "Kitchen appliances",
+      link: "/products/kitchen-appliances",
+      external: false,
+    },
+    {
+      image: slider4,
+      alt: "Furniture",
+      link: "/products/furnitures",
+      external: false,
+    },
+    {
+      image: slider5,
+      alt: "Corporate gifting",
+      link: `https://wa.me/${whatsappNumber}?text=Hi, I am interested in your Corporate gifting.`,
+      external: true,
+    },
+  ];
+
   return (
-    <div className="relative overflow-hidden z-1">
+    <div className="relative z-0 w-full overflow-hidden">
       <Carousel
         responsive={responsive}
         showDots={true}
@@ -38,56 +65,39 @@ const Slider = () => {
         swipeable={true}
         draggable={true}
         autoPlaySpeed={3000}
+        removeArrowOnDeviceType={["tablet", "mobile"]}
       >
+        {slides.map((slide, index) => {
+          const slideContent = (
+            <div className="relative aspect-video w-full overflow-hidden">
+              <img
+                src={slide.image}
+                alt={slide.alt}
+                width="1920"
+                height="1080"
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "low"}
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+          );
 
-        {/* SLIDE 1 */}
-        <Link to="/products/all-products">
-          <div className="relative aspect-video overflow-hidden">
-            <img
-              src={slider1}
-              alt="Mobile deals"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-        </Link>
-
-        {/* SLIDE 2 */}
-        <Link to="/products/kitchen-appliances">
-          <div className="relative aspect-video overflow-hidden">
-            <img
-              src={slider2}
-              alt="Kitchen appliances"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-        </Link>
-
-        {/* SLIDE 3 */}
-        <Link to="/products/furnitures">
-          <div className="relative aspect-video overflow-hidden">
-            <img
-              src={slider4}
-              alt="Furniture"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-        </Link>
-
-        {/* WhatsApp */}
-        <a
-          href={`https://wa.me/${whatsappNumber}?text=Hi, I am interested in your Corporate gifting.`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div className="relative aspect-video overflow-hidden">
-            <img
-              src={slider5}
-              alt="Corporate gifting"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-        </a>
-
+          return slide.external ? (
+            <a
+              key={slide.alt}
+              href={slide.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {slideContent}
+            </a>
+          ) : (
+            <Link key={slide.alt} to={slide.link}>
+              {slideContent}
+            </Link>
+          );
+        })}
       </Carousel>
     </div>
   );
