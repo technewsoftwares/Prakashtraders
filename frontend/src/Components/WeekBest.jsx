@@ -32,26 +32,54 @@ const WeekBest = () => {
     fetchRandomProducts();
   }, []);
 
+    useEffect(() => {
+    const controller = new AbortController();
+  
+    const fetchRandomProducts = async () => {
+      try {
+        const res = await fetch(`${API}/api/products/random/`, {
+          signal: controller.signal,
+        });
+  
+        if (!res.ok) {
+          throw new Error("Failed to fetch products");
+        }
+  
+        const result = await res.json();
+        setData(Array.isArray(result) ? result : []);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Error fetching random products:", error);
+          setData([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+  
+    fetchRandomProducts();
+  
+    return () => controller.abort();
+  }, []);
+
   //  HELPER: Convert relative path to full URL
-   const toFullImageUrl = (img) => {
+  const toFullImageUrl = (img) => {
     if (!img || typeof img !== "string") return "";
   
-    // Optimize Cloudinary images
-    if (img.includes("/upload/")) {
-      return img.replace(
-        "/upload/",
-        "/upload/f_auto,q_auto,w_500/"
-      );
-    }
-  
-    // Already a complete URL
     if (img.startsWith("http")) {
+      if (img.includes("res.cloudinary.com") && img.includes("/upload/")) {
+        return img.replace(
+          "/upload/",
+          "/upload/f_auto,q_auto,w_500/"
+        );
+      }
+  
       return img;
     }
   
-    // Relative backend image path
     const cleanPath = img.startsWith("/") ? img : `/${img}`;
-  
     return `${API}${cleanPath}`;
   };
 
@@ -242,7 +270,7 @@ const WeekBest = () => {
                       {/* DESCRIPTION */}
                       {description && (
                         <ul className="flex flex-col gap-1 mt-2">
-                          {description
+                         {String(description)
                             .split("\n")
                             .slice(0, 3)
                             .map((line, index) => (
