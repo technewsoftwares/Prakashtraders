@@ -34,14 +34,16 @@ const AllProducts = () => {
   }, [API]);
 
   //  HELPER: Convert relative path to full URL
-  const toFullImageUrl = (img) => {
-    if (!img) {
-      return <div className="w-full h-40 bg-zinc-900" />;
-    }
-    if (img.startsWith("http")) return img;
-    const cleanPath = img.startsWith("/") ? img : `/${img}`;
-    return `${API}${cleanPath}`;
-  };
+const toFullImageUrl = (img) => {
+  if (!img || typeof img !== "string") {
+    return "https://via.placeholder.com/300";
+  }
+
+  if (img.startsWith("http")) return img;
+
+  const cleanPath = img.startsWith("/") ? img : `/${img}`;
+  return `${API}${cleanPath}`;
+};
 
   //  HELPER: Get the first available image
   const getProductImage = (product) => {
@@ -116,8 +118,7 @@ const AllProducts = () => {
         </div>
 
         {/* HORIZONTAL SCROLL CONTAINER */}
-<div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1">
-          {data.map((product) => {
+<div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 overscroll-x-contain">          {data.map((product) => {
             const {
               id,
               name,
@@ -161,15 +162,21 @@ const AllProducts = () => {
                 <Link to={`/product/${id}`}>
                   <div className="relative w-[165px] sm:w-64 bg-[#000000] border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 hover:bg-black transition-all flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
 {/* IMAGE */}
+{/* IMAGE */}
 <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
-
   <img
     src={displayImage}
-    alt={name}
+    alt={name || "Product image"}
+    width="400"
+    height="400"
+    loading="lazy"
+    decoding="async"
     className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
-    onError={(e) => (e.target.src = "https://via.placeholder.com/300")}
+    onError={(e) => {
+      e.currentTarget.onerror = null;
+      e.currentTarget.src = "https://via.placeholder.com/300";
+    }}
   />
-
 </div>
 
 
