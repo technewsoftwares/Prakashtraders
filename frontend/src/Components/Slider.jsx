@@ -42,29 +42,35 @@ const Slider = () => {
 
         {/* SLIDE 1 */}
         <Link to="/products/all-products">
-          <img
-            src={slider1}
-            alt="slider0"
-            className="w-full h-auto object-cover block"
-          />
+          <div className="relative aspect-video overflow-hidden">
+            <img
+              src={slider1}
+              alt="Mobile deals"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
         </Link>
 
         {/* SLIDE 2 */}
         <Link to="/products/kitchen-appliances">
-          <img
-            src={slider2}
-            alt="slider1"
-            className="w-full h-auto object-cover block"
-          />
+          <div className="relative aspect-video overflow-hidden">
+            <img
+              src={slider2}
+              alt="Kitchen appliances"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
         </Link>
 
         {/* SLIDE 3 */}
         <Link to="/products/furnitures">
-          <img
-            src={slider4}
-            alt="slider3"
-            className="w-full h-auto object-cover block"
-          />
+          <div className="relative aspect-video overflow-hidden">
+            <img
+              src={slider4}
+              alt="Furniture"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
         </Link>
 
         {/* WhatsApp */}
@@ -73,11 +79,13 @@ const Slider = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img
-            src={slider5}
-            alt="slider4"
-            className="w-full h-auto object-cover block"
-          />
+          <div className="relative aspect-video overflow-hidden">
+            <img
+              src={slider5}
+              alt="Corporate gifting"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
         </a>
 
       </Carousel>
