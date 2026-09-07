@@ -1,73 +1,84 @@
+const brands = [
+  "/brands/samsung.png",
+  "/brands/ifb.png",
+  "/brands/lg.png",
+  "/brands/preethi.png",
+  "/brands/butterfly.png",
+  "/brands/sony.png",
+  "/brands/pigeon.png",
+  "/brands/prestige.png",
+  "/brands/bosch.png",
+  "/brands/v-guard.png",
+  "/brands/philips.png",
+  "/brands/usha.png",
+  "/brands/zebronics.png",
+  "/brands/daikin.png",
+  "/brands/haier.png",
+  "/brands/vivo.png",
+];
+
 const BrandPartnersBanner = () => {
-  const brands = [
-    "/brands/samsung.png",
-    "/brands/ifb.png",
-    "/brands/lg.png",
-    "/brands/preethi.png",
-    "/brands/butterfly.png",
-    "/brands/sony.png",
-    "/brands/pigeon.png",
-    "/brands/prestige.png",
-    "/brands/bosch.png",
-    "/brands/v-guard.png",
-    "/brands/philips.png",
-    "/brands/usha.png",
-    "/brands/zebronics.png",
-    "/brands/daikin.png",
-    "/brands/haier.png",
-    "/brands/vivo.png",
-  ];
+  const repeatedBrands = [...brands, ...brands];
 
   return (
-    <div className="w-full bg-neutral-900 py-1 px-3 md:py-2 md:px-4 rounded-lg">
-
-      {/*  Animation CSS */}
-      <style>
-        {`
-          @keyframes marquee {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
+    <section
+      className="w-full bg-neutral-900 py-1 px-3 md:py-2 md:px-4 rounded-lg"
+      aria-label="Brand partners"
+    >
+      <style>{`
+        @keyframes brand-marquee {
+          from {
+            transform: translateX(0);
           }
 
-          .marquee-track {
-            display: flex;
-            width: max-content;
-            animation: marquee 25s linear infinite;
+          to {
+            transform: translateX(-50%);
           }
-        `}
-      </style>
+        }
 
-      {/*  Banner Wrapper */}
-      <div className="relative bg-white border-4 border-white-200 rounded-xl overflow-hidden flex items-center h-12 md:h-20">
+        .brand-marquee-track {
+          display: flex;
+          width: max-content;
+          animation: brand-marquee 25s linear infinite;
+          will-change: transform;
+        }
 
-        {/* Fixed Text (OUTSIDE animation) */}
-        <div className="bg-black text-white px-3 py-1 md:px-6 md:py-6 font-semibold whitespace-nowrap z-10 h-full flex items-center justify-center rounded-l-xl text-sm md:text-base">
+        .brand-marquee-track:hover {
+          animation-play-state: paused;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .brand-marquee-track {
+            animation: none;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
+
+      <div className="relative flex items-center h-12 md:h-20 overflow-hidden rounded-xl border-4 border-white bg-white">
+        <div className="z-10 flex h-full items-center justify-center rounded-l-xl bg-black px-3 py-1 text-sm font-semibold text-white whitespace-nowrap md:px-6 md:py-6 md:text-base">
           BRAND PARTNERS
         </div>
 
-        {/* ➡ Marquee Area */}
-        <div className="overflow-hidden flex-1">
-          <div className="marquee-track">
-
-            {/*  DUPLICATE ONCE – KEY PART */}
-            {[...brands, ...brands].map((logo, index) => (
+        <div className="flex-1 overflow-hidden">
+          <div className="brand-marquee-track">
+            {repeatedBrands.map((logo, index) => (
               <img
-                key={index}
+                key={`${logo}-${index}`}
                 src={logo}
-                alt="Brand Partner"
-                className="h-8 md:h-12 w-auto mx-4 md:mx-10 object-contain flex-shrink-0"
+                alt=""
+                width="120"
+                height="48"
+                loading={index < brands.length ? "eager" : "lazy"}
+                decoding="async"
+                aria-hidden="true"
+                className="mx-4 h-8 w-auto flex-shrink-0 object-contain md:mx-10 md:h-12"
               />
             ))}
-
           </div>
         </div>
-
       </div>
-    </div>
+    </section>
   );
 };
 
