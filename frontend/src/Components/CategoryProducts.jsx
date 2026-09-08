@@ -38,14 +38,35 @@ const CategoryProducts = () => {
   const [sortOrder, setSortOrder] = useState("");
 
   // ✅ 1. HELPER FUNCTIONS (Fixed for Production)
-  const toFullImageUrl = (img) => {
-    if (!img) return "https://via.placeholder.com/150";
-    if (img.startsWith("http")) return img;
-    const cleanPath = img.startsWith("/") ? img : `/${img}`;
-    // ❌ OLD: return `http://localhost:8000${cleanPath}`;
-    // ✅ NEW:
-    return `${API.replace(/\/$/, "")}${cleanPath}`;
-  };
+  const toFullImageUrl = (img, width = 500) => {
+  if (!img) return "https://via.placeholder.com/150";
+
+  // Cloudinary image
+  if (img.includes("/upload/")) {
+    const [beforeUpload, afterUpload] = img.split("/upload/");
+
+    // Avoid adding transformations twice
+    if (
+      afterUpload.startsWith("f_auto") ||
+      afterUpload.startsWith("q_auto") ||
+      afterUpload.startsWith("w_")
+    ) {
+      return img;
+    }
+
+    return `${beforeUpload}/upload/f_auto,q_auto,w_${width}/${afterUpload}`;
+  }
+
+  // Other external image
+  if (img.startsWith("http")) {
+    return img;
+  }
+
+  // Django/local image
+  const cleanPath = img.startsWith("/") ? img : `/${img}`;
+
+  return `${API.replace(/\/$/, "")}${cleanPath}`;
+};
 
   const getFirstValidImage = (product) => {
     return [product.image_1, product.image_2, product.image_3].find(Boolean);
