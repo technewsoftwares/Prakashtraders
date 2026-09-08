@@ -23,20 +23,13 @@ const Home = () => {
       try {
         setIsLoading(true);
 
-        const category = localStorage.getItem("category");
-
-// No category means there is nothing to personalize.
-// WeekBest.jsx already handles its own random products request.
-if (!category) {
-  if (!controller.signal.aborted) {
-    setPersonalizedProducts([]);
-    setIsLoading(false);
-  }
-  return;
-}
+       const category = localStorage.getItem("category");
 
 const url = new URL(`${API}/api/products/random/`);
-url.searchParams.set("category", category);
+
+if (category) {
+  url.searchParams.set("category", category);
+}
 
 const response = await fetch(url, {
   signal: controller.signal,
