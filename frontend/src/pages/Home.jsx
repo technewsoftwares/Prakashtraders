@@ -25,15 +25,22 @@ const Home = () => {
 
         const category = localStorage.getItem("category");
 
-        const url = new URL(`${API}/api/products/random/`);
+// No category means there is nothing to personalize.
+// WeekBest.jsx already handles its own random products request.
+if (!category) {
+  if (!controller.signal.aborted) {
+    setPersonalizedProducts([]);
+    setIsLoading(false);
+  }
+  return;
+}
 
-        if (category) {
-          url.searchParams.set("category", category);
-        }
+const url = new URL(`${API}/api/products/random/`);
+url.searchParams.set("category", category);
 
-        const response = await fetch(url, {
-          signal: controller.signal,
-        });
+const response = await fetch(url, {
+  signal: controller.signal,
+});
 
         if (!response.ok) {
           throw new Error("Failed to fetch personalized products");
