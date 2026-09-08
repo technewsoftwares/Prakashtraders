@@ -106,25 +106,49 @@ const Navbar = () => {
     setShowProfileMenu(false);
   };
 
-  const fetchData = async () => {
-    try {
-      const res = await axios.get(`${API}/api/products?q=${query}`);
-      setData(res.data.product);
-    } catch (err) {
-      console.log(err);
+  const fetchData = async (searchQuery) => {
+  try {
+    const trimmedQuery = searchQuery.trim();
+
+    // Don't call the API for an empty search
+    if (!trimmedQuery) {
+      setData(null);
+      return;
     }
-  };
+
+    const res = await axios.get(
+      `${API}/api/products?q=${encodeURIComponent(trimmedQuery)}`
+    );
+
+    setData(res.data.product || []);
+  } catch (err) {
+    console.error("Search API error:", err);
+    setData([]);
+  }
+};
 
   useEffect(() => {
-    const delay = setTimeout(fetchData, 500);
-    return () => clearTimeout(delay);
-  }, [query]);
+  const trimmedQuery = query.trim();
+
+  // Don't make an API request when search is empty
+  if (!trimmedQuery) {
+    setData(null);
+    return;
+  }
+
+  const delay = setTimeout(() => {
+    fetchData(trimmedQuery);
+  }, 500);
+
+  return () => clearTimeout(delay);
+}, [query]);
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-    setWindow(value !== "");
-  };
+  const value = e.target.value;
+
+  setQuery(value);
+  setWindow(value.trim() !== "");
+};
 
   return (
     <>
