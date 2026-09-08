@@ -3,28 +3,10 @@ import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
 import { API_BASE } from "../Config";
+import { getProductImage } from "../utils/imageUrl";
 
 const API = API_BASE;
-const FALLBACK_IMAGE = "https://via.placeholder.com/300";
 
-const toFullImageUrl = (img) => {
-  if (!img || typeof img !== "string") {
-    return FALLBACK_IMAGE;
-  }
-
-  if (img.startsWith("http")) {
-    return img;
-  }
-
-  const cleanPath = img.startsWith("/") ? img : `/${img}`;
-  return `${API}${cleanPath}`;
-};
-
-const getProductImage = (product) => {
-  return toFullImageUrl(
-    product.image_1 || product.image_2 || product.image_3
-  );
-};
 
 const ProductCard = memo(
   ({ product, onAddToWishlist, onAddToCart }) => {
@@ -38,7 +20,7 @@ const ProductCard = memo(
       description,
     } = product;
 
-    const displayImage = getProductImage(product);
+    const displayImage = getProductImage(product, 500);
 
     return (
       <div className="relative group shrink-0 snap-start">
@@ -96,14 +78,14 @@ const ProductCard = memo(
               <img
                 src={displayImage}
                 alt={name || "Product image"}
-                width={400}
-                height={400}
+                width={500}
+                height={500}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = FALLBACK_IMAGE;
+                  e.currentTarget.src = "https://via.placeholder.com/300";
                 }}
               />
             </div>
