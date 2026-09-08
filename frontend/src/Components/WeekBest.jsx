@@ -12,26 +12,6 @@ const WeekBest = () => {
 
   const { addToCart, addToWishlist } = useContext(ShopContext);
 
-
-  useEffect(() => {
-    const fetchRandomProducts = async () => {
-      try {
-        const res = await fetch(`${API}/api/products/random/`);
-        if (!res.ok) throw new Error("Failed to fetch products");
-
-        const result = await res.json();
-        setData(result);
-      } catch (error) {
-        console.error("Error fetching random products:", error);
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRandomProducts();
-  }, []);
-
     useEffect(() => {
     const controller = new AbortController();
   
