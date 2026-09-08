@@ -6,13 +6,34 @@ import { API_BASE } from "../Config";
 
 const API = API_BASE;
 // --- HELPER FUNCTIONS ---
-const toFullImageUrl = (img) => {
+const toFullImageUrl = (img, width = 500) => {
+  if (!img) return "https://via.placeholder.com/150";
 
+  // Cloudinary image
+  if (img.includes("/upload/")) {
+    const [beforeUpload, afterUpload] = img.split("/upload/");
 
-  if (!img) return "https://prakashtraders.com/150";
-  if (img.startsWith("http")) return img;
+    // Prevent duplicate transformations
+    if (
+      afterUpload.startsWith("f_auto") ||
+      afterUpload.startsWith("q_auto") ||
+      afterUpload.startsWith("w_")
+    ) {
+      return img;
+    }
+
+    return `${beforeUpload}/upload/f_auto,q_auto,w_${width}/${afterUpload}`;
+  }
+
+  // Other external image
+  if (img.startsWith("http")) {
+    return img;
+  }
+
+  // Django/local image
   const cleanPath = img.startsWith("/") ? img : `/${img}`;
-  return `${API}${cleanPath}`;
+
+  return `${API.replace(/\/$/, "")}${cleanPath}`;
 };
 
 const getFirstValidImage = (product) => {
@@ -108,11 +129,21 @@ const ProductCard = ({ product, addToCart, addToWishlist }) => {
 
           {/* Main Image */}
           <img
-            src={toFullImageUrl(productImages[activeIdx] || productImages[0])}
-            alt={product.name}
-            className="h-28 md:h-48 w-full object-contain transition-all duration-500"
-            onError={(e) => { e.currentTarget.src = "https://prakashtraders.com/150"; }}
-          />
+  src={toFullImageUrl(
+    productImages[activeIdx] || productImages[0],
+    500
+  )}
+  alt={product.name}
+  width={500}
+  height={500}
+  loading="lazy"
+  decoding="async"
+  className="h-28 md:h-48 w-full object-contain transition-all duration-500"
+  onError={(e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = "https://via.placeholder.com/150";
+  }}
+/>
           
           {/* Slider Dots */}
           {productImages.length > 1 && (
