@@ -6,6 +6,59 @@ import { API_BASE } from "../Config";
 
 const API = API_BASE;
 
+// Product card loading skeleton
+const ProductSkeleton = () => {
+  return (
+    <div className="relative shrink-0">
+      <div className="relative w-[165px] sm:w-64 bg-[#000000] border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
+
+        {/* Wishlist + Cart skeleton buttons */}
+        <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800 animate-pulse" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800 animate-pulse" />
+        </div>
+
+        {/* IMAGE SKELETON */}
+        <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-zinc-900 rounded-lg animate-pulse">
+          <div className="w-24 h-24 sm:w-40 sm:h-40 bg-zinc-800 rounded-lg" />
+        </div>
+
+        {/* DETAILS SKELETON */}
+        <div className="flex flex-col gap-2">
+
+          {/* Product name */}
+          <div className="h-4 bg-zinc-800 rounded w-4/5 animate-pulse" />
+          <div className="h-4 bg-zinc-800 rounded w-3/5 animate-pulse" />
+
+          {/* Price */}
+          <div className="flex items-center gap-2 mt-1">
+            <div className="h-4 bg-zinc-800 rounded w-14 animate-pulse" />
+            <div className="h-5 bg-zinc-700 rounded w-20 animate-pulse" />
+          </div>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-zinc-800 animate-pulse"
+              />
+            ))}
+          </div>
+
+          {/* Description */}
+          <div className="flex flex-col gap-2 mt-1">
+            <div className="h-3 bg-zinc-800 rounded w-full animate-pulse" />
+            <div className="h-3 bg-zinc-800 rounded w-4/5 animate-pulse" />
+            <div className="h-3 bg-zinc-800 rounded w-3/5 animate-pulse" />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const WeekBest = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,10 +160,25 @@ const WeekBest = () => {
     }
   };
 
-  if (loading){
-    return <div className="h-40 bg-zinc-900 animate-pulse" />;
+  if (loading) {
+    return (
+      <div className="w-full mx-auto mt-2 mb-10 px-4">
+  
+        {/* HEADER SKELETON */}
+        <div className="flex items-center justify-center mb-3">
+          <div className="h-7 w-64 bg-zinc-800 rounded animate-pulse" />
+        </div>
+  
+        {/* PRODUCT SKELETONS */}
+        <div className="flex gap-3 sm:gap-6 overflow-hidden pb-4">
+          {[...Array(5)].map((_, index) => (
+            <ProductSkeleton key={index} />
+          ))}
+        </div>
+  
+      </div>
+    );
   }
-
   if (!Array.isArray(data) || data.length === 0) {
     return <div className="h-40 bg-zinc-900" />;
   }
