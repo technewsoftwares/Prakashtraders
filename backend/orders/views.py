@@ -14,17 +14,16 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 # CREATE ORDER
 
 import traceback
 
-@csrf_exempt
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def create_order(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=400)
-
     try:
         data = json.loads(request.body)
         items = data.get("items", [])
