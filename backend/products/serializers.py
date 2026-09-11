@@ -26,4 +26,6 @@ class ProductListSerializer(serializers.ModelSerializer):
             "image_1",
             "image_2",
             "image_3",
+            "image_4",
+            "image_5",
         ]
