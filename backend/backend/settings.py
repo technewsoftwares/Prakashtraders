@@ -72,13 +72,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'u907793469_backend_db'),
-        'USER': os.getenv('DB_USER', 'u907793469_root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'Prakashtraders@1984'),
-        'HOST': os.getenv('DB_HOST', 'srv1982.hstgr.io'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '3306'),
+        'CONN_MAX_AGE': 600,
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'connect_timeout': 10,
         },
     }
 }
