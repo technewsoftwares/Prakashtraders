@@ -90,11 +90,17 @@ def create_order(request):
         <h3>Total : ₹{amount}</h3>
         """
         
-        send_brevo_email(
-            to_email="kabilandina11@gmail.com",   # Your admin email
-            subject="🛒 New Order Received",
-            message=admin_message
-        )
+        try:
+             send_brevo_email(
+                 to_email="kabilandina11@gmail.com",
+                 subject="🛒 New Order Received",
+                 message=admin_message
+             )
+              print("ADMIN EMAIL SENT SUCCESSFULLY")
+
+         except Exception as email_error:
+              print("⚠️ ADMIN EMAIL FAILED:", email_error)
+              traceback.print_exc()
                 
 
         response = requests.post(
