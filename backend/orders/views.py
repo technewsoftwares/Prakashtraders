@@ -91,17 +91,16 @@ def create_order(request):
         """
         
         try:
-             send_brevo_email(
-                 to_email="kabilandina11@gmail.com",
-                 subject="🛒 New Order Received",
-                 message=admin_message
-             )
-              print("ADMIN EMAIL SENT SUCCESSFULLY")
+            send_brevo_email(
+                to_email="kabilandina11@gmail.com",
+                subject="🛒 New Order Received",
+                message=admin_message
+            )
+            print("ADMIN EMAIL SENT SUCCESSFULLY")
 
-         except Exception as email_error:
-              print("⚠️ ADMIN EMAIL FAILED:", email_error)
-              traceback.print_exc()
-                
+        except Exception as email_error:
+            print("⚠️ ADMIN EMAIL FAILED:", email_error)
+            traceback.print_exc()       
 
         response = requests.post(
             "https://api.cashfree.com/pg/orders",
