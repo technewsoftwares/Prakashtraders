@@ -40,11 +40,20 @@ class Product(models.Model):
     image_5 = models.ImageField(upload_to="products/", blank=True, null=True)
 
     class Meta:
-        indexes = [
-            models.Index(fields=["category", "is_active"]),
-            models.Index(fields=["brand", "is_active"]),
-            models.Index(fields=["is_best_product", "is_active"]),
-        ]
+    indexes = [
+        models.Index(
+            fields=["category", "is_active"],
+            name="products_cat_active_idx",
+        ),
+        models.Index(
+            fields=["brand", "is_active"],
+            name="products_brand_active_idx",
+        ),
+        models.Index(
+            fields=["is_best_product", "is_active"],
+            name="products_best_active_idx",
+        ),
+    ]
 
     def __str__(self):
         return self.name
