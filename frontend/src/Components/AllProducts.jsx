@@ -60,6 +60,7 @@ const ProductSkeleton = () => {
   );
 };
 
+// Product card
 const ProductCard = memo(
   ({ product, onAddToWishlist, onAddToCart }) => {
     const {
@@ -76,9 +77,11 @@ const ProductCard = memo(
 
     return (
       <div className="relative group shrink-0 snap-start">
+
+        {/* Action buttons */}
         <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
 
-          {/* Wishlist */}
+          {/* Wishlist button */}
           <button
             type="button"
             onClick={(e) => onAddToWishlist(e, product)}
@@ -102,7 +105,7 @@ const ProductCard = memo(
             </svg>
           </button>
 
-          {/* Cart */}
+          {/* Cart button */}
           <button
             type="button"
             onClick={(e) => onAddToCart(e, product)}
@@ -127,10 +130,11 @@ const ProductCard = memo(
           </button>
         </div>
 
+        {/* Product link */}
         <Link to={`/product/${id}`}>
           <div className="relative w-[165px] sm:w-64 bg-black border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 hover:bg-black transition-all flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
 
-            {/* Image */}
+            {/* Product image */}
             <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
               <img
                 src={displayImage}
@@ -147,7 +151,7 @@ const ProductCard = memo(
               />
             </div>
 
-            {/* Details */}
+            {/* Product details */}
             <div className="flex flex-col gap-1 sm:gap-2">
 
               {/* Product name */}
@@ -200,7 +204,7 @@ const ProductCard = memo(
               {/* Description */}
               {description && (
                 <ul className="flex flex-col gap-1 mt-2">
-                  {description
+                  {String(description)
                     .split("\n")
                     .slice(0, 3)
                     .map((line, index) => (
@@ -208,12 +212,13 @@ const ProductCard = memo(
                         key={index}
                         className="text-[11px] text-zinc-400 flex items-start gap-2"
                       >
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1" />
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1 shrink-0" />
                         {line}
                       </li>
                     ))}
                 </ul>
               )}
+
             </div>
           </div>
         </Link>
@@ -224,12 +229,14 @@ const ProductCard = memo(
 
 ProductCard.displayName = "ProductCard";
 
+// All products component
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { addToCart, addToWishlist } = useContext(ShopContext);
 
+  // Fetch best products
   useEffect(() => {
     const controller = new AbortController();
 
@@ -267,7 +274,7 @@ const AllProducts = () => {
     };
   }, []);
 
-  // Add to wishlist
+  // Add product to wishlist
   const handleAddToWishlist = (event, product) => {
     event.preventDefault();
     event.stopPropagation();
@@ -284,7 +291,7 @@ const AllProducts = () => {
     );
   };
 
-  // Add to cart
+  // Add product to cart
   const handleAddToCart = (event, product) => {
     event.preventDefault();
     event.stopPropagation();
@@ -328,6 +335,7 @@ const AllProducts = () => {
     return <div className="h-10" aria-hidden="true" />;
   }
 
+  // Products
   return (
     <section
       className="w-full mx-auto mt-4 mb-10 px-4"
