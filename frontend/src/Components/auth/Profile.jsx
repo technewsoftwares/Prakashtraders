@@ -1,11 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { API_BASE } from "../../Config";
+import axiosInstance from "../../axiosInstance";
 
-const API = API_BASE;
 const Profile = () => {
   // ✅ FIX 1: Changed "admin_token" to "access_token" to match your login logic
-  const token = localStorage.getItem("access_token");
 
   const [form, setForm] = useState({
     title: "",
@@ -20,20 +17,11 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ FIX 2: If token is missing, stop loading immediately so page doesn't freeze
-    if (!token) {
-      setLoading(false); 
-      return;
-    }
+  const fetchProfile = async () => {
+    try {
+      const res = await axiosInstance.get("/api/auth/profile/");
 
-    axios
-      .get(`${API}/api/auth/profile/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setForm((prev) => ({
+      setForm({
         title: res.data.title || "",
         first_name: res.data.first_name || "",
         last_name: res.data.last_name || "",
@@ -41,18 +29,19 @@ const Profile = () => {
         gender: res.data.gender || "",
         mobile: res.data.mobile || "",
         dob: res.data.dob || "",
-       }));
-        // setLoading(false) is handled in .finally() below
-      })
-      .catch((err) => {
-        console.error("Error fetching profile:", err.response?.data);
-        // setLoading(false) is handled in .finally() below
-      })
-      .finally(() => {
-        // ✅ FIX 3: .finally() ensures loading stops whether the API succeeds or fails
-        setLoading(false);
       });
-  }, [token]);
+    } catch (err) {
+      console.error(
+        "Error fetching profile:",
+        err.response?.data || err
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProfile();
+}, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,35 +49,36 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-    if (!token) {
-      alert("Please login again");
-      return;
-    }
-  const payload = {
-    title: form.title,
-    first_name: form.first_name,
-    last_name: form.last_name,
-    email: form.email,
-    email_id: form.email, // backend compatibility
-    gender: form.gender,
-    mobile: form.mobile,
-    dob: form.dob,
-  };     
+  try {
+    const payload = {
+      title: form.title,
+      first_name: form.first_name,
+      last_name: form.last_name,
+      email: form.email,
+      email_id: form.email,
+      gender: form.gender,
+      mobile: form.mobile,
+      dob: form.dob,
+    };
 
+    await axiosInstance.post(
+      "/api/auth/profile/",
+      payload
+    );
 
-    try {
-      await axios.post(`${API}/api/auth/profile/`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      alert("Profile saved successfully");
-    } catch (err) {
-      console.error("SAVE ERROR:", err.response?.data);
-      alert(err.response?.data?.detail || "Profile update failed");
-    }
-  };
+    alert("Profile saved successfully");
+  } catch (err) {
+    console.error(
+      "SAVE ERROR:",
+      err.response?.data || err
+    );
+
+    alert(
+      err.response?.data?.detail ||
+      "Profile update failed"
+    );
+  }
+};
 
   if (loading) {
     return (
