@@ -3,77 +3,37 @@ import { API_BASE } from "./Config";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 let refreshPromise = null;
 
-// =====================================================
-// CLEAR AUTH
-// =====================================================
-
-const clearAuthAndRedirect = () => {
-  console.log("🔴 Clearing authentication");
-
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("role");
-
-  if (
-    window.location.pathname !== "/admin-login" &&
-    window.location.pathname !== "/login"
-  ) {
-    window.location.replace("/admin-login");
-  }
-};
-
-// =====================================================
+// ==========================================
 // REFRESH ACCESS TOKEN
-// =====================================================
+// ==========================================
 
 const refreshAccessToken = async () => {
-  // Prevent multiple refresh requests
   if (refreshPromise) {
-    console.log("⏳ Refresh already running...");
     return refreshPromise;
   }
 
   const refreshToken = localStorage.getItem("refresh_token");
-
-  console.log(
-    "🔑 Refresh token exists:",
-    !!refreshToken
-  );
 
   if (!refreshToken) {
     throw new Error("No refresh token available");
   }
 
   refreshPromise = axios
-    .post(
-      `${API_BASE}/api/auth/token/refresh/`,
-      {
-        refresh: refreshToken,
-      },
-      {
-        timeout: 15000,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    .post(`${API_BASE}/api/auth/token/refresh/`, {
+      refresh: refreshToken,
+    })
     .then((response) => {
-      console.log(
-        "✅ Refresh response:",
-        response.data
-      );
-
       const newAccessToken = response.data?.access;
 
       if (!newAccessToken) {
-        throw new Error(
-          "Refresh endpoint did not return access token"
-        );
+        throw new Error("No access token returned");
       }
 
       // Save new access token
@@ -82,13 +42,7 @@ const refreshAccessToken = async () => {
         newAccessToken
       );
 
-      // Keep adminToken synchronized
-      localStorage.setItem(
-        "adminToken",
-        newAccessToken
-      );
-
-      // If backend rotates refresh token
+      // If refresh rotation is enabled later
       if (response.data?.refresh) {
         localStorage.setItem(
           "refresh_token",
@@ -96,17 +50,7 @@ const refreshAccessToken = async () => {
         );
       }
 
-      console.log("🟢 New access token saved");
-
       return newAccessToken;
-    })
-    .catch((error) => {
-      console.error(
-        "❌ Refresh request failed:",
-        error?.response?.data || error.message
-      );
-
-      throw error;
     })
     .finally(() => {
       refreshPromise = null;
@@ -115,9 +59,9 @@ const refreshAccessToken = async () => {
   return refreshPromise;
 };
 
-// =====================================================
+// ==========================================
 // REQUEST INTERCEPTOR
-// =====================================================
+// ==========================================
 
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -133,30 +77,19 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// =====================================================
+// ==========================================
 // RESPONSE INTERCEPTOR
-// =====================================================
+// ==========================================
 
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
 
-    console.log(
-      "⚠️ Axios error:",
-      error.response?.status,
-      error.response?.data
-    );
-
-    // No response
     if (!error.response || !originalRequest) {
       return Promise.reject(error);
     }
@@ -166,59 +99,46 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't retry same request twice
+    // Never retry the same request twice
     if (originalRequest._retry) {
-      console.error(
-        "❌ Request already retried"
-      );
-
       return Promise.reject(error);
     }
 
-    // Never intercept refresh request
+    // Never intercept refresh request itself
     if (
       originalRequest.url?.includes(
         "/api/auth/token/refresh/"
       )
     ) {
-      clearAuthAndRedirect();
-
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
 
     try {
-      console.log(
-        "🔄 Access token expired. Refreshing..."
-      );
-
       const newAccessToken =
         await refreshAccessToken();
 
-      // Update request header
       originalRequest.headers =
         originalRequest.headers || {};
 
       originalRequest.headers.Authorization =
         `Bearer ${newAccessToken}`;
 
-      console.log(
-        "🔁 Retrying:",
-        originalRequest.url
-      );
-
-      // Retry original request
       return axiosInstance(originalRequest);
 
     } catch (refreshError) {
       console.error(
-        "❌ Unable to refresh token:",
+        "Token refresh failed:",
         refreshError?.response?.data ||
           refreshError.message
       );
 
-      clearAuthAndRedirect();
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("role");
+
+      window.location.replace("/login");
 
       return Promise.reject(refreshError);
     }
