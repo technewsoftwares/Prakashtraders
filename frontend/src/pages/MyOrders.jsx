@@ -1,42 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Package, Calendar, IndianRupee, ShoppingBag } from "lucide-react";
-import { API_BASE } from "../Config";
-
-const API = API_BASE;
+import axiosInstance from "../axiosInstance";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("access_token");
+
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
   const fetchOrders = async () => {
-    try {
-      const res = await fetch(`${API}/api/my-orders/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  try {
+    const res = await axiosInstance.get("/api/my-orders/");
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch orders");
-      }
-
-      const data = await res.json();
-
-      setOrders(data);
-    } catch (err) {
-      console.error(err);
-      setError("Unable to load your orders.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setOrders(res.data);
+  } catch (err) {
+    console.error("MY ORDERS ERROR:", err);
+    setError("Unable to load your orders.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-IN", {
