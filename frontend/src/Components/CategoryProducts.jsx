@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { ShopContext } from "../Context/Context";
 import toast from "react-hot-toast";
 import { API_BASE } from "../Config";
+
 const CategoryProducts = () => {
   const { category } = useParams();
   const navigate = useNavigate();
@@ -11,11 +12,10 @@ const CategoryProducts = () => {
     return <div className="h-screen bg-[#0a0a0a]"></div>;
   }
 
-  // 🔹 CONFIG: API URL
+  // API URL
   const API = API_BASE;
 
-  // ✅ DECODE CATEGORY (slug-case -> Title Case)
-  // Example: "washing-machines" -> "Washing Machines"
+  // Decode category
   const decodedCategory = category
     ? category
         .split("-")
@@ -27,46 +27,46 @@ const CategoryProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 USE CONTEXT
+  // Use context
   const { addToCart, addToWishlist } = useContext(ShopContext);
 
-  // 🔹 FILTER STATES
+  // Filter states
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [rating, setRating] = useState("");
   const [availability, setAvailability] = useState("");
   const [sortOrder, setSortOrder] = useState("");
 
-  // ✅ 1. HELPER FUNCTIONS (Fixed for Production)
+  // Helper functions
   const toFullImageUrl = (img, width = 500) => {
-  if (!img) return "https://via.placeholder.com/150";
+    if (!img) return "https://via.placeholder.com/150";
 
-  // Cloudinary image
-  if (img.includes("/upload/")) {
-    const [beforeUpload, afterUpload] = img.split("/upload/");
+    // Cloudinary image
+    if (img.includes("/upload/")) {
+      const [beforeUpload, afterUpload] = img.split("/upload/");
 
-    // Avoid adding transformations twice
-    if (
-      afterUpload.startsWith("f_auto") ||
-      afterUpload.startsWith("q_auto") ||
-      afterUpload.startsWith("w_")
-    ) {
+      // Avoid adding transformations twice
+      if (
+        afterUpload.startsWith("f_auto") ||
+        afterUpload.startsWith("q_auto") ||
+        afterUpload.startsWith("w_")
+      ) {
+        return img;
+      }
+
+      return `${beforeUpload}/upload/f_auto,q_auto,w_${width}/${afterUpload}`;
+    }
+
+    // Other external image
+    if (img.startsWith("http")) {
       return img;
     }
 
-    return `${beforeUpload}/upload/f_auto,q_auto,w_${width}/${afterUpload}`;
-  }
+    // Django/local image
+    const cleanPath = img.startsWith("/") ? img : `/${img}`;
 
-  // Other external image
-  if (img.startsWith("http")) {
-    return img;
-  }
-
-  // Django/local image
-  const cleanPath = img.startsWith("/") ? img : `/${img}`;
-
-  return `${API.replace(/\/$/, "")}${cleanPath}`;
-};
+    return `${API.replace(/\/$/, "")}${cleanPath}`;
+  };
 
   const getFirstValidImage = (product) => {
     return [product.image_1, product.image_2, product.image_3].find(Boolean);
@@ -74,37 +74,34 @@ const CategoryProducts = () => {
 
   useEffect(() => {
     if (!decodedCategory) return;
-  
+
     const controller = new AbortController();
-  
+
     const fetchCategoryProducts = async () => {
       try {
         setLoading(true);
-  
+
         const res = await fetch(
           `${API}/api/products/?category=${encodeURIComponent(decodedCategory)}`,
           {
             signal: controller.signal,
           }
         );
-  
+
         if (!res.ok) {
           throw new Error(`Request failed: ${res.status}`);
         }
-  
+
         const result = await res.json();
-  
+
         const products = Array.isArray(result)
           ? result
           : result.results || result.products || [];
-  
+
         setData(products);
       } catch (error) {
         if (error.name !== "AbortError") {
-          console.error(
-            "Error fetching category products:",
-            error
-          );
+          console.error("Error fetching category products:", error);
           setData([]);
         }
       } finally {
@@ -113,13 +110,13 @@ const CategoryProducts = () => {
         }
       }
     };
-  
+
     fetchCategoryProducts();
-  
+
     return () => controller.abort();
   }, [decodedCategory]);
 
-  // 🔹 FILTER + SORT LOGIC
+  // Filter + sort logic
   const filteredData = data
     .filter((p) => !minPrice || p.price >= Number(minPrice))
     .filter((p) => !maxPrice || p.price <= Number(maxPrice))
@@ -135,12 +132,14 @@ const CategoryProducts = () => {
       // Ensure prices are numbers for sorting
       const priceA = Number(a.price) || 0;
       const priceB = Number(b.price) || 0;
+
       if (sortOrder === "low-high") return priceA - priceB;
       if (sortOrder === "high-low") return priceB - priceA;
+
       return 0;
     });
 
-  // ✅ 2. HANDLERS
+  // Wishlist handler
   const handleAddToWishlist = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -153,12 +152,17 @@ const CategoryProducts = () => {
     const isAdded = addToWishlist(wishlistItem);
 
     if (isAdded) {
-      toast.success("Added to Wishlist ❤️", { id: `wish-${product.id}` });
+      toast.success("Added to Wishlist ❤️", {
+        id: `wish-${product.id}`,
+      });
     } else {
-      toast.success("Item already in Wishlist!", { id: `wish-exist-${product.id}` });
+      toast.success("Item already in Wishlist!", {
+        id: `wish-exist-${product.id}`,
+      });
     }
   };
 
+  // Cart handler
   const handleAddToCart = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -171,15 +175,19 @@ const CategoryProducts = () => {
     const isAdded = addToCart(cartItem);
 
     if (isAdded) {
-      toast.success("Added to Cart 🛒", { id: `cart-${product.id}` });
+      toast.success("Added to Cart 🛒", {
+        id: `cart-${product.id}`,
+      });
     } else {
-      toast.success("Item already in Cart", { id: `cart-exist-${product.id}` });
+      toast.success("Item already in Cart", {
+        id: `cart-exist-${product.id}`,
+      });
     }
   };
 
-  // ✅ 3. NAVIGATION HANDLER (Better than window.location)
+  // Navigation handler
   const handleViewProduct = (e, productId) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
     navigate(`/product/${productId}`);
   };
@@ -187,12 +195,14 @@ const CategoryProducts = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 pb-10">
       <div className="container mx-auto px-2 md:px-4">
-        {/* TITLE */}
+
+        {/* Title */}
         <h1 className="text-xl md:text-3xl font-bold text-center py-8 tracking-tight uppercase">
-          {decodedCategory} <span className="text-emerald-400">Products</span>
+          {decodedCategory}{" "}
+          <span className="text-emerald-400">Products</span>
         </h1>
 
-        {/* 🔥 HORIZONTAL FILTER BAR */}
+        {/* Horizontal filter bar */}
         <div className="mb-4">
           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pl-4 pr-2">
             {[
@@ -203,7 +213,9 @@ const CategoryProducts = () => {
               <button
                 key={item.key}
                 onClick={() =>
-                  setActiveFilter(activeFilter === item.key ? null : item.key)
+                  setActiveFilter(
+                    activeFilter === item.key ? null : item.key
+                  )
                 }
                 className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
                   activeFilter === item.key
@@ -216,7 +228,7 @@ const CategoryProducts = () => {
             ))}
           </div>
 
-          {/* FILTER CONTENT */}
+          {/* Filter content */}
           {activeFilter && (
             <div className="flex mt-3 bg-zinc-900 p-4 rounded-xl text-sm">
               {activeFilter === "price" && (
@@ -228,6 +240,7 @@ const CategoryProducts = () => {
                     onChange={(e) => setMinPrice(e.target.value)}
                     className="bg-zinc-800 p-2 rounded w-full text-white"
                   />
+
                   <input
                     type="number"
                     placeholder="Max ₹"
@@ -237,6 +250,7 @@ const CategoryProducts = () => {
                   />
                 </div>
               )}
+
               {activeFilter === "rating" && (
                 <div className="flex gap-3">
                   {[4, 3, 2].map((r) => (
@@ -254,17 +268,27 @@ const CategoryProducts = () => {
                   ))}
                 </div>
               )}
+
               {activeFilter === "sort" && (
                 <div className="flex gap-3">
                   <button
                     onClick={() => setSortOrder("low-high")}
-                    className={`px-4 py-2 rounded-full ${sortOrder === 'low-high' ? 'bg-emerald-500 text-black' : 'bg-zinc-800'}`}
+                    className={`px-4 py-2 rounded-full ${
+                      sortOrder === "low-high"
+                        ? "bg-emerald-500 text-black"
+                        : "bg-zinc-800"
+                    }`}
                   >
                     Price: Low → High
                   </button>
+
                   <button
                     onClick={() => setSortOrder("high-low")}
-                    className={`px-4 py-2 rounded-full ${sortOrder === 'high-low' ? 'bg-emerald-500 text-black' : 'bg-zinc-800'}`}
+                    className={`px-4 py-2 rounded-full ${
+                      sortOrder === "high-low"
+                        ? "bg-emerald-500 text-black"
+                        : "bg-zinc-800"
+                    }`}
                   >
                     Price: High → Low
                   </button>
@@ -274,13 +298,73 @@ const CategoryProducts = () => {
           )}
         </div>
 
-        {/* PRODUCTS */}
+        {/* Products */}
         {loading ? (
-          <p className="text-center text-zinc-400">Loading...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0.5 md:gap-6 bg-zinc-800 md:bg-transparent">
+
+            {[...Array(8)].map((_, index) => (
+              <div
+                key={index}
+                className="group bg-zinc-900 md:rounded-2xl overflow-hidden relative block"
+              >
+                <div className="flex flex-row md:flex-col h-full">
+
+                  {/* Image skeleton */}
+                  <div className="relative w-1/3 md:w-full bg-black p-3 md:p-6 flex items-center justify-center">
+                    <div className="w-full h-28 md:h-48 bg-zinc-800 rounded-lg animate-pulse" />
+                  </div>
+
+                  {/* Details skeleton */}
+                  <div className="w-2/3 md:w-full p-4 flex flex-col justify-between border-l border-zinc-800 md:border-l-0">
+
+                    <div>
+
+                      {/* Product name */}
+                      <div className="h-4 bg-zinc-800 rounded w-4/5 animate-pulse mb-2" />
+                      <div className="h-4 bg-zinc-800 rounded w-3/5 animate-pulse mb-4" />
+
+                      {/* Rating */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="h-5 w-12 bg-zinc-800 rounded animate-pulse" />
+                        <div className="h-3 w-20 bg-zinc-800 rounded animate-pulse" />
+                      </div>
+
+                      {/* Description */}
+                      <div className="hidden md:flex flex-col gap-2 mt-3">
+                        <div className="h-3 bg-zinc-800 rounded w-full animate-pulse" />
+                        <div className="h-3 bg-zinc-800 rounded w-4/5 animate-pulse" />
+                        <div className="h-3 bg-zinc-800 rounded w-3/5 animate-pulse" />
+                      </div>
+                    </div>
+
+                    {/* Price + buttons */}
+                    <div className="mt-4 flex flex-col gap-3">
+
+                      {/* Price */}
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 bg-zinc-800 rounded w-14 animate-pulse" />
+                        <div className="h-6 bg-zinc-700 rounded w-24 animate-pulse" />
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="hidden md:flex gap-2">
+                        <div className="flex-1 h-8 bg-zinc-800 rounded-lg animate-pulse" />
+                        <div className="flex-1 h-8 bg-zinc-800 rounded-lg animate-pulse" />
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+          </div>
         ) : filteredData.length === 0 ? (
           <p className="text-center text-zinc-400">
-            No products found for "{decodedCategory}" <br/>
-            <span className="text-xs text-zinc-600">(Check backend category naming)</span>
+            No products found for "{decodedCategory}" <br />
+            <span className="text-xs text-zinc-600">
+              (Check backend category naming)
+            </span>
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0.5 md:gap-6 bg-zinc-800 md:bg-transparent">
@@ -296,11 +380,15 @@ const CategoryProducts = () => {
                   className="group bg-zinc-900 md:rounded-2xl overflow-hidden hover:bg-zinc-800/50 transition-all duration-300 md:border md:border-zinc-800 md:hover:border-zinc-600 relative block"
                 >
                   <div className="flex flex-row md:flex-col h-full">
-                    {/* IMAGE CONTAINER */}
+
+                    {/* Image container */}
                     <div className="relative w-1/3 md:w-full bg-black backdrop-blur-sm p-3 md:p-6 flex items-center justify-center">
-                      {/* WISHLIST BUTTON */}
+
+                      {/* Wishlist button */}
                       <button
-                        onClick={(e) => handleAddToWishlist(e, product)}
+                        onClick={(e) =>
+                          handleAddToWishlist(e, product)
+                        }
                         className="absolute top-2 right-2 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-red-500 transition-all transform hover:scale-110 z-10"
                         title="Add to Wishlist"
                       >
@@ -326,38 +414,46 @@ const CategoryProducts = () => {
                         className="h-28 md:h-48 w-full object-contain transition-transform duration-500 group-hover:scale-110"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = "https://via.placeholder.com/150";
+                          e.currentTarget.src =
+                            "https://via.placeholder.com/150";
                         }}
                       />
                     </div>
 
-                    {/* DETAILS */}
+                    {/* Details */}
                     <div className="w-2/3 md:w-full p-4 flex flex-col justify-between border-l border-zinc-800 md:border-l-0">
                       <div>
+
+                        {/* Product name */}
                         <h2 className="text-sm md:text-base font-medium line-clamp-2 leading-snug text-zinc-200">
                           {product.name}
                         </h2>
-                        
+
                         {/* Rating */}
-                        {(product.rating > 0 || product.reviews_count > 0) && (
+                        {(product.rating > 0 ||
+                          product.reviews_count > 0) && (
                           <div className="flex items-center mt-1.5 gap-2">
+
                             {product.rating > 0 && (
                               <span className="bg-green-700 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
                                 {product.rating} ★
                               </span>
                             )}
+
                             <span className="text-zinc-500 text-[11px]">
                               ({product.reviews_count || 0} Reviews)
                             </span>
                           </div>
                         )}
 
-                        {/* Description (Desktop) */}
+                        {/* Description */}
                         <div className="mt-3 hidden md:block">
                           <ul className="flex flex-col gap-2 mt-2">
                             {product.description
                               ?.split("\n")
-                              .filter((line) => line.trim() !== "")
+                              .filter(
+                                (line) => line.trim() !== ""
+                              )
                               .slice(0, 3)
                               .map((line, index) => (
                                 <li
@@ -365,41 +461,62 @@ const CategoryProducts = () => {
                                   className="text-[11px] text-zinc-400 flex items-start gap-2"
                                 >
                                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1 shrink-0"></div>
-                                  <span className="line-clamp-1">{line}</span>
+
+                                  <span className="line-clamp-1">
+                                    {line}
+                                  </span>
                                 </li>
                               ))}
                           </ul>
                         </div>
                       </div>
 
-                      {/* PRICE + ACTIONS */}
+                      {/* Price + actions */}
                       <div className="mt-4 flex flex-col gap-3">
+
                         <div className="flex items-baseline gap-2">
                           {product.original_price &&
-                            Number(product.original_price) > Number(product.price) && (
+                            Number(product.original_price) >
+                              Number(product.price) && (
                               <span className="text-[10px] md:text-xs text-zinc-500 line-through">
-                                ₹{Number(product.original_price).toLocaleString("en-IN")}
+                                ₹
+                                {Number(
+                                  product.original_price
+                                ).toLocaleString("en-IN")}
                               </span>
                             )}
+
                           <span className="text-lg md:text-xl font-bold text-white">
-                            ₹{Number(product.price).toLocaleString("en-IN")}
+                            ₹
+                            {Number(product.price).toLocaleString(
+                              "en-IN"
+                            )}
                           </span>
                         </div>
 
                         <div className="hidden md:flex gap-2">
+
                           <button
-                            onClick={(e) => handleViewProduct(e, product.id)}
+                            onClick={(e) =>
+                              handleViewProduct(
+                                e,
+                                product.id
+                              )
+                            }
                             className="flex-1 text-[11px] py-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition"
                           >
                             View
                           </button>
 
                           <button
-                            onClick={(e) => handleAddToCart(e, product)}
+                            onClick={(e) =>
+                              handleAddToCart(e, product)
+                            }
                             className="flex-1 text-[11px] py-2 rounded-lg bg-emerald-500 text-black font-semibold hover:bg-emerald-400 transition"
                           >
                             Add to Cart
                           </button>
+
                         </div>
                       </div>
                     </div>
