@@ -384,8 +384,61 @@ const BrandProducts = () => {
 
         {/* --- PRODUCTS GRID --- */}
         {loading ? (
-          <p className="text-center text-zinc-400">Loading...</p>
-        ) : filteredData.length === 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0.5 md:gap-6 bg-zinc-800 md:bg-transparent">
+          {[...Array(8)].map((_, index) => (
+            <div
+              key={index}
+              className="group bg-zinc-900 md:rounded-2xl overflow-hidden relative block"
+            >
+              <div className="flex flex-row md:flex-col h-full">
+      
+                {/* Image skeleton */}
+                <div className="relative w-1/3 md:w-full bg-black p-3 md:p-6 flex items-center justify-center">
+                  <div className="w-full h-28 md:h-48 bg-zinc-800 rounded-lg animate-pulse" />
+                </div>
+      
+                {/* Details skeleton */}
+                <div className="w-2/3 md:w-full p-4 flex flex-col justify-between">
+      
+                  <div>
+                    {/* Product name */}
+                    <div className="h-4 bg-zinc-800 rounded w-4/5 animate-pulse mb-2" />
+                    <div className="h-4 bg-zinc-800 rounded w-3/5 animate-pulse mb-4" />
+      
+                    {/* Rating */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="h-5 w-12 bg-zinc-800 rounded animate-pulse" />
+                      <div className="h-3 w-20 bg-zinc-800 rounded animate-pulse" />
+                    </div>
+      
+                    {/* Description */}
+                    <div className="hidden md:flex flex-col gap-2 mt-3">
+                      <div className="h-3 bg-zinc-800 rounded w-full animate-pulse" />
+                      <div className="h-3 bg-zinc-800 rounded w-4/5 animate-pulse" />
+                      <div className="h-3 bg-zinc-800 rounded w-3/5 animate-pulse" />
+                    </div>
+                  </div>
+      
+                  {/* Price + buttons */}
+                  <div className="mt-4 flex flex-col gap-3">
+      
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 bg-zinc-800 rounded w-14 animate-pulse" />
+                      <div className="h-6 bg-zinc-700 rounded w-24 animate-pulse" />
+                    </div>
+      
+                    <div className="hidden md:flex gap-2">
+                      <div className="flex-1 h-8 bg-zinc-800 rounded-lg animate-pulse" />
+                      <div className="flex-1 h-8 bg-zinc-800 rounded-lg animate-pulse" />
+                    </div>
+      
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredData.length === 0 ? (
           <p className="text-center text-zinc-400">
             No products found for {decodedBrand}
           </p>
