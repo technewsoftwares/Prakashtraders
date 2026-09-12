@@ -41,7 +41,7 @@ def create_order(request):
                 "customer_id": order_id,
                 "customer_name": data.get("name", "Customer"),
                 "customer_email": data.get("email", "customer@example.com"),
-                "customer_phone": data.get("phone", "9999999999")
+                "customer_phone": data.get("mobile", "")
             }
         }
 
