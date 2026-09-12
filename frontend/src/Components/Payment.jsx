@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { load } from "@cashfreepayments/cashfree-js";
 import { API_BASE } from "../Config";
+import axiosInstance from "../axiosInstance";
 
 const API = API_BASE;
 const Payment = () => {
@@ -135,54 +136,41 @@ const totalMRP = cartItems.reduce(
   const token = localStorage.getItem("access_token");
 
   try {
-    const res = await fetch(`${API}/api/create-order/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` // ✅ FIX
-      },
-      body: JSON.stringify({
-          amount: totalPayable,
-      
-          name: address.name,
-          mobile: address.mobile,
-          email: localStorage.getItem("user_email") || "",
-      
-          address: address.fullAddress,
-          pincode: address.pincode,
-          city: address.city,
-          district: address.district,
-          state: address.state,
-      
-          items: cartItems
-      }),
+  const res = await axiosInstance.post("/api/create-order/", {
+    amount: totalPayable,
+    name: address.name,
+    mobile: address.mobile,
+    email: localStorage.getItem("user_email") || "",
+    address: address.fullAddress,
+    pincode: address.pincode,
+    city: address.city,
+    district: address.district,
+    state: address.state,
+    items: cartItems,
+  });
+
+  const data = res.data;
+
+  if (data.payment_session_id) {
+    const cashfree = await load({ mode: "production" });
+
+    await cashfree.checkout({
+      paymentSessionId: data.payment_session_id,
     });
-
-    if (!res.ok) {
-      alert("Server error while creating order");
-      return;
-    }
-
-    const data = await res.json();
-
-    // 🔥 CASHFREE CHECKOUT START
-    if (data.payment_session_id) {
-
-      const cashfree = await load({ mode: "production" });
-
-      await cashfree.checkout({
-        paymentSessionId: data.payment_session_id
-      });
-
-    } else {
-      alert("Failed to create payment");
-    }
-
-  } catch (error) {
-    console.error("PAYMENT ERROR:", error);
-    alert("Something went wrong. Try again.");
+  } else {
+    alert("Failed to create payment");
   }
-};
+
+} catch (error) {
+  console.error("PAYMENT ERROR:", error);
+
+  if (error.response) {
+    console.error("STATUS:", error.response.status);
+    console.error("DATA:", error.response.data);
+  }
+
+  alert("Something went wrong. Try again.");
+}
 
 useEffect(() => {
   if (!location.state || !location.state.items) {
