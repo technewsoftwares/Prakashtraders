@@ -171,6 +171,7 @@ const totalMRP = cartItems.reduce(
 
   alert("Something went wrong. Try again.");
 }
+  };
 
 useEffect(() => {
   if (!location.state || !location.state.items) {
