@@ -1,54 +1,55 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { API_BASE } from "../../Config";
+import axiosInstance from "../../axiosInstance";
 
-const API = API_BASE;
 const UserAddress = () => {
   const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
-  const token = localStorage.getItem("access_token");
-
   useEffect(() => {
-    if (!token) return;
-
-    axios
-      .get(`${API}/api/auth/addresses/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setAddresses(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-        alert("Failed to load addresses");
-      });
-  }, [token]);
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this address?")) return;
-
+  const fetchAddresses = async () => {
     try {
-      await axios.delete(
-        `${API}/api/auth/addresses/${id}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const res = await axiosInstance.get(
+        "/api/auth/addresses/"
       );
 
-      setAddresses((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      alert("Delete failed");
+      setAddresses(res.data);
+    } catch (error) {
+      console.error(
+        "LOAD ADDRESSES ERROR:",
+        error.response?.data || error.message
+      );
+
+      alert("Failed to load addresses");
+    } finally {
+      setLoading(false);
     }
   };
+
+  fetchAddresses();
+}, []);
+
+  const handleDelete = async (id) => {
+  if (!window.confirm("Delete this address?")) return;
+
+  try {
+    await axiosInstance.delete(
+      `/api/auth/addresses/${id}/`
+    );
+
+    setAddresses((prev) =>
+      prev.filter((a) => a.id !== id)
+    );
+  } catch (error) {
+    console.error(
+      "DELETE ADDRESS ERROR:",
+      error.response?.data || error.message
+    );
+
+    alert("Delete failed");
+  }
+};
 
   if (loading) {
     return (
