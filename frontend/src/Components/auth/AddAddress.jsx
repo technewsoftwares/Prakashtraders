@@ -1,12 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
-import { API_BASE } from "../../Config";
+import axiosInstance from "../../axiosInstance";
 
-const API = API_BASE;
 const AddAddress = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("access_token");
 
   const [form, setForm] = useState({
     full_name: "",
@@ -25,25 +22,25 @@ const AddAddress = () => {
   };
 
   const handleSubmit = async () => {
-    if (!token) return; // 👈 IMPORTANT
+  try {
+    await axiosInstance.post(
+      "/api/auth/addresses/",
+      form
+    );
 
-    try {
-      await axios.post(
-        `${API}/api/auth/addresses/`,
-        form,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    navigate("/address");
+  } catch (error) {
+    console.error(
+      "SAVE ADDRESS ERROR:",
+      error.response?.data || error.message
+    );
 
-      navigate("/address");
-    } catch (error) {
-      console.error(error.response?.data || error.message);
-      alert("Failed to save address");
-    }
-  };
+    alert(
+      error.response?.data?.detail ||
+      "Failed to save address"
+    );
+  }
+};
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
