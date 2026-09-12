@@ -73,7 +73,6 @@ const Account = ({ onClose, onSuccess }) => {
         setOtp("");
         setStage("email");
         onSuccess?.();
-      }
       } else {
         setError(response.data.message || "Invalid OTP");
       }
