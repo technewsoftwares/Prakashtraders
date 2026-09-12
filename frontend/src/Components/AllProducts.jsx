@@ -7,60 +7,6 @@ import { getProductImage } from "../utils/imageUrl";
 
 const API = API_BASE;
 
-// Product card loading skeleton
-const ProductSkeleton = () => {
-  return (
-    <div className="relative shrink-0">
-      <div className="relative w-[165px] sm:w-64 bg-black border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
-
-        {/* Wishlist + Cart skeleton buttons */}
-        <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800 animate-pulse" />
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800 animate-pulse" />
-        </div>
-
-        {/* Image skeleton */}
-        <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-zinc-900 rounded-lg animate-pulse">
-          <div className="w-24 h-24 sm:w-40 sm:h-40 bg-zinc-800 rounded-lg" />
-        </div>
-
-        {/* Details skeleton */}
-        <div className="flex flex-col gap-2">
-
-          {/* Product name */}
-          <div className="h-4 bg-zinc-800 rounded w-4/5 animate-pulse" />
-          <div className="h-4 bg-zinc-800 rounded w-3/5 animate-pulse" />
-
-          {/* Price */}
-          <div className="flex items-center gap-2 mt-1">
-            <div className="h-4 bg-zinc-800 rounded w-14 animate-pulse" />
-            <div className="h-5 bg-zinc-700 rounded w-20 animate-pulse" />
-          </div>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, index) => (
-              <div
-                key={index}
-                className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-zinc-800 animate-pulse"
-              />
-            ))}
-          </div>
-
-          {/* Description */}
-          <div className="flex flex-col gap-2 mt-1">
-            <div className="h-3 bg-zinc-800 rounded w-full animate-pulse" />
-            <div className="h-3 bg-zinc-800 rounded w-4/5 animate-pulse" />
-            <div className="h-3 bg-zinc-800 rounded w-3/5 animate-pulse" />
-          </div>
-
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Product card
 const ProductCard = memo(
   ({ product, onAddToWishlist, onAddToCart }) => {
     const {
@@ -77,11 +23,7 @@ const ProductCard = memo(
 
     return (
       <div className="relative group shrink-0 snap-start">
-
-        {/* Action buttons */}
         <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-
-          {/* Wishlist button */}
           <button
             type="button"
             onClick={(e) => onAddToWishlist(e, product)}
@@ -105,7 +47,6 @@ const ProductCard = memo(
             </svg>
           </button>
 
-          {/* Cart button */}
           <button
             type="button"
             onClick={(e) => onAddToCart(e, product)}
@@ -130,11 +71,8 @@ const ProductCard = memo(
           </button>
         </div>
 
-        {/* Product link */}
         <Link to={`/product/${id}`}>
           <div className="relative w-[165px] sm:w-64 bg-black border border-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-4 hover:bg-black transition-all flex flex-col h-[280px] sm:h-[400px] overflow-hidden">
-
-            {/* Product image */}
             <div className="flex-none w-full h-36 sm:h-56 mb-2 sm:mb-4 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
               <img
                 src={displayImage}
@@ -146,20 +84,17 @@ const ProductCard = memo(
                 className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = "https://via.placeholder.com/300";
+                  e.currentTarget.src =
+                    "https://via.placeholder.com/300";
                 }}
               />
             </div>
 
-            {/* Product details */}
             <div className="flex flex-col gap-1 sm:gap-2">
-
-              {/* Product name */}
               <h2 className="text-[12px] sm:text-[15px] font-medium line-clamp-2 text-white/90">
                 {name}
               </h2>
 
-              {/* Price */}
               <div className="flex items-center gap-2">
                 {original_price &&
                   Number(original_price) > Number(price) && (
@@ -173,7 +108,6 @@ const ProductCard = memo(
                 </span>
               </div>
 
-              {/* Rating */}
               <div
                 className="flex items-center gap-1"
                 aria-label={`Rating ${rating} out of 5`}
@@ -201,10 +135,9 @@ const ProductCard = memo(
                 )}
               </div>
 
-              {/* Description */}
               {description && (
                 <ul className="flex flex-col gap-1 mt-2">
-                  {String(description)
+                  {description
                     .split("\n")
                     .slice(0, 3)
                     .map((line, index) => (
@@ -212,13 +145,12 @@ const ProductCard = memo(
                         key={index}
                         className="text-[11px] text-zinc-400 flex items-start gap-2"
                       >
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1 shrink-0" />
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1" />
                         {line}
                       </li>
                     ))}
                 </ul>
               )}
-
             </div>
           </div>
         </Link>
@@ -229,14 +161,12 @@ const ProductCard = memo(
 
 ProductCard.displayName = "ProductCard";
 
-// All products component
 const AllProducts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { addToCart, addToWishlist } = useContext(ShopContext);
 
-  // Fetch best products
   useEffect(() => {
     const controller = new AbortController();
 
@@ -274,7 +204,6 @@ const AllProducts = () => {
     };
   }, []);
 
-  // Add product to wishlist
   const handleAddToWishlist = (event, product) => {
     event.preventDefault();
     event.stopPropagation();
@@ -291,7 +220,6 @@ const AllProducts = () => {
     );
   };
 
-  // Add product to cart
   const handleAddToCart = (event, product) => {
     event.preventDefault();
     event.stopPropagation();
@@ -308,34 +236,10 @@ const AllProducts = () => {
     );
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <section
-        className="w-full mx-auto mt-4 mb-10 px-4"
-        aria-label="Loading products"
-      >
-        {/* Header skeleton */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="h-7 w-64 bg-zinc-800 rounded animate-pulse" />
-        </div>
-
-        {/* Product skeletons */}
-        <div className="flex gap-3 sm:gap-6 overflow-hidden pb-1">
-          {[...Array(5)].map((_, index) => (
-            <ProductSkeleton key={index} />
-          ))}
-        </div>
-      </section>
-    );
-  }
-
-  // Empty state
-  if (!Array.isArray(data) || data.length === 0) {
+  if (loading || data.length === 0) {
     return <div className="h-10" aria-hidden="true" />;
   }
 
-  // Products
   return (
     <section
       className="w-full mx-auto mt-4 mb-10 px-4"
