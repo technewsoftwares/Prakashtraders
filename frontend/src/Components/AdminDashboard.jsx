@@ -1077,13 +1077,48 @@ const handleSaveProduct = async (e) => {
     }
 
     const url = isEditing
-      ? `/api/products/${formData.id}/`
-      : "/api/products/";
+      ? `${API}/api/products/${formData.id}/`
+      : `${API}/api/products/`;
 
     const method = isEditing ? "PUT" : "POST";
 
     const form = new FormData();
 
+    // -----------------------------
+    // TEXT / NUMBER / BOOLEAN FIELDS
+    // -----------------------------
+    const normalFields = [
+      "name",
+      "description",
+      "category",
+      "brand",
+      "original_price",
+      "price",
+      "discount_price",
+      "stock",
+      "rating",
+      "reviews_count",
+      "warranty",
+      "length",
+      "breadth",
+      "height",
+      "weight",
+      "is_active",
+      "is_best_product",
+      "created_at",
+    ];
+
+    normalFields.forEach((key) => {
+      const value = formData[key];
+
+      if (value !== null && value !== undefined) {
+        form.append(key, value);
+      }
+    });
+
+    // -----------------------------
+    // IMAGE FILES
+    // -----------------------------
     const imageKeys = [
       "image_1",
       "image_2",
@@ -1092,30 +1127,63 @@ const handleSaveProduct = async (e) => {
       "image_5",
     ];
 
-    Object.keys(formData).forEach((key) => {
-      const value = formData[key];
+    imageKeys.forEach((key) => {
+      const file = formData[key];
 
-      if (
-        value !== null &&
-        value !== undefined
-      ) {
-        if (imageKeys.includes(key)) {
-          if (value instanceof File) {
-            form.append(key, value);
-          }
-        } else {
-          form.append(key, value);
-        }
+      if (file instanceof File) {
+        form.append(key, file);
       }
     });
 
-    const response = await axiosInstance({
-      url,
+    // -----------------------------
+    // DEBUG
+    // -----------------------------
+    console.log("========== FORM DATA ==========");
+
+    for (const [key, value] of form.entries()) {
+      if (value instanceof File) {
+        console.log(
+          `${key}: FILE`,
+          value.name,
+          value.type,
+          value.size
+        );
+      } else {
+        console.log(`${key}:`, value);
+      }
+    }
+
+    console.log("===============================");
+
+    // -----------------------------
+    // SEND REQUEST
+    // IMPORTANT:
+    // DON'T SET Content-Type HERE
+    // -----------------------------
+    const response = await fetch(url, {
       method,
-      data: form,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: form,
     });
 
-    const savedProduct = response.data;
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("SERVER RESPONSE:", data);
+      throw new Error(
+        data?.detail ||
+        data?.error ||
+        data?.message ||
+        JSON.stringify(data) ||
+        "Unable to save product"
+      );
+    }
+
+    console.log("PRODUCT SAVED:", data);
+
+    const savedProduct = data;
 
     setProducts((prev) =>
       isEditing
@@ -1137,32 +1205,10 @@ const handleSaveProduct = async (e) => {
     );
 
   } catch (err) {
-    console.error(
-      "PRODUCT SAVE ERROR:",
-      err
-    );
-
-    console.error(
-      "STATUS:",
-      err?.response?.status
-    );
-
-    console.error(
-      "SERVER RESPONSE:",
-      err?.response?.data
-    );
-
-    const message =
-      err?.response?.data?.detail ||
-      err?.response?.data?.error ||
-      err?.response?.data?.message ||
-      err?.message ||
-      "Unable to save product";
-
-    toast.error(`❌ ${message}`);
+    console.error("PRODUCT SAVE ERROR:", err);
+    toast.error(`❌ ${err.message || "Unable to save product"}`);
   }
 };
-
 const handleDeleteProduct = async (id) => {
   if (!window.confirm("❗ Delete this product?")) {
     return;
