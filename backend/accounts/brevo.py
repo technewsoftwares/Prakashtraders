@@ -14,8 +14,8 @@ def send_brevo_email(to_email, subject, message):
 
     payload = {
         "sender": {
-            "name": "TECH NEW SOFTWARES",
-            "email": "technewsoftwares@gmail.com"
+            "name": "Prakash Traders",
+            "email": "kabilandina11@gmail.com"
         },
         "to": [
             {
