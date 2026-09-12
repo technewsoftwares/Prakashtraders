@@ -90,16 +90,15 @@ const Login = () => {
         );
 
         if (response.data.success) {
-    alert(JSON.stringify(response.data));
 
     console.log("VERIFY OTP RESPONSE:", response.data);
     console.log("ACCESS:", response.data.access);
 
-    localStorage.setItem("access_token", response.data.access);
-    localStorage.setItem("refresh_token", response.data.refresh);
-    localStorage.setItem("role", "user");
-
-    alert("Saved access token: " + localStorage.getItem("access_token"));
+    login(
+      response.data.access,
+      response.data.refresh,
+      "user"
+    );
 
     navigate("/", { replace: true });
 } else {
