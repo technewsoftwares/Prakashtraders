@@ -61,9 +61,11 @@ const Account = ({ onClose, onSuccess }) => {
       );
 
       if (response.data.success) {
-        localStorage.setItem("refresh_token", response.data.refresh);
-
-        login(response.data.access, "user");
+        login(
+          response.data.access,
+          response.data.refresh,
+          "user"
+        );
 
         setSuccess("Login successful 🎉");
 
@@ -71,7 +73,7 @@ const Account = ({ onClose, onSuccess }) => {
         setOtp("");
         setStage("email");
         onSuccess?.();
-
+      }
       } else {
         setError(response.data.message || "Invalid OTP");
       }
