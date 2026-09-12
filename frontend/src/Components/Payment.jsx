@@ -133,8 +133,6 @@ const totalMRP = cartItems.reduce(
     return;
    }  
 
-  const token = localStorage.getItem("access_token");
-
   try {
   const res = await axiosInstance.post("/api/create-order/", {
     amount: totalPayable,
