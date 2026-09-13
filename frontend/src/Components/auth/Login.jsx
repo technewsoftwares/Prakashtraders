@@ -53,33 +53,31 @@ const Login = () => {
       return;
     }
 
-    // ===== CHECK LOGIN TYPE =====
-    if (stage === "email") {
-      setIsLoading(true);
-      try {
-        const res = await axios.post(
-          `${API}/api/auth/login-type/`,
-          { email }
-        );
+   // ===== USER OTP LOGIN =====
+if (stage === "email") {
+  setIsLoading(true);
 
-        if (res.data.type === "admin") {
-          setStage("admin-password");
-          return;
-        }
+  try {
+    await axios.post(
+      `${API}/api/auth/send-otp/`,
+      { email }
+    );
 
-        await axios.post(
-          `${API}/api/auth/send-otp/`,
-          { email }
-        );
+    setStage("otp");
+  } catch (err) {
+    console.error("SEND OTP ERROR:", err.response?.data || err);
 
-        setStage("otp");
-      } catch {
-        setError("Something went wrong. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
+    setError(
+      err.response?.data?.message ||
+      err.response?.data?.detail ||
+      "Unable to send OTP. Please try again."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+
+  return;
+}
 
     // ===== USER OTP LOGIN =====
     if (stage === "otp") {
