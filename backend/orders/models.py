@@ -38,6 +38,13 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE
     )
     product_name = models.CharField(max_length=100)
+
+    product_image = models.URLField(
+        max_length=1000,
+        blank=True,
+        null=True
+    )
+
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField()
 
