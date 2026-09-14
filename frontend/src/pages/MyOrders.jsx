@@ -183,12 +183,20 @@ const MyOrders = () => {
 
                     <div className="flex gap-5">
 
-                      <div className="w-24 h-24 rounded-2xl bg-slate-100 flex items-center justify-center">
+                      <div className="w-24 h-24 rounded-2xl bg-slate-100 flex items-center justify-center overflow-hidden">
 
-                        <Package
-                          size={45}
-                          className="text-slate-400"
-                        />
+                        {item.product_image ? (
+                          <img
+                            src={item.product_image}
+                            alt={item.product_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Package
+                            size={45}
+                            className="text-slate-400"
+                         />
+                        )}
 
                       </div>
 
