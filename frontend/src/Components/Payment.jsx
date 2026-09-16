@@ -167,7 +167,7 @@ const totalMRP = cartItems.reduce(
     console.error("DATA:", error.response.data);
   }
 
-  alert("Something went wrong. Try again.");
+  alert("Please Login to proceed futher.");
 }
   };
 
