@@ -10,6 +10,12 @@ class Order(models.Model):
         related_name="orders"
     )
     order_id = models.CharField(max_length=100, unique=True)
+    cashfree_order_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
+    )
     name = models.CharField(max_length=100)
     mobile = models.CharField(
     max_length=15,
