@@ -119,6 +119,7 @@ def create_order(request):
         order = Order.objects.create(
             user=request.user,
             order_id=order_id,
+            cashfree_order_id=order_id,
             name=data.get("name", ""),
             mobile=data.get("mobile", ""),
             address=data.get("address", ""),
