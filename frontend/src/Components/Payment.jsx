@@ -160,23 +160,33 @@ const totalMRP = cartItems.reduce(
   // VERIFY CASHFREE PAYMENT
   // ==============================
 
-  const verifyResponse = await axiosInstance.post(
-    "/api/verify-payment/",
-    {
-      order_id: data.order_id,
+    let paymentVerified = false;
+    
+    for (let i = 0; i < 5; i++) {
+      const verifyResponse = await axiosInstance.post(
+        "/api/verify-payment/",
+        {
+          order_id: data.order_id,
+        }
+      );
+    
+      console.log("PAYMENT VERIFICATION:", verifyResponse.data);
+    
+      if (verifyResponse.data.status === "PAID") {
+        paymentVerified = true;
+        break;
+      }
+    
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     }
-  );
-
-  console.log("PAYMENT VERIFICATION:", verifyResponse.data);
-
-  if (verifyResponse.data.status === "PAID") {
-    alert("Payment successful! Your order is confirmed.");
-
-    // Go to My Orders
-    navigate("/my-orders");
-  } else {
-    alert("Payment could not be verified. Please contact support.");
-  }
+    
+    if (paymentVerified) {
+      alert("Payment successful! Your order is confirmed.");
+      navigate("/my-orders");
+    } else {
+      alert("Payment verification is still pending.");
+      navigate("/my-orders");
+    }
 
 } else {
   alert("Failed to create payment");
