@@ -158,9 +158,14 @@ def create_order(request):
 @csrf_exempt
 def verify_payment(request):
     try:
-        data = json.loads(request.body)
+        if request.method != "POST":
+            return JsonResponse({"error": "POST required"}, status=400)
 
+        data = json.loads(request.body)
         order_id = data.get("order_id")
+
+        if not order_id:
+            return JsonResponse({"error": "Order ID required"}, status=400)
 
         headers = {
             "x-client-id": settings.CASHFREE_CLIENT_ID,
@@ -170,31 +175,57 @@ def verify_payment(request):
 
         response = requests.get(
             f"https://api.cashfree.com/pg/orders/{order_id}/payments",
-            headers=headers
+            headers=headers,
+            timeout=30
         )
 
         payments = response.json()
 
-        if payments and payments[0]["payment_status"] == "SUCCESS":
+        successful_payment = next(
+            (
+                payment
+                for payment in payments
+                if payment.get("payment_status") == "SUCCESS"
+            ),
+            None
+        )
 
-            order = Order.objects.get(order_id=order_id)
+        if not successful_payment:
+            return JsonResponse({
+                "status": "PENDING"
+            })
 
-            Transaction.objects.create(
-                order=order,
-                transaction_id=payments[0]["cf_payment_id"],
-                amount=order.total_amount,
-                status="PAID"
-            )
+        order = Order.objects.get(order_id=order_id)
 
-            order.status = "PAID"
-            order.save()
+        Transaction.objects.update_or_create(
+            order=order,
+            defaults={
+                "transaction_id": successful_payment.get("cf_payment_id"),
+                "amount": order.total_amount,
+                "status": "PAID"
+            }
+        )
 
-            return JsonResponse({"status": "PAID"})
+        order.status = "PAID"
+        order.save(update_fields=["status"])
 
-        return JsonResponse({"status": "FAILED"})
+        return JsonResponse({
+            "status": "PAID",
+            "order_id": order.order_id,
+            "payment_status": "SUCCESS"
+        })
+
+    except Order.DoesNotExist:
+        return JsonResponse({
+            "error": "Order not found"
+        }, status=404)
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        print("VERIFY PAYMENT ERROR:", str(e))
+
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
 
 def admin_orders(request):
     if request.method != "GET":
