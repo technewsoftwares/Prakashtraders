@@ -1080,7 +1080,7 @@ const handleSaveProduct = async (e) => {
       ? `${API}/api/products/${formData.id}/`
       : `${API}/api/products/`;
 
-    const method = isEditing ? "PUT" : "POST";
+    const method = isEditing ? "PATCH" : "POST";
 
     const form = new FormData();
 
