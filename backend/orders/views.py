@@ -23,7 +23,6 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 # CREATE ORDER
 
 import traceback
-
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -31,6 +30,7 @@ def create_order(request):
     try:
         data = json.loads(request.body)
         items = data.get("items", [])
+
         print("REQUEST DATA:", data)
 
         amount = float(data.get("amount", 0))
@@ -38,128 +38,118 @@ def create_order(request):
 
         order_id = f"ORD_{uuid.uuid4().hex[:10]}"
 
-           payload = {
-                "order_id": order_id,
-                "order_amount": amount,
-                "order_currency": "INR",
-            
-                "customer_details": {
-                    "customer_id": order_id,
-                    "customer_name": data.get("name", "Customer"),
-                    "customer_email": customer_email,
-                    "customer_phone": data.get("mobile", "")
-                },
-            
-                "order_meta": {
-                    "notify_url": "https://backend-yprm.onrender.com/api/webhook/"
-                }
+        payload = {
+            "order_id": order_id,
+            "order_amount": amount,
+            "order_currency": "INR",
+            "customer_details": {
+                "customer_id": order_id,
+                "customer_name": data.get("name", "Customer"),
+                "customer_email": customer_email,
+                "customer_phone": data.get("mobile", "")
+            },
+            "order_meta": {
+                "notify_url": "https://backend-yprm.onrender.com/api/webhook/"
             }
-    
-            print("CASHFREE PAYLOAD:", payload)
-    
-            headers = {
-                "x-client-id": settings.CASHFREE_CLIENT_ID,
-                "x-client-secret": settings.CASHFREE_CLIENT_SECRET,
-                "x-api-version": "2023-08-01",
-                "Content-Type": "application/json"
-            }
-    
-            # ================= ADMIN EMAIL =================
-            
-            items_html = ""
-            
-            for item in items:
-                items_html += f"""
-                • {item.get('name')}<br>
-                Qty : {item.get('qty', 1)}<br>
-                Price : ₹{item.get('price')}<br><br>
-                """
-            
-            admin_message = f"""
-            <h2>🛒 New Order Received</h2>
-            
-            <b>Name:</b> {data.get("name")}<br>
-            <b>Mobile:</b> {data.get("mobile")}<br>
-            <b>Email:</b> {data.get("email")}<br><br>
-            
-            <b>Address</b><br>
-            
-            {data.get("address")}<br>
-            {data.get("city")}<br>
-            {data.get("district")}<br>
-            {data.get("state")}<br>
-            {data.get("pincode")}<br><br>
-            
-            <h3>Products</h3>
-            
-            {items_html}
-            
-            <hr>
-            
-            <h3>Total : ₹{amount}</h3>
+        }
+
+        headers = {
+            "x-client-id": settings.CASHFREE_CLIENT_ID,
+            "x-client-secret": settings.CASHFREE_CLIENT_SECRET,
+            "x-api-version": "2023-08-01",
+            "Content-Type": "application/json"
+        }
+
+        items_html = ""
+
+        for item in items:
+            items_html += f"""
+            • {item.get('name')}<br>
+            Qty: {item.get('qty', 1)}<br>
+            Price: ₹{item.get('price')}<br><br>
             """
-            
-            try:
-                send_brevo_email(
-                    to_email="kabilandina11@gmail.com",
-                    subject="🛒 New Order Received",
-                    message=admin_message
-                )
-                print("ADMIN EMAIL SENT SUCCESSFULLY")
-    
-            except Exception as email_error:
-                print("⚠️ ADMIN EMAIL FAILED:", email_error)
-                traceback.print_exc()       
-    
-            response = requests.post(
-                "https://api.cashfree.com/pg/orders",
-                json=payload,
-                headers=headers,
-                timeout=30
+
+        admin_message = f"""
+        <h2>🛒 New Order Received</h2>
+
+        <b>Name:</b> {data.get("name")}<br>
+        <b>Mobile:</b> {data.get("mobile")}<br>
+        <b>Email:</b> {customer_email}<br><br>
+
+        <b>Address:</b><br>
+        {data.get("address")}<br>
+        {data.get("city")}<br>
+        {data.get("district")}<br>
+        {data.get("state")}<br>
+        {data.get("pincode")}<br><br>
+
+        <h3>Products</h3>
+        {items_html}
+
+        <hr>
+
+        <h3>Total: ₹{amount}</h3>
+        """
+
+        try:
+            send_brevo_email(
+                to_email="kabilandina11@gmail.com",
+                subject="🛒 New Order Received",
+                message=admin_message
             )
-    
-            print("CASHFREE STATUS:", response.status_code)
-            print("CASHFREE RESPONSE:", response.text)
-    
-            result = response.json()
-    
-            if response.status_code != 200:
-                return JsonResponse(result, status=response.status_code)
-    
-            order = Order.objects.create(
-                user=request.user,
-                order_id=order_id,
-                cashfree_order_id=order_id,
-                name=data.get("name", ""),
-                email=customer_email,  # 👈 ADD
-                mobile=data.get("mobile", ""),
-                address=data.get("address", ""),
-                pincode=data.get("pincode", ""),
-                total_amount=amount,
-                status="PENDING"
-            )
-            for item in items:
-                OrderItem.objects.create(
-                    order=order,
-                    product_name=item.get("name", ""),
-                    price=item.get("price", 0),
-                    quantity=item.get("qty", 1),
-                )
-    
-            return JsonResponse({
-                "order_id": order_id,
-                "payment_session_id": result["payment_session_id"]
-            })
-    
-        except Exception as e:
-            print("========== CREATE ORDER ERROR ==========")
+            print("ADMIN EMAIL SENT SUCCESSFULLY")
+        except Exception as email_error:
+            print("ADMIN EMAIL FAILED:", email_error)
             traceback.print_exc()
-            print("ERROR TYPE:", type(e).__name__)
-            print("ERROR:", str(e))
-    
-            return JsonResponse({
-                "error": str(e)
-            }, status=500)
+
+        response = requests.post(
+            "https://api.cashfree.com/pg/orders",
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+
+        print("CASHFREE STATUS:", response.status_code)
+        print("CASHFREE RESPONSE:", response.text)
+
+        result = response.json()
+
+        if response.status_code != 200:
+            return JsonResponse(result, status=response.status_code)
+
+        order = Order.objects.create(
+            user=request.user,
+            order_id=order_id,
+            cashfree_order_id=order_id,
+            name=data.get("name", ""),
+            email=customer_email,
+            mobile=data.get("mobile", ""),
+            address=data.get("address", ""),
+            pincode=data.get("pincode", ""),
+            total_amount=amount,
+            status="PENDING"
+        )
+
+        for item in items:
+            OrderItem.objects.create(
+                order=order,
+                product_name=item.get("name", ""),
+                price=item.get("price", 0),
+                quantity=item.get("qty", 1)
+            )
+
+        return JsonResponse({
+            "order_id": order_id,
+            "payment_session_id": result["payment_session_id"]
+        })
+
+    except Exception as e:
+        print("CREATE ORDER ERROR:", str(e))
+        traceback.print_exc()
+
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
     
     
 
