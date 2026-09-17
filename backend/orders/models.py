@@ -9,6 +9,7 @@ class Order(models.Model):
         blank=True,
         related_name="orders"
     )
+
     order_id = models.CharField(max_length=100, unique=True)
     cashfree_order_id = models.CharField(
         max_length=100,
@@ -16,15 +17,16 @@ class Order(models.Model):
         null=True,
         blank=True
     )
+
     name = models.CharField(max_length=100)
-    mobile = models.CharField(
-    max_length=15,
-    default="",
-    blank=True
-)
+    email = models.EmailField(blank=True, default="")   # ADD THIS
+    mobile = models.CharField(max_length=15, default="", blank=True)
+
     address = models.TextField()
     pincode = models.CharField(max_length=10)
+
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
     status = models.CharField(
         max_length=10,
         choices=[
@@ -34,6 +36,7 @@ class Order(models.Model):
         ],
         default="PENDING"
     )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
 
