@@ -265,9 +265,137 @@ def admin_orders(request):
 
 @csrf_exempt
 def payment_webhook(request):
-    return JsonResponse({
-        "status": "Webhook received"
-    })
+    try:
+        if request.method != "POST":
+            return JsonResponse(
+                {"error": "POST required"},
+                status=405
+            )
+
+        data = json.loads(request.body)
+
+        print("========================================")
+        print("🔥 CASHFREE WEBHOOK RECEIVED")
+        print("WEBHOOK DATA:", data)
+        print("========================================")
+
+        event_type = data.get("type")
+
+        # We only process successful payments
+        if event_type != "PAYMENT_SUCCESS_WEBHOOK":
+            print("ℹ️ Ignoring webhook event:", event_type)
+
+            return JsonResponse({
+                "status": "ignored",
+                "event": event_type
+            }, status=200)
+
+        webhook_data = data.get("data", {})
+
+        order_data = webhook_data.get("order", {})
+        payment_data = webhook_data.get("payment", {})
+
+        cashfree_order_id = order_data.get("order_id")
+        payment_status = payment_data.get("payment_status")
+        cf_payment_id = payment_data.get("cf_payment_id")
+        payment_amount = payment_data.get("payment_amount")
+
+        print("Cashfree Order ID:", cashfree_order_id)
+        print("Payment Status:", payment_status)
+        print("CF Payment ID:", cf_payment_id)
+        print("Payment Amount:", payment_amount)
+
+        # -----------------------------------------
+        # Validate Cashfree order ID
+        # -----------------------------------------
+
+        if not cashfree_order_id:
+            print("❌ Cashfree order ID missing")
+
+            return JsonResponse({
+                "error": "Cashfree order ID missing"
+            }, status=400)
+
+        # -----------------------------------------
+        # Find our Django order
+        # -----------------------------------------
+
+        try:
+            order = Order.objects.get(
+                cashfree_order_id=cashfree_order_id
+            )
+
+        except Order.DoesNotExist:
+            print(
+                "❌ Local order not found:",
+                cashfree_order_id
+            )
+
+            return JsonResponse({
+                "error": "Local order not found"
+            }, status=404)
+
+        # -----------------------------------------
+        # Process successful payment
+        # -----------------------------------------
+
+        if payment_status == "SUCCESS":
+
+            transaction, created = Transaction.objects.update_or_create(
+                order=order,
+                defaults={
+                    "transaction_id": cf_payment_id,
+                    "amount": payment_amount or order.total_amount,
+                    "status": "PAID"
+                }
+            )
+
+            order.status = "PAID"
+            order.save(update_fields=["status"])
+
+            print("========================================")
+            print("✅ PAYMENT SUCCESS")
+            print("Order ID:", order.order_id)
+            print("Cashfree Order ID:", order.cashfree_order_id)
+            print("Transaction ID:", transaction.transaction_id)
+            print("Transaction Created:", created)
+            print("Order Status:", order.status)
+            print("========================================")
+
+            return JsonResponse({
+                "status": "PAID",
+                "order_id": order.order_id,
+                "cashfree_order_id": order.cashfree_order_id,
+                "transaction_id": transaction.transaction_id
+            }, status=200)
+
+        # -----------------------------------------
+        # Payment wasn't successful
+        # -----------------------------------------
+
+        print(
+            "⚠️ Payment status is:",
+            payment_status
+        )
+
+        return JsonResponse({
+            "status": payment_status or "UNKNOWN"
+        }, status=200)
+
+    except json.JSONDecodeError:
+        print("❌ Invalid JSON received from Cashfree")
+
+        return JsonResponse({
+            "error": "Invalid JSON"
+        }, status=400)
+
+    except Exception as e:
+        print("❌ WEBHOOK ERROR:", str(e))
+        traceback.print_exc()
+
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
 
 @csrf_exempt
 def delete_order(request, order_id):
