@@ -42,6 +42,9 @@ def create_order(request):
                 "customer_name": data.get("name", "Customer"),
                 "customer_email": data.get("email", "customer@example.com"),
                 "customer_phone": data.get("mobile", "")
+            },
+            "order_meta": {
+                "notify_url": "https://prakashtraders.com/api/webhook/"
             }
         }
 
