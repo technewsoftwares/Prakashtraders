@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_order, verify_payment, payment_webhook, admin_orders, delete_order, UserOrdersView
+from .views import create_order, verify_payment, payment_webhook, admin_orders, delete_order, UserOrdersView, track_order
 
 urlpatterns = [
     path("create-order/", create_order),
@@ -8,4 +8,5 @@ urlpatterns = [
     path("admin-orders/", admin_orders),
     path("admin-orders/delete/<str:order_id>/", delete_order),
     path("my-orders/", UserOrdersView.as_view()),
+    path("track/<str:order_id>/", track_order, name="track-order"),
 ]
