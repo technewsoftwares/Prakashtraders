@@ -44,7 +44,7 @@ def create_order(request):
                 "customer_phone": data.get("mobile", "")
             },
             "order_meta": {
-                "notify_url": "https://prakashtraders.com/api/webhook/"
+                "notify_url": "https://backend-yprm.onrender.com/api/webhook/"
             }
         }
 
