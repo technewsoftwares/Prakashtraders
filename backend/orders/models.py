@@ -79,3 +79,60 @@ class Transaction(models.Model):
 
     def __str__(self):
         return self.transaction_id
+
+
+class OrderTracking(models.Model):
+    STATUS_CHOICES = [
+        ("ORDER_PLACED", "Order Placed"),
+        ("CONFIRMED", "Order Confirmed"),
+        ("PACKED", "Packed"),
+        ("SHIPPED", "Shipped"),
+        ("OUT_FOR_DELIVERY", "Out for Delivery"),
+        ("DELIVERED", "Delivered"),
+        ("CANCELLED", "Cancelled"),
+    ]
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="tracking_updates"
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES
+    )
+
+    message = models.CharField(
+        max_length=255,
+        blank=True,
+        default=""
+    )
+
+    tracking_number = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    carrier = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    location = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.order.order_id} - {self.status}"
