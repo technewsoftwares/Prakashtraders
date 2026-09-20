@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from accounts.brevo import send_brevo_email
 from rest_framework.response import Response
-from .models import Order, OrderItem, Transaction
+from .models import Order, OrderItem, Transaction, OrderTracking
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
@@ -129,6 +129,12 @@ def create_order(request):
             pincode=data.get("pincode", ""),
             total_amount=amount,
             status="PENDING"
+        )
+
+        OrderTracking.objects.create(
+            order=order,
+            status="ORDER_PLACED",
+            message="Your order has been placed successfully."
         )
 
         for item in items:
