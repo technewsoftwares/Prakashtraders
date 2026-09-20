@@ -446,6 +446,7 @@ class UserOrdersView(APIView):
                 "items": [
                     {
                         "product_name": item.product_name,
+                        "product_image": item.product_image,
                         "price": float(item.price),
                         "quantity": item.quantity,
                     }
