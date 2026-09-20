@@ -461,3 +461,47 @@ class UserOrdersView(APIView):
             })
 
         return Response(data)
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def track_order(request, order_id):
+    try:
+        order = Order.objects.get(
+            order_id=order_id,
+            user=request.user
+        )
+
+        tracking_updates = order.tracking_updates.all()
+
+        return Response({
+            "order_id": order.order_id,
+            "order_status": order.status,
+            "tracking": [
+                {
+                    "status": update.status,
+                    "status_display": update.get_status_display(),
+                    "message": update.message,
+                    "tracking_number": update.tracking_number,
+                    "carrier": update.carrier,
+                    "location": update.location,
+                    "created_at": update.created_at,
+                }
+                for update in tracking_updates
+            ]
+        })
+
+    except Order.DoesNotExist:
+        return Response(
+            {"detail": "Order not found."},
+            status=404
+        )
+
+    except Exception as e:
+        print("❌ TRACK ORDER ERROR:", str(e))
+        traceback.print_exc()
+
+        return Response(
+            {"detail": "Unable to load order tracking."},
+            status=500
+        )
