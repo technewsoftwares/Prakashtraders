@@ -552,14 +552,52 @@ def update_order_tracking(request, order_id):
                 },
                 status=400
             )
-            # Prevent duplicate tracking status for the same order
-            if order.tracking_updates.filter(status=status_value).exists():
-                return Response(
-                    {
-                        "detail": f"This order already has the tracking status '{status_value}'."
-                    },
-                    status=400
-                )
+
+        # Prevent duplicate tracking status for the same order
+        if order.tracking_updates.filter(status=status_value).exists():
+            return Response(
+                {
+                    "detail": f"This order already has the tracking status '{status_value}'."
+                },
+                status=400
+            )
+
+        # Enforce tracking sequence
+        last_tracking = order.tracking_updates.order_by("-created_at").first()
+
+        allowed_next_status = {
+            "ORDER_PLACED": "CONFIRMED",
+            "CONFIRMED": "PACKED",
+            "PACKED": "SHIPPED",
+            "SHIPPED": "OUT_FOR_DELIVERY",
+            "OUT_FOR_DELIVERY": "DELIVERED",
+        }
+
+        if last_tracking:
+            if status_value != "CANCELLED":
+                expected_status = allowed_next_status.get(last_tracking.status)
+
+                if expected_status and status_value != expected_status:
+                    return Response(
+                        {
+                            "detail": (
+                                f"Next tracking status must be "
+                                f"'{expected_status}'."
+                            )
+                        },
+                        status=400
+                    )
+
+                if last_tracking.status in ["DELIVERED", "CANCELLED"]:
+                    return Response(
+                        {
+                            "detail": (
+                                f"Tracking cannot be updated after "
+                                f"'{last_tracking.get_status_display()}'."
+                            )
+                        },
+                        status=400
+                    )
         # Create tracking history
         tracking = OrderTracking.objects.create(
             order=order,
