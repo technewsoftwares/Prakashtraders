@@ -10,6 +10,7 @@ import AddAddress from "../Components/auth/AddAddress";
 import Login from "../Components/auth/Login";
 import Disclaimer from "../pages/info/Disclaimer";
 import MyOrders from "../pages/MyOrders";
+import TrackOrder from "../pages/TrackOrder";
 
 import AdminLogin from "../Components/auth/AdminLogin";
 import AdminProtectedRoute from "./AdminProtectedRoute"; 
@@ -96,6 +97,15 @@ const AllRoutes = () => {
         element={
           <PrivateRoute>
             <MyOrders />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/track-order/:order_id"
+        element={
+          <PrivateRoute>
+            <TrackOrder />
           </PrivateRoute>
         }
       />
