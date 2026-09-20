@@ -505,3 +505,92 @@ def track_order(request, order_id):
             {"detail": "Unable to load order tracking."},
             status=500
         )
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_order_tracking(request, order_id):
+    try:
+        # Admin only
+        if not request.user.is_staff:
+            return Response(
+                {"detail": "Admin access required."},
+                status=403
+            )
+
+        # Find the order
+        try:
+            order = Order.objects.get(order_id=order_id)
+        except Order.DoesNotExist:
+            return Response(
+                {"detail": "Order not found."},
+                status=404
+            )
+
+        status_value = request.data.get("status")
+        message = request.data.get("message", "")
+        tracking_number = request.data.get("tracking_number")
+        carrier = request.data.get("carrier")
+        location = request.data.get("location")
+
+        # Validate status
+        valid_statuses = [
+            "ORDER_PLACED",
+            "CONFIRMED",
+            "PACKED",
+            "SHIPPED",
+            "OUT_FOR_DELIVERY",
+            "DELIVERED",
+            "CANCELLED",
+        ]
+
+        if status_value not in valid_statuses:
+            return Response(
+                {
+                    "detail": "Invalid tracking status.",
+                    "valid_statuses": valid_statuses
+                },
+                status=400
+            )
+
+        # Create tracking history
+        tracking = OrderTracking.objects.create(
+            order=order,
+            status=status_value,
+            message=message,
+            tracking_number=tracking_number,
+            carrier=carrier,
+            location=location
+        )
+
+        # Update main order status when appropriate
+        if status_value == "CANCELLED":
+            order.status = "FAILED"
+            order.save(update_fields=["status"])
+
+        return Response(
+            {
+                "message": "Tracking status updated successfully.",
+                "order_id": order.order_id,
+                "tracking": {
+                    "id": tracking.id,
+                    "status": tracking.status,
+                    "status_display": tracking.get_status_display(),
+                    "message": tracking.message,
+                    "tracking_number": tracking.tracking_number,
+                    "carrier": tracking.carrier,
+                    "location": tracking.location,
+                    "created_at": tracking.created_at,
+                }
+            },
+            status=201
+        )
+
+    except Exception as e:
+        print("❌ UPDATE TRACKING ERROR:", str(e))
+        traceback.print_exc()
+
+        return Response(
+            {"detail": "Unable to update order tracking."},
+            status=500
+        )
