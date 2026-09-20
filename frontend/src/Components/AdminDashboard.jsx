@@ -534,7 +534,6 @@ const handleDeleteOrder = async (orderId) => {
           </tbody>
         </table>
       </div>
-    </div>
       {/* TRACKING MODAL */}
 
       {trackingOrder && (
