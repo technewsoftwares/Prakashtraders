@@ -135,6 +135,7 @@ def create_order(request):
             OrderItem.objects.create(
                 order=order,
                 product_name=item.get("name", ""),
+                product_image=item.get("image") or item.get("image_1"),
                 price=item.get("price", 0),
                 quantity=item.get("qty", 1),
             )
