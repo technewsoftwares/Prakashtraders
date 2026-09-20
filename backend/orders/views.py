@@ -552,7 +552,14 @@ def update_order_tracking(request, order_id):
                 },
                 status=400
             )
-
+            # Prevent duplicate tracking status for the same order
+            if order.tracking_updates.filter(status=status_value).exists():
+                return Response(
+                    {
+                        "detail": f"This order already has the tracking status '{status_value}'."
+                    },
+                    status=400
+                )
         # Create tracking history
         tracking = OrderTracking.objects.create(
             order=order,
