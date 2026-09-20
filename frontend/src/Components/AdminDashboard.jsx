@@ -205,6 +205,17 @@ const OrdersView = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [trackingOrder, setTrackingOrder] = useState(null);
+
+const [trackingForm, setTrackingForm] = useState({
+  status: "CONFIRMED",
+  message: "",
+  tracking_number: "",
+  carrier: "",
+  location: "",
+});
+
+const [trackingSaving, setTrackingSaving] = useState(false);
 
  useEffect(() => {
   const token = localStorage.getItem("access_token");
@@ -346,6 +357,49 @@ const handleDeleteOrder = async (orderId) => {
     toast.error(message);
   }
 };
+
+  const handleUpdateTracking = async () => {
+  if (!trackingOrder) return;
+
+  try {
+    setTrackingSaving(true);
+
+    const response = await axiosInstance.post(
+      `/api/admin/update-tracking/${trackingOrder.order_id}/`,
+      trackingForm
+    );
+
+    console.log("TRACKING UPDATED:", response.data);
+
+    toast.success("Order tracking updated successfully");
+
+    setTrackingOrder(null);
+
+    setTrackingForm({
+      status: "CONFIRMED",
+      message: "",
+      tracking_number: "",
+      carrier: "",
+      location: "",
+    });
+
+  } catch (error) {
+    console.error(
+      "TRACKING UPDATE ERROR:",
+      error?.response?.data || error
+    );
+
+    const message =
+      error?.response?.data?.detail ||
+      error?.response?.data?.error ||
+      "Failed to update order tracking.";
+
+    toast.error(message);
+
+  } finally {
+    setTrackingSaving(false);
+  }
+};
   return (
     <div className="rounded-[2rem] bg-white border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
       <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -449,8 +503,22 @@ const handleDeleteOrder = async (orderId) => {
                   </td>
                   <td className="px-8 py-5 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all">
-                       <Eye size={18} />
+                      <button
+                        onClick={() => {
+                          setTrackingOrder(o);
+
+                          setTrackingForm({
+                            status: "CONFIRMED",
+                            message: "",
+                            tracking_number: "",
+                            carrier: "",
+                            location: "",
+                          });
+                        }}
+                        title="Update Tracking"
+                        className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all"
+                      >
+                        <Eye size={18} />
                       </button>
                       <button
                         onClick={() => handleDeleteOrder(o.order_id)}
@@ -466,6 +534,221 @@ const handleDeleteOrder = async (orderId) => {
           </tbody>
         </table>
       </div>
+    </div>
+          </div>
+
+      {/* TRACKING MODAL */}
+
+      {trackingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+
+          {/* BACKDROP */}
+
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => {
+              if (!trackingSaving) {
+                setTrackingOrder(null);
+              }
+            }}
+          ></div>
+
+          {/* MODAL */}
+
+          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+            {/* HEADER */}
+
+            <div className="bg-indigo-600 px-6 py-5 text-white flex items-center justify-between">
+
+              <div>
+                <h3 className="text-xl font-black">
+                  Update Order Tracking
+                </h3>
+
+                <p className="text-indigo-100 text-sm mt-1">
+                  Order #{trackingOrder.order_id}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setTrackingOrder(null)}
+                disabled={trackingSaving}
+                className="p-2 rounded-xl hover:bg-white/10 transition"
+              >
+                <X size={22} />
+              </button>
+
+            </div>
+
+            {/* FORM */}
+
+            <div className="p-6 space-y-5">
+
+              {/* STATUS */}
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                  Tracking Status
+                </label>
+
+                <select
+                  value={trackingForm.status}
+                  onChange={(e) =>
+                    setTrackingForm({
+                      ...trackingForm,
+                      status: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl bg-slate-100 border-none p-3 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="ORDER_PLACED">
+                    Order Placed
+                  </option>
+
+                  <option value="CONFIRMED">
+                    Order Confirmed
+                  </option>
+
+                  <option value="PACKED">
+                    Packed
+                  </option>
+
+                  <option value="SHIPPED">
+                    Shipped
+                  </option>
+
+                  <option value="OUT_FOR_DELIVERY">
+                    Out for Delivery
+                  </option>
+
+                  <option value="DELIVERED">
+                    Delivered
+                  </option>
+
+                  <option value="CANCELLED">
+                    Cancelled
+                  </option>
+                </select>
+              </div>
+
+              {/* MESSAGE */}
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                  Message
+                </label>
+
+                <textarea
+                  rows="3"
+                  placeholder="Example: Your order has been packed and is ready for dispatch."
+                  value={trackingForm.message}
+                  onChange={(e) =>
+                    setTrackingForm({
+                      ...trackingForm,
+                      message: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl bg-slate-100 border-none p-3 font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* TRACKING NUMBER */}
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                  Tracking / AWB Number
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Example: AWB123456789"
+                  value={trackingForm.tracking_number}
+                  onChange={(e) =>
+                    setTrackingForm({
+                      ...trackingForm,
+                      tracking_number: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl bg-slate-100 border-none p-3 font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* CARRIER */}
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                  Carrier
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Example: Delhivery"
+                  value={trackingForm.carrier}
+                  onChange={(e) =>
+                    setTrackingForm({
+                      ...trackingForm,
+                      carrier: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl bg-slate-100 border-none p-3 font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* LOCATION */}
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                  Current Location
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Example: Salem, Tamil Nadu"
+                  value={trackingForm.location}
+                  onChange={(e) =>
+                    setTrackingForm({
+                      ...trackingForm,
+                      location: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl bg-slate-100 border-none p-3 font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* BUTTONS */}
+
+              <div className="flex justify-end gap-3 pt-2">
+
+                <button
+                  type="button"
+                  disabled={trackingSaving}
+                  onClick={() => setTrackingOrder(null)}
+                  className="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={trackingSaving}
+                  onClick={handleUpdateTracking}
+                  className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  {trackingSaving
+                    ? "Updating..."
+                    : "Update Tracking"}
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
     </div>
   );
 };
