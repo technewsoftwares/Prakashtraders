@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Package, Calendar, IndianRupee, ShoppingBag } from "lucide-react";
 import axiosInstance from "../axiosInstance";
 
 const MyOrders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -298,7 +300,7 @@ const MyOrders = () => {
                     <button
                       className="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition"
                       onClick={() =>
-                        alert("Track Order feature coming soon.")
+                        navigate(`/track-order/${order.order_id}`)
                       }
                     >
                       Track Order
