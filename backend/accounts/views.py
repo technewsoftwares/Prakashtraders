@@ -147,8 +147,19 @@ class SendOTP(APIView):
         try:
             send_brevo_email(
                 to_email=email,
-                subject="Your OTP - Prakash Traders",
-                message=f"Your OTP is {otp}"
+                subject="Prakash Traders - OTP Verification",
+                message=f"""
+            Dear Customer,
+            
+            Your OTP for Prakash Traders verification is:
+            
+            {otp}
+            
+            Please do not share this OTP with anyone.
+            
+            Thank you,
+            Prakash Traders Team
+            """
             )
 
             return Response(
