@@ -145,23 +145,46 @@ class SendOTP(APIView):
         OTP.objects.create(email=email, otp=otp)
 
         try:
-            send_brevo_email(
-                to_email=email,
-                subject="Prakash Traders - OTP Verification",
-                message=f"""
-            Dear Customer,
-            
-            Your OTP for Prakash Traders verification is:
-            
-            {otp}
-            
-            Please do not share this OTP with anyone.
-            
-            Thank you,
-            Prakash Traders Team
+           send_brevo_email(
+            to_email=email,
+            subject="Prakash Traders - OTP Verification",
+            message=f"""
+            <p>Hello,</p>
+        
+            <p>Your One-Time Password (OTP) for verifying your Prakash Traders account is:</p>
+        
+            <div style="
+                text-align: center;
+                margin: 25px 0;
+                padding: 20px;
+                background-color: #f4f4f4;
+                border-radius: 10px;
+            ">
+                <span style="
+                    font-size: 32px;
+                    font-weight: bold;
+                    letter-spacing: 8px;
+                    color: #222;
+                ">
+                    {otp}
+                </span>
+            </div>
+        
+            <p>Please use this OTP to complete your verification.</p>
+        
+            <p>
+                <strong>Important:</strong>
+                Never share this OTP with anyone.
+            </p>
+        
+            <p>This OTP is valid for a limited time.</p>
+        
+            <p>
+                Thank you,<br>
+                <strong>Prakash Traders Team</strong>
+            </p>
             """
-            )
-
+        )
             return Response(
                 {
                     "success": True,
