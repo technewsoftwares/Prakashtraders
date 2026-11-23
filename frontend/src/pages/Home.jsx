@@ -7,6 +7,7 @@ import Slider from "../Components/Slider";
 import BrandSlider from "../Components/BrandPartnersBanner";
 import WeekBest from "../Components/WeekBest";
 import GoogleReviews from "../Components/GoogleReviews";
+import BusinessIntroduction from "../Components/BusinessIntroduction";
 
 import { API_BASE } from "../Config";
 
@@ -67,6 +68,9 @@ const response = await fetch(url, {
     <main>
       {/* HERO SLIDER */}
       <Slider />
+
+      {/* BUSINESS INTRODUCTION */}
+      <BusinessIntroduction />
 
       {/* CATEGORY */}
       <CategorySlider />
