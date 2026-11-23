@@ -69,9 +69,6 @@ const response = await fetch(url, {
       {/* HERO SLIDER */}
       <Slider />
 
-      {/* BUSINESS INTRODUCTION */}
-      <BusinessIntroduction />
-
       {/* CATEGORY */}
       <CategorySlider />
 
@@ -94,6 +91,10 @@ const response = await fetch(url, {
         {/* GOOGLE REVIEWS */}
         <GoogleReviews />
       </div>
+
+       {/* BUSINESS SOLUTIONS AND CORPORATE ENQUIRIES - BOTTOM */}
+      <BusinessIntroduction />
+      
     </main>
   );
 };
