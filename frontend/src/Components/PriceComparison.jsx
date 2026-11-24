@@ -51,7 +51,7 @@ const PriceComparison = ({ productId }) => {
           </h2>
 
           <p className="text-xs text-zinc-500 mt-1">
-            Find the best available deal across stores
+            Find the available deal across stores
           </p>
         </div>
 
@@ -74,7 +74,7 @@ const PriceComparison = ({ productId }) => {
           ))}
 
           <p className="text-center text-xs text-zinc-500">
-            Finding the best prices...
+            Finding the prices...
           </p>
 
         </div>
@@ -132,9 +132,7 @@ const PriceComparison = ({ productId }) => {
               {/* Best Price Badge */}
 
               {index === 0 && (
-                <span className="absolute -top-2 left-3 bg-emerald-500 text-black text-[9px] font-bold px-2 py-0.5 rounded">
-                  BEST PRICE
-                </span>
+                
               )}
 
               {/* Product Image */}
