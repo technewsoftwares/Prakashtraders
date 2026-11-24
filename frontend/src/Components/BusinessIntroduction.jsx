@@ -102,7 +102,7 @@ const BusinessIntroduction = () => {
             </span>
           </h2>
 
-          <p className="text-gray-600 leading-7">
+          <p className="text-gray-300 leading-7">
             Prakash Traders brings decades of experience in electronics,
             home appliances and business solutions. From individual
             purchases to large-scale institutional requirements, we aim
