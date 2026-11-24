@@ -144,7 +144,7 @@ const BusinessIntroduction = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-gray-50 rounded-2xl p-6 md:p-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white text-black rounded-2xl p-6 md:p-10">
           <div className="flex flex-col justify-center">
             <p className="text-emerald-700 font-semibold uppercase tracking-wider text-sm mb-3">
               Business Enquiries
