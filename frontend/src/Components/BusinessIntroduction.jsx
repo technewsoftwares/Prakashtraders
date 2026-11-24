@@ -92,7 +92,7 @@ const BusinessIntroduction = () => {
       <div className="max-w-7xl mx-auto px-5 py-16 md:py-20">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <p className="text-emerald-700 font-semibold tracking-widest uppercase text-sm mb-3">
-            Trusted Since 1984
+            <h2>Trusted Since 1984</h2>
           </p>
 
           <h2 className="text-3xl md:text-5xl font-bold mb-5">
