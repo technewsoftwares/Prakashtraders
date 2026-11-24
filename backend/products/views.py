@@ -124,33 +124,35 @@ class ProductViewSet(viewsets.ModelViewSet):
                 is_active=False
             ).count(),
         })
-        @action(
-            detail=True,
-            methods=["get"],
-            url_path="price-comparison"
-        )
-        def price_comparison(self, request, pk=None):
-        
-            product = self.get_object()
-        
-            try:
-                results = get_price_comparison(product)
-        
-                return Response({
-                    "product_id": product.id,
-                    "product_name": product.name,
-                    "comparison": results,
-                    "total_results": len(results),
-                })
-        
-            except requests.RequestException:
-                return Response({
-                    "error": "Unable to fetch shopping prices",
-                    "comparison": []
-                }, status=502)
-        
-            except Exception:
-                return Response({
-                    "error": "Price comparison is temporarily unavailable",
-                    "comparison": []
-                }, status=500)
+
+    # PRICE COMPARISON API
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="price-comparison"
+    )
+    def price_comparison(self, request, pk=None):
+
+        product = self.get_object()
+
+        try:
+            results = get_price_comparison(product)
+
+            return Response({
+                "product_id": product.id,
+                "product_name": product.name,
+                "comparison": results,
+                "total_results": len(results),
+            })
+
+        except requests.RequestException:
+            return Response({
+                "error": "Unable to fetch shopping prices",
+                "comparison": []
+            }, status=502)
+
+        except Exception:
+            return Response({
+                "error": "Price comparison is temporarily unavailable",
+                "comparison": []
+            }, status=500)
