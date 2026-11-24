@@ -121,7 +121,7 @@ const BusinessIntroduction = () => {
           {services.map((service, index) => (
             <div
               key={index}
-              className="border border-gray-200 rounded-xl p-7 hover:border-emerald-600 hover:shadow-lg transition"
+              className="bg-white text-black border border-gray-200 rounded-xl p-7 hover:border-emerald-600 hover:shadow-lg transition"
             >
               <div className="text-emerald-700 mb-5">
                 {service.icon}
