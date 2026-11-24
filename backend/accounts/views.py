@@ -442,3 +442,69 @@ class AdminDashboardStats(APIView):
             "total_revenue": total_revenue,
             "stock_units": stock_units,
         })
+
+
+class AdminCorporateEnquiryListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        enquiries = CorporateEnquiry.objects.all().order_by("-created_at")
+
+        data = []
+
+        for enquiry in enquiries:
+            data.append({
+                "id": enquiry.id,
+                "name": enquiry.name,
+                "email": enquiry.email,
+                "phone": enquiry.phone,
+                "company": enquiry.company,
+                "enquiry_type": enquiry.enquiry_type,
+                "message": enquiry.message,
+                "status": enquiry.status,
+                "created_at": enquiry.created_at,
+            })
+
+        return Response(data)
+
+
+class AdminCorporateEnquiryDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, pk):
+        try:
+            enquiry = CorporateEnquiry.objects.get(pk=pk)
+        except CorporateEnquiry.DoesNotExist:
+            return Response(
+                {"success": False, "message": "Enquiry not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        new_status = request.data.get("status")
+
+        valid_statuses = [
+            choice[0]
+            for choice in CorporateEnquiry.STATUS_CHOICES
+        ]
+
+        if new_status not in valid_statuses:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid enquiry status."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        enquiry.status = new_status
+        enquiry.save(update_fields=["status"])
+
+        return Response({
+            "success": True,
+            "message": "Enquiry status updated successfully.",
+            "id": enquiry.id,
+            "status": enquiry.status
+        })
+
