@@ -507,4 +507,23 @@ class AdminCorporateEnquiryDetailView(APIView):
             "id": enquiry.id,
             "status": enquiry.status
         })
+            def delete(self, request, pk):
+        try:
+            enquiry = CorporateEnquiry.objects.get(pk=pk)
+        except CorporateEnquiry.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Enquiry not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        enquiry.delete()
+
+        return Response({
+            "success": True,
+            "message": "Corporate enquiry deleted successfully."
+        }, status=status.HTTP_200_OK)
+        
 
