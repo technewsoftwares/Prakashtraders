@@ -30,21 +30,21 @@ from .serializers import (
 # ---------------------------------------------------------
 
 
+
 class ContactSupportView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         data = request.data
 
-        name = data.get("name")
-        user_email = data.get("email")
-        message = data.get("message")
+        name = data.get("name", "").strip()
+        user_email = data.get("email", "").strip()
+        message = data.get("message", "").strip()
 
         phone = data.get("phone", "")
         company = data.get("company", "")
-        enquiry_type = data.get("enquiry_type", "General Enquiry")
+        enquiry_type = data.get("enquiry_type", "General")
 
-        # Validation
         if not name or not user_email or not message:
             return Response(
                 {
@@ -54,12 +54,44 @@ class ContactSupportView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Match enquiry type with the model choices
+        valid_types = [
+            choice[0]
+            for choice in CorporateEnquiry.ENQUIRY_TYPE_CHOICES
+        ]
+
+        if enquiry_type not in valid_types:
+            enquiry_type = "General"
+
         try:
-            # Email to Prakash Traders owner
+            # Save enquiry in MySQL
+            enquiry = CorporateEnquiry.objects.create(
+                name=name,
+                email=user_email,
+                phone=phone,
+                company=company,
+                enquiry_type=enquiry_type,
+                message=message
+            )
+
+        except Exception as e:
+            print(f"Corporate Enquiry Database Error: {str(e)}")
+
+            return Response(
+                {
+                    "success": False,
+                    "message": "Unable to save your enquiry. Please try again."
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Email notification to Prakash Traders owner
+        try:
             owner_subject = f"New {enquiry_type} Enquiry from {name}"
 
             owner_message = (
                 f"New Business Enquiry - Prakash Traders\n\n"
+                f"Enquiry ID: {enquiry.id}\n"
                 f"Name: {name}\n"
                 f"Email: {user_email}\n"
                 f"Phone: {phone}\n"
@@ -74,7 +106,11 @@ class ContactSupportView(APIView):
                 message=owner_message
             )
 
-            # Acknowledgement email to customer
+        except Exception as e:
+            print(f"Owner Email Error: {str(e)}")
+
+        # Acknowledgement email to customer
+        try:
             user_subject = "We received your enquiry - Prakash Traders"
 
             user_message = (
@@ -94,24 +130,18 @@ class ContactSupportView(APIView):
                 message=user_message
             )
 
-            return Response(
-                {
-                    "success": True,
-                    "message": "Enquiry submitted successfully!"
-                },
-                status=status.HTTP_200_OK
-            )
-
         except Exception as e:
-            print(f"Contact API Error: {str(e)}")
+            print(f"Customer Email Error: {str(e)}")
 
-            return Response(
-                {
-                    "success": False,
-                    "message": "Something went wrong. Please try again."
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return Response(
+            {
+                "success": True,
+                "message": "Enquiry submitted successfully!",
+                "enquiry_id": enquiry.id
+            },
+            status=status.HTTP_201_CREATED
+        )
+
 
 # ---------------------------------------------------------
 #  EXISTING VIEWS
