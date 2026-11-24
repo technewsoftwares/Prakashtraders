@@ -11,6 +11,8 @@ from .views import (
     AdminCustomerListView,
     DeleteCustomerView,
     AdminDashboardStats,
+    AdminCorporateEnquiryListView,
+    AdminCorporateEnquiryDetailView,
     ContactSupportView  # <--- ✅ IMPORT ADDED
 )
 
@@ -32,4 +34,7 @@ urlpatterns = [
     path("contact/", ContactSupportView.as_view(), name="contact-support"),
     
     path("", include(router.urls)),   # <-- product API
+
+    path("admin-corporate-enquiries/", AdminCorporateEnquiryListView.as_view(), name="admin-corporate-enquiries"),
+    path("admin-corporate-enquiries/<int:pk>/", AdminCorporateEnquiryDetailView.as_view(), name="admin-corporate-enquiry-detail"),
 ]
