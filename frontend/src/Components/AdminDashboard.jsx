@@ -3,7 +3,7 @@ import {
   Package, DollarSign, ShoppingBag, Users,
   Search, User, Phone, Calendar, Gift, Eye, CreditCard,
   BarChart3, LayoutGrid, Settings, LogOut, Menu,
-  Plus, Edit3, Trash2, X
+  Plus, Edit3, Trash2, X, Building2
 } from "lucide-react";
 import Chart from "react-apexcharts";
 import toast from "react-hot-toast";
@@ -1079,6 +1079,401 @@ const RedeemView = () => {
 };
 
 
+// ===================== CORPORATE ENQUIRIES =====================
+
+const CorporateEnquiriesView = () => {
+  const [enquiries, setEnquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
+
+  // Fetch enquiries from backend
+  const fetchEnquiries = async () => {
+    try {
+      setLoading(true);
+
+      const response = await axiosInstance.get(
+        "/api/auth/admin-corporate-enquiries/"
+      );
+
+      setEnquiries(
+        Array.isArray(response.data) ? response.data : []
+      );
+    } catch (error) {
+      console.error(
+        "Corporate enquiries error:",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.detail ||
+        "Unable to load corporate enquiries."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEnquiries();
+  }, []);
+
+  // Update enquiry status
+  const updateEnquiryStatus = async (id, newStatus) => {
+    try {
+      setUpdatingId(id);
+
+      await axiosInstance.patch(
+        `/api/auth/admin-corporate-enquiries/${id}/`,
+        { status: newStatus }
+      );
+
+      setEnquiries((previous) =>
+        previous.map((item) =>
+          item.id === id
+            ? { ...item, status: newStatus }
+            : item
+        )
+      );
+
+      toast.success("Enquiry status updated successfully.");
+    } catch (error) {
+      console.error(
+        "Enquiry status update error:",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Failed to update enquiry status."
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  // Search enquiries
+  const filteredEnquiries = enquiries.filter((item) => {
+    const search = searchTerm.toLowerCase();
+
+    return [
+      item.name,
+      item.email,
+      item.phone,
+      item.company,
+      item.enquiry_type,
+      item.message,
+      item.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(search);
+  });
+
+  // Status styling
+  const getEnquiryStatusStyle = (status) => {
+    switch (status) {
+      case "New":
+        return "bg-blue-50 text-blue-600";
+
+      case "Contacted":
+        return "bg-amber-50 text-amber-600";
+
+      case "Completed":
+        return "bg-emerald-50 text-emerald-600";
+
+      default:
+        return "bg-slate-100 text-slate-600";
+    }
+  };
+
+  const newCount = enquiries.filter(
+    (item) => item.status === "New"
+  ).length;
+
+  const contactedCount = enquiries.filter(
+    (item) => item.status === "Contacted"
+  ).length;
+
+  const completedCount = enquiries.filter(
+    (item) => item.status === "Completed"
+  ).length;
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+
+      {/* SUMMARY CARDS */}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Total Enquiries
+          </p>
+          <h3 className="text-3xl font-black text-slate-900 mt-2">
+            {enquiries.length}
+          </h3>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-blue-500">
+            New
+          </p>
+          <h3 className="text-3xl font-black text-blue-600 mt-2">
+            {newCount}
+          </h3>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-500">
+            Contacted
+          </p>
+          <h3 className="text-3xl font-black text-amber-600 mt-2">
+            {contactedCount}
+          </h3>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-500">
+            Completed
+          </p>
+          <h3 className="text-3xl font-black text-emerald-600 mt-2">
+            {completedCount}
+          </h3>
+        </div>
+
+      </div>
+
+      {/* MAIN ENQUIRY TABLE */}
+
+      <div className="rounded-[2rem] bg-white border border-slate-200 shadow-sm overflow-hidden">
+
+        {/* HEADER */}
+
+        <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+
+          <div>
+            <h3 className="text-xl font-black text-slate-900">
+              Corporate Enquiries
+            </h3>
+
+            <p className="text-slate-500 text-xs font-bold mt-1">
+              Manage corporate gifting, institutional supply and furniture enquiries.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+
+            <div className="relative w-full sm:w-80">
+              <Search
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                size={18}
+              />
+
+              <input
+                type="text"
+                placeholder="Search enquiries..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-xl bg-slate-100 py-3 pl-11 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-100"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={fetchEnquiries}
+              disabled={loading}
+              className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {loading ? "Loading..." : "Refresh"}
+            </button>
+
+          </div>
+        </div>
+
+        {/* TABLE */}
+
+        <div className="overflow-x-auto">
+
+          <table className="w-full text-left min-w-[1150px]">
+
+            <thead className="bg-slate-50">
+              <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+
+                <th className="px-5 py-5">Customer</th>
+                <th className="px-5 py-5">Phone</th>
+                <th className="px-5 py-5">Company</th>
+                <th className="px-5 py-5">Enquiry Type</th>
+                <th className="px-5 py-5">Message</th>
+                <th className="px-5 py-5">Date</th>
+                <th className="px-5 py-5">Status</th>
+
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100">
+
+              {loading ? (
+
+                <tr>
+                  <td colSpan="7" className="px-5 py-12 text-center text-slate-400 font-bold">
+                    Loading corporate enquiries...
+                  </td>
+                </tr>
+
+              ) : filteredEnquiries.length === 0 ? (
+
+                <tr>
+                  <td colSpan="7" className="px-5 py-12 text-center text-slate-400 font-bold">
+                    {searchTerm
+                      ? "No matching enquiries found."
+                      : "No corporate enquiries received yet."}
+                  </td>
+                </tr>
+
+              ) : (
+
+                filteredEnquiries.map((item) => (
+
+                  <tr
+                    key={item.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
+
+                    {/* CUSTOMER */}
+
+                    <td className="px-5 py-5">
+                      <div className="min-w-[180px]">
+
+                        <p className="font-bold text-sm text-slate-900">
+                          {item.name || "N/A"}
+                        </p>
+
+                        <p className="text-xs text-slate-500 mt-1">
+                          {item.email || "N/A"}
+                        </p>
+
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Enquiry #{item.id}
+                        </p>
+
+                      </div>
+                    </td>
+
+                    {/* PHONE */}
+
+                    <td className="px-5 py-5">
+                      <span className="text-sm font-semibold text-slate-700">
+                        {item.phone || "N/A"}
+                      </span>
+                    </td>
+
+                    {/* COMPANY */}
+
+                    <td className="px-5 py-5">
+                      <span className="text-sm font-semibold text-slate-700">
+                        {item.company || "Individual"}
+                      </span>
+                    </td>
+
+                    {/* TYPE */}
+
+                    <td className="px-5 py-5">
+                      <span className="inline-flex rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600">
+                        {item.enquiry_type || "General"}
+                      </span>
+                    </td>
+
+                    {/* MESSAGE */}
+
+                    <td className="px-5 py-5">
+                      <p className="text-sm text-slate-600 max-w-[260px] whitespace-pre-wrap break-words">
+                        {item.message || "-"}
+                      </p>
+                    </td>
+
+                    {/* DATE */}
+
+                    <td className="px-5 py-5">
+                      <span className="text-xs font-semibold text-slate-500">
+                        {item.created_at
+                          ? new Date(item.created_at).toLocaleDateString("en-IN")
+                          : "-"}
+                      </span>
+                    </td>
+
+                    {/* STATUS */}
+
+                    <td className="px-5 py-5">
+
+                      <div className="flex flex-col gap-2 min-w-[130px]">
+
+                        <span
+                          className={`inline-flex w-fit rounded-full px-3 py-1 text-[10px] font-black uppercase ${getEnquiryStatusStyle(item.status)}`}
+                        >
+                          {item.status || "New"}
+                        </span>
+
+                        <select
+                          value={item.status || "New"}
+                          disabled={updatingId === item.id}
+                          onChange={(e) =>
+                            updateEnquiryStatus(
+                              item.id,
+                              e.target.value
+                            )
+                          }
+                          className="rounded-lg border border-slate-200 bg-white p-2 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+                        >
+                          <option value="New">New</option>
+                          <option value="Contacted">Contacted</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+
+                        {updatingId === item.id && (
+                          <span className="text-[10px] text-indigo-500 font-bold">
+                            Updating...
+                          </span>
+                        )}
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        {/* FOOTER */}
+
+        <div className="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between gap-2">
+
+          <p className="text-xs font-semibold text-slate-400">
+            Showing {filteredEnquiries.length} of {enquiries.length} enquiries
+          </p>
+
+          <p className="text-xs font-semibold text-slate-400">
+            Prakash Traders Admin
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+};
+
+
 // --- MAIN COMPONENT: ADMIN DASHBOARD ---
 export default function AdminDashboard() {
   // --- 1. AUTH & ROLE STATE ---
@@ -1559,6 +1954,7 @@ const handleDeleteProduct = async (id) => {
               { name: 'Products', icon: LayoutGrid },
               { name: 'Orders', icon: ShoppingBag },
               { name: 'Customers', icon: Users },
+              { name: 'Corporate Enquiries', icon: Building2 },
               { name: 'Redeem', icon: Users }
             ].map((item) => (
               <button
@@ -1666,6 +2062,11 @@ const handleDeleteProduct = async (id) => {
           {/* CUSTOMERS */}
           {activeTab === "Customers" && (
             <CustomersView />
+          )}
+
+          {/* CORPORATE ENQUIRIES */}
+          {activeTab === "Corporate Enquiries" && (
+           <CorporateEnquiriesView />
           )}
 
           {/* 5. REDEEM VIEW */}
