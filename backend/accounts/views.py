@@ -28,39 +28,61 @@ from .serializers import (
 #  CONTACT SUPPORT VIEW (NEW ADDITION)
 # ---------------------------------------------------------
 
+
 class ContactSupportView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         data = request.data
-        name = data.get('name')
-        user_email = data.get('email')
-        message = data.get('message')
+
+        name = data.get("name")
+        user_email = data.get("email")
+        message = data.get("message")
+
+        phone = data.get("phone", "")
+        company = data.get("company", "")
+        enquiry_type = data.get("enquiry_type", "General Enquiry")
 
         # Validation
         if not name or not user_email or not message:
-            return Response({'success': False, 'message': 'All fields are required'}, status=400)
+            return Response(
+                {
+                    "success": False,
+                    "message": "Name, email and message are required."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
-            # 1. Send Email to OWNER (You)
-            owner_subject = f"New Inquiry from {name}"
-            owner_message = f"Name: {name}\nEmail: {user_email}\n\nMessage:\n{message}"
-            
-            
+            # Email to Prakash Traders owner
+            owner_subject = f"New {enquiry_type} Enquiry from {name}"
+
+            owner_message = (
+                f"New Business Enquiry - Prakash Traders\n\n"
+                f"Name: {name}\n"
+                f"Email: {user_email}\n"
+                f"Phone: {phone}\n"
+                f"Company / Organisation: {company}\n"
+                f"Enquiry Type: {enquiry_type}\n\n"
+                f"Message:\n{message}"
+            )
+
             send_brevo_email(
                 to_email=settings.EMAIL_HOST_USER,
                 subject=owner_subject,
                 message=owner_message
             )
-            # 2. Send Acknowledgement Email to USER
-                        # 2. Send Acknowledgement Email to USER
-            user_subject = "We received your message - Prakash Traders"
+
+            # Acknowledgement email to customer
+            user_subject = "We received your enquiry - Prakash Traders"
+
             user_message = (
                 f"Dear {name},\n\n"
-                f"Thank you for contacting Prakash Traders. "
-                f"We have received your inquiry regarding:\n"
-                f"'{message}'\n\n"
-                f"Our team will get back to you shortly.\n\n"
+                f"Thank you for contacting Prakash Traders.\n\n"
+                f"We have received your enquiry regarding "
+                f"{enquiry_type}.\n\n"
+                f"Our team will review your requirements and "
+                f"get back to you shortly.\n\n"
                 f"Best Regards,\n"
                 f"Prakash Traders Team"
             )
@@ -70,11 +92,25 @@ class ContactSupportView(APIView):
                 subject=user_subject,
                 message=user_message
             )
-            return Response({'success': True, 'message': 'Message sent successfully!'})
+
+            return Response(
+                {
+                    "success": True,
+                    "message": "Enquiry submitted successfully!"
+                },
+                status=status.HTTP_200_OK
+            )
 
         except Exception as e:
             print(f"Contact API Error: {str(e)}")
-            return Response({'success': False, 'message': 'Something went wrong. Please try again.'}, status=500)
+
+            return Response(
+                {
+                    "success": False,
+                    "message": "Something went wrong. Please try again."
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # ---------------------------------------------------------
 #  EXISTING VIEWS
