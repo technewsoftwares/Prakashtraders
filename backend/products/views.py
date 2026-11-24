@@ -115,75 +115,75 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-    @action(detail=False, methods=["get"], url_path="debug-count")
-    def debug_count(self, request):
-        return Response({
-            "total_products": Product.objects.count(),
-            "active_products": Product.objects.filter(
-                is_active=True
-            ).count(),
-            "inactive_products": Product.objects.filter(
-                is_active=False
-            ).count(),
-        })
-
-   @action(
-    detail=True,
-    methods=["get"],
-    url_path="price-comparison"
-    )
-    def price_comparison(self, request, pk=None):
-    
-        product = self.get_object()
-    
-        try:
-            results = get_price_comparison(product)
-    
-            own_price = float(product.price)
-    
-            filtered_results = []
-            seen_stores = set()
-    
-            for item in results:
-    
-                store = item.get("store", "").strip().lower()
-    
-                try:
-                    competitor_price = float(item.get("price", 0))
-                except (ValueError, TypeError):
-                    continue
-    
-                # Only show prices higher than Prakash Traders
-                if competitor_price <= own_price:
-                    continue
-    
-                # Avoid duplicate stores
-                if store in seen_stores:
-                    continue
-    
-                seen_stores.add(store)
-                filtered_results.append(item)
-    
-            # Lowest competitor price first
-            filtered_results.sort(
-                key=lambda x: float(x["price"])
-            )
-    
-            # Maximum 4 comparisons
-            filtered_results = filtered_results[:4]
-    
+       @action(detail=False, methods=["get"], url_path="debug-count")
+        def debug_count(self, request):
             return Response({
-                "product_id": product.id,
-                "product_name": product.name,
-                "prakash_traders_price": own_price,
-                "comparison": filtered_results,
-                "total_results": len(filtered_results),
+                "total_products": Product.objects.count(),
+                "active_products": Product.objects.filter(
+                    is_active=True
+                ).count(),
+                "inactive_products": Product.objects.filter(
+                    is_active=False
+                ).count(),
             })
     
-        except Exception as e:
-            print("Price comparison error:", str(e))
+        @action(
+            detail=True,
+            methods=["get"],
+            url_path="price-comparison"
+        )
+        def price_comparison(self, request, pk=None):
     
-            return Response({
-                "error": "Price comparison unavailable",
-                "comparison": []
-            }, status=500)
+            product = self.get_object()
+    
+            try:
+                results = get_price_comparison(product)
+    
+                own_price = float(product.price)
+    
+                filtered_results = []
+                seen_stores = set()
+    
+                for item in results:
+    
+                    store = item.get("store", "").strip().lower()
+    
+                    try:
+                        competitor_price = float(item.get("price", 0))
+                    except (ValueError, TypeError):
+                        continue
+    
+                    # Only show prices higher than Prakash Traders
+                    if competitor_price <= own_price:
+                        continue
+    
+                    # Avoid duplicate stores
+                    if store in seen_stores:
+                        continue
+    
+                    seen_stores.add(store)
+                    filtered_results.append(item)
+    
+                # Sort prices from lowest to highest
+                filtered_results.sort(
+                    key=lambda x: float(x["price"])
+                )
+    
+                # Show maximum 4 competitors
+                filtered_results = filtered_results[:4]
+    
+                return Response({
+                    "product_id": product.id,
+                    "product_name": product.name,
+                    "prakash_traders_price": own_price,
+                    "comparison": filtered_results,
+                    "total_results": len(filtered_results),
+                })
+    
+            except Exception:
+                logger.exception("Price comparison failed")
+    
+                return Response({
+                    "error": "Price comparison unavailable",
+                    "comparison": []
+                }, status=500)
