@@ -17,6 +17,7 @@ from accounts.brevo import send_brevo_email
 
 # Local Imports
 from .models import OTP, UserProfile, UserAddress, Product
+from .models import CorporateEnquiry
 from .serializers import (
     UserProfileSerializer, 
     UserAddressSerializer, 
