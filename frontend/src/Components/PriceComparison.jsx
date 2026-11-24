@@ -22,8 +22,9 @@ const PriceComparison = ({ productId }) => {
         const results = response.data.comparison || [];
 
         const sortedResults = results
-          .filter((item) => Number(item.price) > 0 && item.link)
-          .sort((a, b) => Number(a.price) - Number(b.price));
+          .filter((item) => Number(item.price) > 0)
+          .sort((a, b) => Number(a.price) - Number(b.price))
+          .slice(0, 4);
 
         setComparison(sortedResults);
 
@@ -42,9 +43,7 @@ const PriceComparison = ({ productId }) => {
     <section className="mt-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5">
 
       {/* Heading */}
-
       <div className="flex justify-between items-center mb-5">
-
         <div>
           <h2 className="text-xl font-bold text-white">
             Compare Prices
@@ -58,14 +57,11 @@ const PriceComparison = ({ productId }) => {
         <span className="text-emerald-400 text-xs font-semibold">
           LIVE DEALS
         </span>
-
       </div>
 
       {/* Loading */}
-
       {loading && (
         <div className="space-y-3">
-
           {[1, 2, 3].map((item) => (
             <div
               key={item}
@@ -76,15 +72,12 @@ const PriceComparison = ({ productId }) => {
           <p className="text-center text-xs text-zinc-500">
             Finding the prices...
           </p>
-
         </div>
       )}
 
       {/* Error */}
-
       {!loading && error && (
         <div className="text-center py-8">
-
           <p className="text-zinc-400 text-sm">
             Unable to fetch prices right now.
           </p>
@@ -99,12 +92,10 @@ const PriceComparison = ({ productId }) => {
           >
             Try Again
           </button>
-
         </div>
       )}
 
       {/* No Results */}
-
       {!loading && !error && comparison.length === 0 && (
         <p className="text-center text-zinc-500 text-sm py-8">
           No comparison prices available at the moment.
@@ -112,41 +103,17 @@ const PriceComparison = ({ productId }) => {
       )}
 
       {/* Results */}
-
       {!loading && comparison.length > 0 && (
-
         <div className="space-y-3">
 
           {comparison.map((item, index) => (
-
             <div
               key={`${item.store}-${index}`}
-              className={`relative flex items-center gap-3 p-3 rounded-xl border transition-all
-                ${
-                  index === 0
-                    ? "border-emerald-500/50 bg-emerald-500/5"
-                    : "border-zinc-800 bg-black/30 hover:border-zinc-600"
-                }`}
+              className="flex items-center justify-between gap-4 p-4 rounded-xl border border-zinc-800 bg-black/30 hover:border-zinc-600 transition-all"
             >
 
-            
-
-              {/* Product Image */}
-
-              <div className="w-16 h-16 flex-shrink-0 bg-white rounded-lg p-1">
-
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-contain"
-                />
-
-              </div>
-
               {/* Store Details */}
-
               <div className="flex-1 min-w-0">
-
                 <h3 className="text-white font-semibold text-sm">
                   {item.store}
                 </h3>
@@ -154,38 +121,22 @@ const PriceComparison = ({ productId }) => {
                 <p className="text-zinc-500 text-xs mt-1 line-clamp-2">
                   {item.title}
                 </p>
-
               </div>
 
               {/* Price */}
-
               <div className="text-right flex-shrink-0">
-
                 <p className="text-white font-bold text-lg">
                   ₹{Number(item.price).toLocaleString("en-IN")}
                 </p>
-
-                <a
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-1 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold px-3 py-2 rounded-lg transition"
-                >
-                  View Deal ↗
-                </a>
-
               </div>
 
             </div>
-
           ))}
 
         </div>
-
       )}
 
       {/* Footer */}
-
       <p className="text-[10px] text-zinc-600 mt-5 text-center">
         Prices and availability may change. Verify the final price
         on the retailer's website.
