@@ -129,11 +129,7 @@ const PriceComparison = ({ productId }) => {
                 }`}
             >
 
-              {/* Best Price Badge */}
-
-              {index === 0 && (
-                
-              )}
+            
 
               {/* Product Image */}
 
