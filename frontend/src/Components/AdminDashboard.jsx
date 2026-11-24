@@ -2198,8 +2198,7 @@ const handleDeleteProduct = async (id) => {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
-
+    <div className="flex w-full max-w-full min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-900 font-sans">
       {/* --- SIDEBAR --- */}
       <aside className={`${sidebarOpen ? 'w-72' : 'w-20'} fixed left-0 top-0 z-40 h-screen bg-white border-r border-slate-200 transition-all duration-300 hidden md:block`}>
         <div className="flex h-full flex-col">
@@ -2238,7 +2237,7 @@ const handleDeleteProduct = async (id) => {
       </aside>
 
       {/* --- MAIN CONTENT --- */}
-      <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'md:ml-72' : 'md:ml-20'}`}>
+      <main className={`min-w-0 w-full flex-1 overflow-x-hidden transition-all duration-300 ${sidebarOpen ? 'md:ml-72' : 'md:ml-20'}`}>
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white/80 px-8 py-4 backdrop-blur-md">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><Menu size={20} /></button>
@@ -2255,7 +2254,7 @@ const handleDeleteProduct = async (id) => {
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="w-full min-w-0 max-w-full p-4 sm:p-6 lg:p-8">
           {/* DASHBOARD */}
            {activeTab === "Dashboard" && (
            <div
