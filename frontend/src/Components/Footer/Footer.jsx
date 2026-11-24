@@ -105,10 +105,6 @@ const Footer = () => {
               <SocialIcon Icon={FaTwitter} link="https://twitter.com" color="hover:text-sky-400" />
               <SocialIcon Icon={FaYoutube} link="https://youtube.com" color="hover:text-red-500" />
             </div>
-
-            <p className="text-[10px] text-gray-500 pt-4">
-              © {new Date().getFullYear()} Prakash Traders. All rights reserved.
-            </p>
           </div>
 
           {/* ================= COLUMN 2: USEFUL LINKS ================= */}
@@ -205,6 +201,10 @@ const Footer = () => {
       </div>
     </div>
 
+  </div>
+  {/* Centered Copyright */}
+  <div className="mt-12 text-center text-[10px] text-gray-600 tracking-wide">
+    © 2026 Prakash Traders. All rights reserved.
   </div>
 </div>
 
