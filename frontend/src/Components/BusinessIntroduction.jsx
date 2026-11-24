@@ -149,7 +149,7 @@ const BusinessIntroduction = () => {
             <p className="text-emerald-700 font-semibold uppercase tracking-wider text-sm mb-3">
               Business Enquiries
             </p>
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-3xl font-bold mb-4 text-black">
               Let's Discuss Your Requirements
             </h2>
             <p className="text-gray-600 leading-7 mb-6">
