@@ -206,11 +206,6 @@ const Footer = () => {
     </div>
 
   </div>
-
-  {/* Centered Copyright */}
-  <div className="mt-12 text-center text-[10px] text-gray-600 tracking-wide">
-    © 2026 Prakash Traders. All rights reserved.
-  </div>
 </div>
 
         </div>
