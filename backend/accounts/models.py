@@ -102,3 +102,41 @@ class UserAddress(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.city}"
+
+class CorporateEnquiry(models.Model):
+    ENQUIRY_TYPE_CHOICES = (
+        ("Corporate Gifting", "Corporate Gifting"),
+        ("Institutional Supply", "Institutional Supply"),
+        ("Furniture Solutions", "Furniture Solutions"),
+        ("General", "General"),
+    )
+
+    STATUS_CHOICES = (
+        ("New", "New"),
+        ("Contacted", "Contacted"),
+        ("Completed", "Completed"),
+    )
+
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    company = models.CharField(max_length=150, blank=True)
+
+    enquiry_type = models.CharField(
+        max_length=50,
+        choices=ENQUIRY_TYPE_CHOICES,
+        default="General"
+    )
+
+    message = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="New"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.enquiry_type}"
