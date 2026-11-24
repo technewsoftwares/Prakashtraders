@@ -127,8 +127,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             ).count(),
         })
 
-    # PRICE COMPARISON API
-    @action(
+   @action(
     detail=True,
     methods=["get"],
     url_path="price-comparison"
@@ -140,31 +139,51 @@ class ProductViewSet(viewsets.ModelViewSet):
         try:
             results = get_price_comparison(product)
     
+            own_price = float(product.price)
+    
+            filtered_results = []
+            seen_stores = set()
+    
+            for item in results:
+    
+                store = item.get("store", "").strip().lower()
+    
+                try:
+                    competitor_price = float(item.get("price", 0))
+                except (ValueError, TypeError):
+                    continue
+    
+                # Only show prices higher than Prakash Traders
+                if competitor_price <= own_price:
+                    continue
+    
+                # Avoid duplicate stores
+                if store in seen_stores:
+                    continue
+    
+                seen_stores.add(store)
+                filtered_results.append(item)
+    
+            # Lowest competitor price first
+            filtered_results.sort(
+                key=lambda x: float(x["price"])
+            )
+    
+            # Maximum 4 comparisons
+            filtered_results = filtered_results[:4]
+    
             return Response({
                 "product_id": product.id,
                 "product_name": product.name,
-                "comparison": results,
-                "total_results": len(results),
+                "prakash_traders_price": own_price,
+                "comparison": filtered_results,
+                "total_results": len(filtered_results),
             })
     
-        except requests.RequestException:
-            logger.exception(
-                "SerpApi request failed for product %s",
-                product.id
-            )
+        except Exception as e:
+            print("Price comparison error:", str(e))
     
             return Response({
-                "error": "Shopping API request failed",
-                "comparison": []
-            }, status=502)
-    
-        except Exception:
-            logger.exception(
-                "Price comparison failed for product %s",
-                product.id
-            )
-    
-            return Response({
-                "error": "Price comparison is temporarily unavailable",
+                "error": "Price comparison unavailable",
                 "comparison": []
             }, status=500)
