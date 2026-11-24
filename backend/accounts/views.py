@@ -507,7 +507,7 @@ class AdminCorporateEnquiryDetailView(APIView):
             "id": enquiry.id,
             "status": enquiry.status
         })
-            def delete(self, request, pk):
+    def delete(self, request, pk):
         try:
             enquiry = CorporateEnquiry.objects.get(pk=pk)
         except CorporateEnquiry.DoesNotExist:
