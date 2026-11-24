@@ -164,12 +164,13 @@ const Footer = () => {
               ))}
             </ul>
           </div>
+        </div>
       
            {/* --- CENTERED TRUST & PAYMENT BAR --- */}
 <div className="border-t border-zinc-800 mt-0 md:mt-12 pt-6 md:pt-10 flex flex-col items-center">
   
   {/* Container for both Badge and Payments */}
-  <div className="flex flex-col md:flex-row items-center justify-center gap-10 w-full max-w-4xl">
+  <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 w-full">
     
     {/* SSL Certificate Badge (Centered Left) */}
     <div className="flex items-center gap-4 bg-zinc-900/50 p-4 px-6 rounded-xl border border-zinc-800">
@@ -208,7 +209,6 @@ const Footer = () => {
   </div>
 </div>
 
-        </div>
       </div>
     </footer>
   );
