@@ -1081,13 +1081,16 @@ const RedeemView = () => {
 
 // ===================== CORPORATE ENQUIRIES =====================
 
+
 const CorporateEnquiriesView = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [updatingId, setUpdatingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
-  // Fetch enquiries from backend
   const fetchEnquiries = async () => {
     try {
       setLoading(true);
@@ -1118,7 +1121,6 @@ const CorporateEnquiriesView = () => {
     fetchEnquiries();
   }, []);
 
-  // Update enquiry status
   const updateEnquiryStatus = async (id, newStatus) => {
     try {
       setUpdatingId(id);
@@ -1134,6 +1136,12 @@ const CorporateEnquiriesView = () => {
             ? { ...item, status: newStatus }
             : item
         )
+      );
+
+      setSelectedEnquiry((previous) =>
+        previous?.id === id
+          ? { ...previous, status: newStatus }
+          : previous
       );
 
       toast.success("Enquiry status updated successfully.");
@@ -1152,11 +1160,89 @@ const CorporateEnquiriesView = () => {
     }
   };
 
-  // Search enquiries
-  const filteredEnquiries = enquiries.filter((item) => {
-    const search = searchTerm.toLowerCase();
+  // DELETE ENQUIRY
+  const deleteEnquiry = async (id) => {
+    if (!window.confirm(
+      "Are you sure you want to permanently delete this enquiry?"
+    )) {
+      return;
+    }
 
-    return [
+    try {
+      setDeletingId(id);
+
+      await axiosInstance.delete(
+        `/api/auth/admin-corporate-enquiries/${id}/`
+      );
+
+      setEnquiries((previous) =>
+        previous.filter((item) => item.id !== id)
+      );
+
+      setSelectedEnquiry((previous) =>
+        previous?.id === id ? null : previous
+      );
+
+      toast.success("Enquiry deleted successfully.");
+    } catch (error) {
+      console.error(
+        "Delete enquiry error:",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        error?.response?.data?.detail ||
+        "Failed to delete enquiry."
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // EXPORT TO EXCEL
+  const exportEnquiriesToExcel = () => {
+    if (filteredEnquiries.length === 0) {
+      toast.error("No enquiries available to export.");
+      return;
+    }
+
+    const excelData = filteredEnquiries.map((item) => ({
+      "Enquiry ID": item.id,
+      "Customer Name": item.name,
+      "Email": item.email,
+      "Phone": item.phone,
+      "Company": item.company,
+      "Enquiry Type": item.enquiry_type,
+      "Message": item.message,
+      "Status": item.status,
+      "Date": item.created_at
+        ? new Date(item.created_at).toLocaleString("en-IN")
+        : ""
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Corporate Enquiries"
+    );
+
+    XLSX.writeFile(
+      workbook,
+      `Corporate_Enquiries_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
+
+    toast.success("Excel file downloaded successfully.");
+  };
+
+  // SEARCH AND STATUS FILTER
+  const filteredEnquiries = enquiries.filter((item) => {
+    const search = searchTerm.trim().toLowerCase();
+
+    const matchesSearch = [
       item.name,
       item.email,
       item.phone,
@@ -1169,20 +1255,22 @@ const CorporateEnquiriesView = () => {
       .join(" ")
       .toLowerCase()
       .includes(search);
+
+    const matchesStatus =
+      statusFilter === "All" ||
+      item.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
-  // Status styling
   const getEnquiryStatusStyle = (status) => {
     switch (status) {
       case "New":
         return "bg-blue-50 text-blue-600";
-
       case "Contacted":
         return "bg-amber-50 text-amber-600";
-
       case "Completed":
         return "bg-emerald-50 text-emerald-600";
-
       default:
         return "bg-slate-100 text-slate-600";
     }
@@ -1204,7 +1292,6 @@ const CorporateEnquiriesView = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
 
       {/* SUMMARY CARDS */}
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
@@ -1245,62 +1332,94 @@ const CorporateEnquiriesView = () => {
 
       </div>
 
-      {/* MAIN ENQUIRY TABLE */}
-
+      {/* ENQUIRY TABLE */}
       <div className="rounded-[2rem] bg-white border border-slate-200 shadow-sm overflow-hidden">
 
-        {/* HEADER */}
+        <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
 
-        <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 
-          <div>
-            <h3 className="text-xl font-black text-slate-900">
-              Corporate Enquiries
-            </h3>
+            <div>
+              <h3 className="text-xl font-black text-slate-900">
+                Corporate Enquiries
+              </h3>
 
-            <p className="text-slate-500 text-xs font-bold mt-1">
-              Manage corporate gifting, institutional supply and furniture enquiries.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-
-            <div className="relative w-full sm:w-80">
-              <Search
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
-              />
-
-              <input
-                type="text"
-                placeholder="Search enquiries..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl bg-slate-100 py-3 pl-11 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-100"
-              />
+              <p className="text-slate-500 text-xs font-bold mt-1">
+                Manage corporate gifting, institutional supply and furniture enquiries.
+              </p>
             </div>
 
-            <button
-              type="button"
-              onClick={fetchEnquiries}
-              disabled={loading}
-              className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {loading ? "Loading..." : "Refresh"}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+
+              <div className="relative w-full sm:w-72">
+                <Search
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={18}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Search enquiries..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-xl bg-slate-100 py-3 pl-11 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={exportEnquiriesToExcel}
+                className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700"
+              >
+                Export Excel
+              </button>
+
+              <button
+                type="button"
+                onClick={fetchEnquiries}
+                disabled={loading}
+                className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+
+            </div>
+          </div>
+
+          {/* STATUS FILTER */}
+          <div className="flex flex-wrap items-center gap-3">
+
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              Filter Status:
+            </span>
+
+            {["All", "New", "Contacted", "Completed"].map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  statusFilter === status
+                    ? "bg-indigo-600 text-white shadow-md"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
 
           </div>
+
         </div>
 
         {/* TABLE */}
-
         <div className="overflow-x-auto">
 
-          <table className="w-full text-left min-w-[1150px]">
+          <table className="w-full text-left min-w-[1250px]">
 
             <thead className="bg-slate-50">
-              <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
 
+              <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                 <th className="px-5 py-5">Customer</th>
                 <th className="px-5 py-5">Phone</th>
                 <th className="px-5 py-5">Company</th>
@@ -1308,8 +1427,9 @@ const CorporateEnquiriesView = () => {
                 <th className="px-5 py-5">Message</th>
                 <th className="px-5 py-5">Date</th>
                 <th className="px-5 py-5">Status</th>
-
+                <th className="px-5 py-5">Actions</th>
               </tr>
+
             </thead>
 
             <tbody className="divide-y divide-slate-100">
@@ -1317,7 +1437,7 @@ const CorporateEnquiriesView = () => {
               {loading ? (
 
                 <tr>
-                  <td colSpan="7" className="px-5 py-12 text-center text-slate-400 font-bold">
+                  <td colSpan="8" className="px-5 py-12 text-center text-slate-400 font-bold">
                     Loading corporate enquiries...
                   </td>
                 </tr>
@@ -1325,8 +1445,8 @@ const CorporateEnquiriesView = () => {
               ) : filteredEnquiries.length === 0 ? (
 
                 <tr>
-                  <td colSpan="7" className="px-5 py-12 text-center text-slate-400 font-bold">
-                    {searchTerm
+                  <td colSpan="8" className="px-5 py-12 text-center text-slate-400 font-bold">
+                    {searchTerm || statusFilter !== "All"
                       ? "No matching enquiries found."
                       : "No corporate enquiries received yet."}
                   </td>
@@ -1336,32 +1456,21 @@ const CorporateEnquiriesView = () => {
 
                 filteredEnquiries.map((item) => (
 
-                  <tr
-                    key={item.id}
-                    className="hover:bg-slate-50 transition-colors"
-                  >
-
-                    {/* CUSTOMER */}
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
 
                     <td className="px-5 py-5">
                       <div className="min-w-[180px]">
-
                         <p className="font-bold text-sm text-slate-900">
                           {item.name || "N/A"}
                         </p>
-
                         <p className="text-xs text-slate-500 mt-1">
                           {item.email || "N/A"}
                         </p>
-
                         <p className="text-[10px] text-slate-400 mt-1">
                           Enquiry #{item.id}
                         </p>
-
                       </div>
                     </td>
-
-                    {/* PHONE */}
 
                     <td className="px-5 py-5">
                       <span className="text-sm font-semibold text-slate-700">
@@ -1369,15 +1478,11 @@ const CorporateEnquiriesView = () => {
                       </span>
                     </td>
 
-                    {/* COMPANY */}
-
                     <td className="px-5 py-5">
                       <span className="text-sm font-semibold text-slate-700">
                         {item.company || "Individual"}
                       </span>
                     </td>
-
-                    {/* TYPE */}
 
                     <td className="px-5 py-5">
                       <span className="inline-flex rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600">
@@ -1385,15 +1490,11 @@ const CorporateEnquiriesView = () => {
                       </span>
                     </td>
 
-                    {/* MESSAGE */}
-
                     <td className="px-5 py-5">
                       <p className="text-sm text-slate-600 max-w-[260px] whitespace-pre-wrap break-words">
                         {item.message || "-"}
                       </p>
                     </td>
-
-                    {/* DATE */}
 
                     <td className="px-5 py-5">
                       <span className="text-xs font-semibold text-slate-500">
@@ -1403,15 +1504,10 @@ const CorporateEnquiriesView = () => {
                       </span>
                     </td>
 
-                    {/* STATUS */}
-
                     <td className="px-5 py-5">
-
                       <div className="flex flex-col gap-2 min-w-[130px]">
 
-                        <span
-                          className={`inline-flex w-fit rounded-full px-3 py-1 text-[10px] font-black uppercase ${getEnquiryStatusStyle(item.status)}`}
-                        >
+                        <span className={`inline-flex w-fit rounded-full px-3 py-1 text-[10px] font-black uppercase ${getEnquiryStatusStyle(item.status)}`}>
                           {item.status || "New"}
                         </span>
 
@@ -1419,10 +1515,7 @@ const CorporateEnquiriesView = () => {
                           value={item.status || "New"}
                           disabled={updatingId === item.id}
                           onChange={(e) =>
-                            updateEnquiryStatus(
-                              item.id,
-                              e.target.value
-                            )
+                            updateEnquiryStatus(item.id, e.target.value)
                           }
                           className="rounded-lg border border-slate-200 bg-white p-2 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
                         >
@@ -1438,7 +1531,32 @@ const CorporateEnquiriesView = () => {
                         )}
 
                       </div>
+                    </td>
 
+                    {/* ACTIONS */}
+                    <td className="px-5 py-5">
+                      <div className="flex items-center gap-2">
+
+                        <button
+                          type="button"
+                          title="View full enquiry"
+                          onClick={() => setSelectedEnquiry(item)}
+                          className="p-2 rounded-lg text-indigo-600 hover:bg-indigo-50 transition"
+                        >
+                          <Eye size={18} />
+                        </button>
+
+                        <button
+                          type="button"
+                          title="Delete enquiry"
+                          disabled={deletingId === item.id}
+                          onClick={() => deleteEnquiry(item.id)}
+                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition disabled:opacity-50"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+
+                      </div>
                     </td>
 
                   </tr>
@@ -1452,8 +1570,6 @@ const CorporateEnquiriesView = () => {
           </table>
 
         </div>
-
-        {/* FOOTER */}
 
         <div className="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between gap-2">
 
@@ -1469,9 +1585,153 @@ const CorporateEnquiriesView = () => {
 
       </div>
 
+      {/* VIEW FULL ENQUIRY MODAL */}
+      {selectedEnquiry && (
+
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setSelectedEnquiry(null)}
+          />
+
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+            <div className="bg-indigo-600 px-6 py-5 text-white flex items-center justify-between">
+
+              <div>
+                <h3 className="text-xl font-black">
+                  Enquiry Details
+                </h3>
+
+                <p className="text-indigo-100 text-sm mt-1">
+                  Enquiry #{selectedEnquiry.id}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedEnquiry(null)}
+                className="p-2 rounded-xl hover:bg-white/10 transition"
+              >
+                <X size={22} />
+              </button>
+
+            </div>
+
+            <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-400">
+                    Customer Name
+                  </p>
+                  <p className="mt-1 font-bold text-slate-900">
+                    {selectedEnquiry.name || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-400">
+                    Email
+                  </p>
+                  <p className="mt-1 font-bold text-slate-900 break-all">
+                    {selectedEnquiry.email || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-400">
+                    Phone
+                  </p>
+                  <p className="mt-1 font-bold text-slate-900">
+                    {selectedEnquiry.phone || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-400">
+                    Company
+                  </p>
+                  <p className="mt-1 font-bold text-slate-900">
+                    {selectedEnquiry.company || "Individual"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-400">
+                    Enquiry Type
+                  </p>
+                  <p className="mt-1 font-bold text-indigo-600">
+                    {selectedEnquiry.enquiry_type || "General"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-400">
+                    Date
+                  </p>
+                  <p className="mt-1 font-bold text-slate-900">
+                    {selectedEnquiry.created_at
+                      ? new Date(selectedEnquiry.created_at).toLocaleString("en-IN")
+                      : "N/A"}
+                  </p>
+                </div>
+
+              </div>
+
+              <div>
+                <p className="text-xs font-black uppercase text-slate-400 mb-2">
+                  Full Message
+                </p>
+
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap break-words">
+                  {selectedEnquiry.message || "No message provided."}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-black uppercase text-slate-400 mb-2">
+                  Enquiry Status
+                </p>
+
+                <select
+                  value={selectedEnquiry.status || "New"}
+                  disabled={updatingId === selectedEnquiry.id}
+                  onChange={(e) =>
+                    updateEnquiryStatus(selectedEnquiry.id, e.target.value)
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="New">New</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedEnquiry(null)}
+                  className="px-6 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200"
+                >
+                  Close
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
     </div>
   );
 };
+
 
 
 // --- MAIN COMPONENT: ADMIN DASHBOARD ---
