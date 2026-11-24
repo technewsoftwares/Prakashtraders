@@ -1415,7 +1415,7 @@ const CorporateEnquiriesView = () => {
         {/* TABLE */}
         <div className="overflow-x-auto">
 
-          <table className="w-full text-left min-w-[1250px]">
+          <table className="w-full min-w-[1100px] table-fixed text-left">
 
             <thead className="bg-slate-50">
 
