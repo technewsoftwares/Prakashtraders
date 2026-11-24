@@ -3,6 +3,7 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShopContext } from "../Context/Context";
 import { API_BASE } from "../Config";
+import PriceComparison from "./PriceComparison";
 
 const API = API_BASE;
 const SingleItem = () => {
@@ -326,6 +327,9 @@ if (!product) {
                 Add to Cart
               </button>
             </div>
+            {/* PRICE COMPARISON */}
+
+            <PriceComparison productId={id} />
 
             <div className="space-y-4 flex-grow">
               {/* Description Box */}
