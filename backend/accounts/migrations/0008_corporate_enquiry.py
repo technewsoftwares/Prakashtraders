@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0007_alter_wishlist_unique_together_and_delete_cart_wishlist'),
+        ('accounts', '0007_alter_wishlist_unique_together_and_more'),
     ]
 
     operations = [
