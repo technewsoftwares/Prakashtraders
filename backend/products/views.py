@@ -1,7 +1,7 @@
 import random
 import requests
 
-from .services.price_comparison import get_price_comparison
+from .price_comparison import get_price_comparison
 
 from django.db.models import Q
 from rest_framework import viewsets
