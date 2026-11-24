@@ -1,6 +1,8 @@
 import random
 import requests
+import logging
 
+logger = logging.getLogger(__name__)
 from .price_comparison import get_price_comparison
 
 from django.db.models import Q
@@ -127,31 +129,41 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     # PRICE COMPARISON API
     @action(
-        detail=True,
-        methods=["get"],
-        url_path="price-comparison"
+    detail=True,
+    methods=["get"],
+    url_path="price-comparison"
     )
     def price_comparison(self, request, pk=None):
-
+    
         product = self.get_object()
-
+    
         try:
             results = get_price_comparison(product)
-
+    
             return Response({
                 "product_id": product.id,
                 "product_name": product.name,
                 "comparison": results,
                 "total_results": len(results),
             })
-
+    
         except requests.RequestException:
+            logger.exception(
+                "SerpApi request failed for product %s",
+                product.id
+            )
+    
             return Response({
-                "error": "Unable to fetch shopping prices",
+                "error": "Shopping API request failed",
                 "comparison": []
             }, status=502)
-
+    
         except Exception:
+            logger.exception(
+                "Price comparison failed for product %s",
+                product.id
+            )
+    
             return Response({
                 "error": "Price comparison is temporarily unavailable",
                 "comparison": []
