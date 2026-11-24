@@ -67,7 +67,7 @@ const Footer = () => {
     <footer className="bg-zinc-900 text-white mt-auto border-t border-zinc-800">
       <div className="container mx-auto px-4 py-12">
         {/* GRID LAYOUT */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-6 md:gap-y-10">
           
           {/* ================= COLUMN 1: CONNECT & NEWSLETTER ================= */}
           <div className="space-y-6 md:border-r md:border-zinc-800 md:pr-6">
@@ -170,7 +170,7 @@ const Footer = () => {
           </div>
       
            {/* --- CENTERED TRUST & PAYMENT BAR --- */}
-<div className="border-t border-zinc-800 mt-12 pt-10 flex flex-col items-center">
+<div className="border-t border-zinc-800 mt-0 md:mt-12 pt-6 md:pt-10 flex flex-col items-center">
   
   {/* Container for both Badge and Payments */}
   <div className="flex flex-col md:flex-row items-center justify-center gap-10 w-full max-w-4xl">
